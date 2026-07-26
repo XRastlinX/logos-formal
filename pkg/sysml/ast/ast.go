@@ -30,8 +30,8 @@ type Package struct {
 	NodeSpan SourceSpan
 }
 
-func (p *Package) Span() SourceSpan       { return p.NodeSpan }
-func (p *Package) TokenLiteral() string   { return "package" }
+func (p *Package) Span() SourceSpan     { return p.NodeSpan }
+func (p *Package) TokenLiteral() string { return "package" }
 
 // Import represents a namespace inclusion
 type Import struct {
@@ -40,8 +40,8 @@ type Import struct {
 	NodeSpan SourceSpan
 }
 
-func (i *Import) Span() SourceSpan       { return i.NodeSpan }
-func (i *Import) TokenLiteral() string   { return "import" }
+func (i *Import) Span() SourceSpan     { return i.NodeSpan }
+func (i *Import) TokenLiteral() string { return "import" }
 
 // Parameter represents a directed attribute input/return with physical dimensions
 type Parameter struct {
@@ -51,8 +51,8 @@ type Parameter struct {
 	NodeSpan SourceSpan
 }
 
-func (p *Parameter) Span() SourceSpan       { return p.NodeSpan }
-func (p *Parameter) TokenLiteral() string   { return p.Name }
+func (p *Parameter) Span() SourceSpan     { return p.NodeSpan }
+func (p *Parameter) TokenLiteral() string { return p.Name }
 
 // CalcDef represents a candidate Set morphism (deterministic calculation)
 type CalcDef struct {
@@ -64,8 +64,8 @@ type CalcDef struct {
 	NodeSpan SourceSpan
 }
 
-func (c *CalcDef) Span() SourceSpan       { return c.NodeSpan }
-func (c *CalcDef) TokenLiteral() string   { return "calc def" }
+func (c *CalcDef) Span() SourceSpan     { return c.NodeSpan }
+func (c *CalcDef) TokenLiteral() string { return "calc def" }
 
 // ConstraintDef represents a formal predicate in Rel
 type ConstraintDef struct {
@@ -76,8 +76,8 @@ type ConstraintDef struct {
 	NodeSpan SourceSpan
 }
 
-func (c *ConstraintDef) Span() SourceSpan       { return c.NodeSpan }
-func (c *ConstraintDef) TokenLiteral() string   { return "constraint def" }
+func (c *ConstraintDef) Span() SourceSpan     { return c.NodeSpan }
+func (c *ConstraintDef) TokenLiteral() string { return "constraint def" }
 
 // --- Expression Nodes ---
 
@@ -87,9 +87,19 @@ type NumberLiteral struct {
 	NodeSpan SourceSpan
 }
 
-func (nl *NumberLiteral) Span() SourceSpan       { return nl.NodeSpan }
-func (nl *NumberLiteral) TokenLiteral() string   { return nl.Lexeme }
-func (nl *NumberLiteral) expressionNode()        {}
+func (nl *NumberLiteral) Span() SourceSpan     { return nl.NodeSpan }
+func (nl *NumberLiteral) TokenLiteral() string { return nl.Lexeme }
+func (nl *NumberLiteral) expressionNode()      {}
+
+type UnitLiteral struct {
+	Lexeme string // preserve the exact quantity literal, e.g. 10[km]
+
+	NodeSpan SourceSpan
+}
+
+func (ul *UnitLiteral) Span() SourceSpan     { return ul.NodeSpan }
+func (ul *UnitLiteral) TokenLiteral() string { return ul.Lexeme }
+func (ul *UnitLiteral) expressionNode()      {}
 
 type Identifier struct {
 	Value string
@@ -97,9 +107,20 @@ type Identifier struct {
 	NodeSpan SourceSpan
 }
 
-func (i *Identifier) Span() SourceSpan       { return i.NodeSpan }
-func (i *Identifier) TokenLiteral() string   { return i.Value }
-func (i *Identifier) expressionNode()        {}
+func (i *Identifier) Span() SourceSpan     { return i.NodeSpan }
+func (i *Identifier) TokenLiteral() string { return i.Value }
+func (i *Identifier) expressionNode()      {}
+
+type PrefixExpression struct {
+	Operator string
+	Right    Expr
+
+	NodeSpan SourceSpan
+}
+
+func (pe *PrefixExpression) Span() SourceSpan     { return pe.NodeSpan }
+func (pe *PrefixExpression) TokenLiteral() string { return pe.Operator }
+func (pe *PrefixExpression) expressionNode()      {}
 
 type InfixExpression struct {
 	Left     Expr
@@ -109,9 +130,9 @@ type InfixExpression struct {
 	NodeSpan SourceSpan
 }
 
-func (ie *InfixExpression) Span() SourceSpan       { return ie.NodeSpan }
-func (ie *InfixExpression) TokenLiteral() string   { return ie.Operator }
-func (ie *InfixExpression) expressionNode()        {}
+func (ie *InfixExpression) Span() SourceSpan     { return ie.NodeSpan }
+func (ie *InfixExpression) TokenLiteral() string { return ie.Operator }
+func (ie *InfixExpression) expressionNode()      {}
 
 type CallExpression struct {
 	Function Expr // Identifier representing the calc def
@@ -120,7 +141,6 @@ type CallExpression struct {
 	NodeSpan SourceSpan
 }
 
-func (ce *CallExpression) Span() SourceSpan       { return ce.NodeSpan }
-func (ce *CallExpression) TokenLiteral() string   { return "(" }
-func (ce *CallExpression) expressionNode()        {}
-
+func (ce *CallExpression) Span() SourceSpan     { return ce.NodeSpan }
+func (ce *CallExpression) TokenLiteral() string { return "(" }
+func (ce *CallExpression) expressionNode()      {}
