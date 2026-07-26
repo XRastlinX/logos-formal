@@ -9,6 +9,8 @@
 
 This schema strictly enforces the epistemic boundary of the prime gap simulator. By embedding the Governance Algebra directly into the data contract, the schema guarantees that any downstream consumer reads the output structurally as **pure interpretation (`010`)**—permanently stripped of any authorization or effectuation claims.
 
+This interpretive (`010`) structure directly integrates with the [PIC-4 Standards Mapping](../08_Builder_Layer/PIC4_STANDARDS_MAPPING_V1.md) and [PIC-4 Schemas](../08_Builder_Layer/PIC4_SCHEMAS_V1.md). Simulator output can be safely treated as raw data feeding into a PIC-4 `Validator`, but it natively lacks the `permit` or `attestation` wrappers required to actuate a physical system.
+
 It also explicitly codifies the mathematical null-case for the first prime gap (\(3 - 2 = 1\)).
 
 ## JSON Schema Definition
