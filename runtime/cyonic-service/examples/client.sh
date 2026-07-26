@@ -19,4 +19,3 @@ go run ./runtime/cyonic-service evaluate \
 printf '\nInteraction receipt:\n'
 cat "$FIXTURE_DIR/interactions.jsonl"
 printf '\nExternality remains CLAIMED_EXTERNAL until independently adjudicated.\n'
-

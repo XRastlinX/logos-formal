@@ -1,10 +1,10 @@
 # PROPOSED: Cy-Egology Adoption Arc V1
 
-**Record Type:** Evidence-Gated Adoption Strategy  
-**Layer:** Builder, Exposure, and Sustainability  
-**Status:** PROPOSED  
-**Authority Effect:** NONE  
-**Depends On:** Cyonic Codexica Sustainability Strategy V1  
+**Record Type:** Evidence-Gated Adoption Strategy
+**Layer:** Builder, Exposure, and Sustainability
+**Status:** PROPOSED
+**Authority Effect:** NONE
+**Depends On:** Cyonic Codexica Sustainability Strategy V1
 
 ---
 
@@ -33,26 +33,32 @@ The phases below are evidence gates. They are not a guaranteed timeline, an inev
 - three cold users independently locate the primary claim;
 - median time from clone to passing demonstration is at most ten minutes;
 - each user can accurately distinguish proposal, validation, authorization, and effect;
-- installation and execution failures are recorded;
+- at least one independently reported, reproducible cold-run limitation or
+  confusion is recorded as verified friction;
 - public claims match the demonstrators' actual test boundaries.
 
 **Exit event:** `FIRST_CONTACT_VALIDATED`
 
-Repository visits, stars, model praise, or internal walkthroughs do not satisfy this gate.
+Repository visits, stars, model praise, or internal walkthroughs do not satisfy
+this gate. If the first three qualifying participants report no friction, the
+cohort expands until one qualifying friction event is recorded or this
+requirement is formally revised.
 
-### Phase 2 — First Friction
+### Phase 2 — First Applied Friction
 
-**Objective:** Observe a real external use attempt and the limitation that prevents or complicates it.
+**Objective:** Observe a real external workflow, beyond the bounded cold-run
+trial, and the limitation that prevents or complicates it.
 
 **Required evidence:**
 
-- an external actor identifies a concrete workflow;
+- an external actor identifies a concrete workflow beyond the First Contact
+  setup and trial;
 - the actor attempts to apply at least one project component;
 - the encountered limitation is reproducible or documented with sufficient context;
 - the limitation is classified as product, documentation, integration, governance, or conceptual friction;
 - no internal proposal is counted as external friction.
 
-**Exit event:** `FIRST_FRICTION_RECORDED`
+**Exit event:** `FIRST_APPLIED_FRICTION_RECORDED`
 
 Friction is evidence about use, not evidence that a requested feature is correct or should be built.
 
@@ -190,7 +196,7 @@ The following have not yet been demonstrated by the evidence presently bound to 
 
 ```
 FIRST_CONTACT_VALIDATED
-FIRST_FRICTION_RECORDED
+FIRST_APPLIED_FRICTION_RECORDED
 FIRST_ADOPTION_CONFIRMED
 TOOLING_CANDIDATE_VALIDATED
 INSTITUTIONAL_TOUCH

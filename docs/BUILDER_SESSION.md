@@ -54,4 +54,3 @@ candidate for Principal review rather than configuring a GitHub remote itself.
 
 No local commit, test pass, or builder report changes canon status or grants
 push authority.
-

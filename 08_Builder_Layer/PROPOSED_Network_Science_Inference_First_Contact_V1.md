@@ -1,26 +1,26 @@
 # PROPOSED: Network Science Inference for First Contact
 
-**Record Type:** Strategic Inference / Network Theory  
-**Layer:** Builder, Exposure, and Sustainability  
-**Status:** PROPOSED  
-**Authority Effect:** NONE  
-**Governing Rule:** Constitutio Alchemica  
+**Record Type:** Strategic Inference / Network Theory
+**Layer:** Builder, Exposure, and Sustainability
+**Status:** PROPOSED
+**Authority Effect:** NONE
+**Governing Rule:** Constitutio Alchemica
 
 ---
 
 ## 1. Purpose
 
-This document provides the network-science foundation for the First Contact outreach strategy defined in the [Cy-Egology Adoption Arc V1](PROPOSED_Cy_Egology_Adoption_Arc_V1.md). It outlines established mechanisms from network research and applies them as a structured hypothesis (an inference) for achieving initial trial adoption. 
+This document provides the network-science foundation for the First Contact outreach strategy defined in the [Cy-Egology Adoption Arc V1](PROPOSED_Cy_Egology_Adoption_Arc_V1.md). It outlines established mechanisms from network research and applies them as a structured hypothesis (an inference) for achieving initial trial adoption.
 
 ## 2. Theoretical Foundations
 
 The synthesis relies on standard, cited results from network science:
 
-- **Preferential attachment** explains cumulative advantage in growing networks; it does not establish that GitHub discovery follows the Barabási–Albert model exactly. [[Barabási & Albert, 1999](https://pubmed.ncbi.nlm.nih.gov/10521342/)]
-- **Small-world structure** demonstrates that high clustering can coexist with short path lengths; it does not guarantee access to the particular practitioners needed here. [[Watts & Strogatz, 1998](https://pubmed.ncbi.nlm.nih.gov/9623998/)]
-- **Multiple-source reinforcement** for unfamiliar behavior is well supported theoretically and experimentally. Classifying this cold run as a complex contagion is a reasonable hypothesis about participant behavior, not a measured result. [[Centola & Macy, 2007](https://www.journals.uchicago.edu/doi/abs/10.1086/521848), [Centola, 2010](https://pubmed.ncbi.nlm.nih.gov/20813952/)]
-- **Granovetter’s threshold model** supports the importance of threshold distributions and early low-threshold actors. The choice of three participants is still the project’s governance rule—not a number derived from that model. [[Granovetter, 1978](https://www.journals.uchicago.edu/doi/pdf/10.1086/226707)]
-- **Weak ties** are well-supported information bridges, with the wide-bridge qualification for complex contagions. [[Granovetter, 1973](https://www.journals.uchicago.edu/doi/abs/10.1086/225469)]
+- **Preferential attachment** explains cumulative advantage in growing networks; it does not establish that GitHub discovery follows the Barabási–Albert model exactly. [Barabási & Albert, 1999](https://pubmed.ncbi.nlm.nih.gov/10521342/)
+- **Small-world structure** demonstrates that high clustering can coexist with short path lengths; it does not guarantee access to the particular practitioners needed here. [Watts & Strogatz, 1998](https://pubmed.ncbi.nlm.nih.gov/9623998/)
+- **Multiple-source reinforcement** for unfamiliar behavior is well supported theoretically and experimentally. Classifying this cold run as a complex contagion is a reasonable hypothesis about participant behavior, not a measured result. [Centola & Macy, 2007](https://www.journals.uchicago.edu/doi/abs/10.1086/521848), [Centola, 2010](https://pubmed.ncbi.nlm.nih.gov/20813952/)
+- **Granovetter’s threshold model** supports the importance of threshold distributions and early low-threshold actors. The choice of three participants is still the project’s governance rule—not a number derived from that model. [Granovetter, 1978](https://www.journals.uchicago.edu/doi/pdf/10.1086/226707)
+- **Weak ties** are well-supported information bridges, with the wide-bridge qualification for complex contagions. [Granovetter, 1973](https://www.journals.uchicago.edu/doi/abs/10.1086/225469)
 
 ## 3. The Core Inference
 
@@ -90,14 +90,14 @@ Hype may elaborate the possibilities above that stack—why the work matters, wh
 
 This mapping is interpretive rather than physical.
 
-1. **Cubed-Bit classification:** Strategic hype is assigned to `010` by governance policy. Concrete implementations may enforce this classification, but the label alone does not prove non-interference.
+1. **Cubed-Bit classification:** Strategic hype is assigned to `010` by governance policy. Concrete implementations may enforce this classification, but the label alone does not prove non-interference or eliminate undocumented escalation paths.
 2. **Operator analogy:** Sun and Salt are interpretive aliases for projection and stabilization. No thermodynamic quantity, enthalpy change, physical process, or scientific identity is asserted.
 3. **Experimental staging:** The bounded experiment produces evidence with `authority_effect: NONE`. Evidence may inform external governance but cannot issue a Permit or write status by itself.
 
 The governing sequence is:
 
 ```text
-Hype -> candidate inference -> bounded experiment -> evidence receipt -> external decision -> optional Permit -> bounded Apply
+Hype -> candidate inference -> bounded experiment -> evidence receipt -> external decision -> optional externally issued Permit -> bounded Apply
 ```
 
 ```text

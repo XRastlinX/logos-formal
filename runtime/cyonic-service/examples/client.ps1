@@ -37,4 +37,3 @@ finally {
         Remove-Item -LiteralPath $FixtureDir -Recurse -Force
     }
 }
-
