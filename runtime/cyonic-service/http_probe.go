@@ -2,11 +2,13 @@ package main
 
 import (
 	"bytes"
+	"context"
 	"encoding/json"
 	"errors"
 	"flag"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"os"
 	"strings"
@@ -25,6 +27,7 @@ type HTTPProbeResult struct {
 	ApplyProbeStatus  int      `json:"applyProbeStatus"`
 	ApplyProbeReason  string   `json:"applyProbeReason"`
 	ExternalityStatus string   `json:"externalityStatus"`
+	SourceRef         string   `json:"sourceRef"`
 }
 
 func requireHTTPStatus(response *http.Response, expected int, label string) error {
@@ -79,6 +82,7 @@ func runHTTPProbe(baseURL string) (HTTPProbeResult, error) {
 		Effect:            "NOT_PERFORMED",
 		Forwarded:         false,
 		ExternalityStatus: "NOT_ADJUDICATED",
+		SourceRef:         detectSourceRef(),
 	}
 
 	health, err := client.Get(baseURL + "/health")
@@ -185,6 +189,76 @@ func runHTTPProbe(baseURL string) (HTTPProbeResult, error) {
 
 	result.Status = "COLD_CALL_PASSED"
 	return result, nil
+}
+
+func smokeHTTP(now time.Time) (HTTPProbeResult, error) {
+	fixture, err := makeFixture(now)
+	if err != nil {
+		return HTTPProbeResult{}, err
+	}
+	config := HTTPConfig{
+		TrustedIssuer: "example-principal",
+		PublicKey:     fixture.PublicKey,
+		OriginClaim:   "undetermined",
+		Now:           func() time.Time { return now },
+		SampleRequest: &fixture.Request,
+	}
+	listener, err := net.Listen("tcp", "127.0.0.1:0")
+	if err != nil {
+		return HTTPProbeResult{}, fmt.Errorf("open loopback listener: %w", err)
+	}
+	server := &http.Server{
+		Handler:           newHTTPHandler(config),
+		ReadHeaderTimeout: 5 * time.Second,
+		ReadTimeout:       10 * time.Second,
+		WriteTimeout:      10 * time.Second,
+		IdleTimeout:       30 * time.Second,
+		MaxHeaderBytes:    1 << 20,
+	}
+	serverErrors := make(chan error, 1)
+	go func() {
+		serverErrors <- server.Serve(listener)
+	}()
+
+	result, probeErr := runHTTPProbe("http://" + listener.Addr().String())
+	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
+	shutdownErr := server.Shutdown(ctx)
+	cancel()
+	serveErr := <-serverErrors
+	if serveErr != nil && !errors.Is(serveErr, http.ErrServerClosed) {
+		return result, fmt.Errorf("serve smoke surface: %w", serveErr)
+	}
+	if shutdownErr != nil {
+		return result, fmt.Errorf("stop smoke surface: %w", shutdownErr)
+	}
+	if probeErr != nil {
+		return result, probeErr
+	}
+	return result, nil
+}
+
+func runSmokeHTTP(args []string) int {
+	flags := flag.NewFlagSet("smoke-http", flag.ContinueOnError)
+	flags.SetOutput(os.Stderr)
+	if err := flags.Parse(args); err != nil {
+		return 2
+	}
+	if flags.NArg() != 0 {
+		fmt.Fprintln(os.Stderr, "smoke-http: no positional arguments are accepted")
+		return 2
+	}
+	result, err := smokeHTTP(time.Now().UTC())
+	if err != nil {
+		fmt.Fprintln(os.Stderr, "smoke-http:", err)
+		return 2
+	}
+	encoder := json.NewEncoder(os.Stdout)
+	encoder.SetIndent("", "  ")
+	if err := encoder.Encode(result); err != nil {
+		fmt.Fprintln(os.Stderr, "smoke-http:", err)
+		return 2
+	}
+	return 0
 }
 
 func runProbeHTTP(args []string) int {

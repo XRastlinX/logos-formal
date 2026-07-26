@@ -11,6 +11,7 @@
 | Single entry point | `go run ./runtime/cyonic-service demo` | Implemented |
 | Standalone HTTP entry point | `go run ./runtime/cyonic-service serve-demo` | Implemented |
 | Cold-call network probe | `go run ./runtime/cyonic-service probe-http` | Implemented |
+| One-command HTTP cold path | `go run ./runtime/cyonic-service smoke-http` | Implemented |
 | Stable validation aliases | `/api/service/cyonic-validate` and `/api/cyonic/validate` | Implemented |
 | Governance headers on every HTTP response | `010`, `NONE`, `NOT_PERFORMED`, `forwarded=false`, bounded router decision | Implemented |
 | Apply compatibility boundary | HTTP 405 before body or permit parsing | Implemented |

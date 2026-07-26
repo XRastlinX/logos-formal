@@ -23,6 +23,7 @@ Usage:
   cyonic-service serve-demo [-listen 127.0.0.1:8787]
   cyonic-service serve -trust-key <public.key> -issuer <issuer> [-listen 127.0.0.1:8787]
   cyonic-service probe-http [-base-url http://127.0.0.1:8787]
+  cyonic-service smoke-http
   cyonic-service trial    -report <trial-report.json> [-origin external]
   cyonic-service adjudicate -report <trial-report.json> -out <adjudication.json> -reviewer <ref> [review options]
   cyonic-service summarize-trials -dir <adjudication-dir> -out <summary.json>
@@ -204,6 +205,8 @@ func main() {
 		code = runServe(os.Args[2:])
 	case "probe-http":
 		code = runProbeHTTP(os.Args[2:])
+	case "smoke-http":
+		code = runSmokeHTTP(os.Args[2:])
 	case "trial":
 		code = runTrial(os.Args[2:])
 	case "adjudicate":

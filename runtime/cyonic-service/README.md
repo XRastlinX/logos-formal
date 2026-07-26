@@ -48,6 +48,19 @@ adoption evidence.
 
 ## Standalone HTTP surface
 
+Run the complete HTTP boundary once, including both aliases and the fail-closed
+Apply probe, with one command:
+
+```bash
+go run ./runtime/cyonic-service smoke-http
+```
+
+This opens an ephemeral loopback listener, probes it, shuts it down, and prints
+the structured result. It does not establish externality or adoption.
+
+To keep the service running for interactive calls, start the isolated
+demonstration server:
+
 Start the isolated demonstration server from the repository root:
 
 ```bash

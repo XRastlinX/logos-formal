@@ -36,6 +36,19 @@ invalid or mismatched permit evidence fails closed
 
 ## Standalone HTTP surface
 
+One-command cold path:
+
+```bash
+go run ./runtime/cyonic-service smoke-http
+```
+
+This runs a real ephemeral loopback HTTP listener, calls both validation
+aliases, checks the Apply rejection, shuts down, and prints a structured probe
+result. It remains internal unless a separate participant and reviewer establish
+externality.
+
+Interactive server path:
+
 ```bash
 go run ./runtime/cyonic-service serve-demo
 ```

@@ -292,3 +292,23 @@ func TestHTTPProbeExercisesAliasesAndFailClosedApply(t *testing.T) {
 		t.Fatalf("probe self-adjudicated externality: %+v", result)
 	}
 }
+
+func TestHTTPSmokeRunsOneCommandBoundaryWithoutExternalityClaim(t *testing.T) {
+	now := time.Date(2026, 7, 26, 12, 30, 0, 0, time.UTC)
+	result, err := smokeHTTP(now)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if result.Status != "COLD_CALL_PASSED" ||
+		result.GovernanceState != "010" ||
+		result.AuthorityEffect != "NONE" ||
+		result.Effect != "NOT_PERFORMED" ||
+		result.Forwarded ||
+		result.ApplyProbeStatus != http.StatusMethodNotAllowed ||
+		result.ApplyProbeReason != "EFFECT_ROUTE_FORBIDDEN" {
+		t.Fatalf("smoke result crossed boundary: %+v", result)
+	}
+	if result.ExternalityStatus != "NOT_ADJUDICATED" {
+		t.Fatalf("smoke result self-adjudicated externality: %+v", result)
+	}
+}

@@ -17,13 +17,7 @@ capability.
 Requires [Go 1.24+](https://go.dev/dl/).
 
 ```bash
-go run ./runtime/cyonic-service serve-demo
-```
-
-In a second terminal:
-
-```bash
-go run ./runtime/cyonic-service probe-http
+go run ./runtime/cyonic-service smoke-http
 ```
 
 The network response separates:
@@ -89,6 +83,7 @@ Or run individually:
 ```bash
 go test ./...                              # Run the complete test suite
 go run ./runtime/cyonic-service demo       # Read-only Ed25519 boundary service
+go run ./runtime/cyonic-service smoke-http # One-command HTTP boundary probe
 go run ./runtime/cyonic-service serve-demo # Standalone HTTP surface on localhost
 go run ./runtime/cyonic-service probe-http # Dependency-free cold-call probe
 cd runtime/demonstrator && go run .        # Permit-gated actuation
