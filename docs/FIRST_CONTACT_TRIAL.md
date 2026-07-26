@@ -3,17 +3,74 @@
 This trial is for a person who did not help build Logos-Formal and has not been
 briefed on its private terminology.
 
+## Qualifying participant
+
+A report counts toward the First Contact threshold only when all of these
+conditions are satisfied:
+
+1. **Independence**
+   - The participant is not the project Principal.
+   - The participant is not an agent acting under the Principal's direct
+     session control for the purpose of producing evidence.
+   - The participant has no write access to protected `main` or to the
+     evidence log.
+2. **Actual run**
+   - The participant uses the published portable trial or the exact
+     PR-candidate cold-run path below.
+   - The run uses the declared source commit or package hash.
+   - The run occurs on the participant's own machine or environment.
+3. **Minimum report content**
+   - elapsed time from start to a working result or clear failure;
+   - one short statement of what the participant believes the surface does;
+   - friction, confusion, or blockage, or an explicit statement that none was
+     observed.
+4. **Verifiability**
+   - An Issue #2 comment needs no additional identity machinery: the GitHub
+     handle and comment timestamp are sufficient.
+   - A report from another public channel includes a link with visible
+     identity and timestamp.
+   - A private report is reposted by the participant to Issue #2, or the
+     maintainer records a dated, redacted summary identifying it as an
+     independent report.
+
+Stars, forks, praise without a run, internal CI, project-authored runs,
+agent-generated evidence rehearsals, locally modified surfaces, and reports
+missing either elapsed time or the participant's explanation do not count.
+
 ## Instructions for the participant
+
+The preferred route is the portable package:
+
+```text
+dist/cyonic-node-setup-v0.1.2-portable-7e0f263.zip
+sha256:8d1263b1dff0fcd84c42ac8911f132d270e8b172d50d06982d73d227499315a7
+```
+
+After verifying and unpacking the archive, run:
+
+```powershell
+.\setup.cmd friend-node-01 codex
+.\trial.cmd cyonic-first-contact-report-01.json
+```
+
+Or on Linux/macOS:
+
+```bash
+chmod +x scripts/*.sh
+./scripts/setup.sh friend-node-01 codex
+./scripts/trial.sh cyonic-first-contact-report-01.json
+```
+
+The source-checkout alternative follows.
 
 Start timing before cloning:
 
 ```bash
-git clone \
-  --branch codex/cyonic-service-surface-v1 \
-  --single-branch \
-  https://github.com/XRastlinX/logos-formal.git
+expected_commit="7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a"
+git clone https://github.com/XRastlinX/logos-formal.git
 cd logos-formal
-git rev-parse HEAD
+git checkout --detach "$expected_commit"
+test "$(git rev-parse HEAD)" = "$expected_commit" || exit 1
 go run ./runtime/cyonic-service trial \
   -origin external \
   -report cyonic-first-contact-report-01.json
@@ -22,12 +79,14 @@ go run ./runtime/cyonic-service trial \
 PowerShell:
 
 ```powershell
-git clone `
-  --branch codex/cyonic-service-surface-v1 `
-  --single-branch `
-  https://github.com/XRastlinX/logos-formal.git
+$ExpectedCommit = "7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a"
+git clone https://github.com/XRastlinX/logos-formal.git
 Set-Location logos-formal
-git rev-parse HEAD
+git checkout --detach $ExpectedCommit
+$ActualCommit = (git rev-parse HEAD).Trim()
+if ($ActualCommit -ne $ExpectedCommit) {
+    throw "Exact candidate verification failed; do not continue."
+}
 go run ./runtime/cyonic-service trial `
   -origin external `
   -report cyonic-first-contact-report-01.json
@@ -35,11 +94,11 @@ go run ./runtime/cyonic-service trial `
 
 The service is currently a public pull-request candidate, not part of default
 `main`. Record the exact commit printed by `git rev-parse HEAD`; do not replace
-it with a branch name in the report. The current independently tested candidate
-baseline is:
+it with a branch name in the report. The published service candidate baseline
+is:
 
 ```text
-3a5b0801bc243a1716273dfe98acc5265e6c6882
+7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a
 ```
 
 Answer from the command output rather than from other project documents.
@@ -58,27 +117,40 @@ The report records:
 - `PENDING_EXTERNAL_REVIEW`;
 - `authorityEffect: NONE`.
 
-## Instructions for the project reviewer
+## Minimum project record
 
 Do not edit the participant's original report.
 
-Verify separately:
+For each report, retain one line:
 
-1. the participant was not part of the project team;
-2. the source ref exists and contains the trial implementation;
-3. the report receipt still shows `010`, `OBSERVE_ONLY`,
+```text
+date | handle-or-name | trial version/hash | elapsed | friction? (y/n) | link-or-location
+```
+
+Before counting the line, check:
+
+1. the participant satisfies the independence conditions above;
+2. the source ref or archive hash matches the published trial;
+3. the report has a durable identity/time record;
+4. any generated receipt still shows `010`, `OBSERVE_ONLY`,
    `forwarded: false`, and `NOT_PERFORMED`;
-4. the participant's explanation distinguishes:
+5. the participant's explanation distinguishes:
    - structural interpretation;
    - externally supplied authorization evidence;
    - absence of effect;
-5. setup time is below ten minutes;
-6. any claimed friction is reproducible or sufficiently described.
+6. elapsed time is present;
+7. any claimed friction is a reproducible limitation or confusion affecting
+   use of the published surface.
 
-Create an additive adjudication record. Never replace
-`PENDING_EXTERNAL_REVIEW` inside the participant's report.
+For Phase 1, an Issue #2 comment plus this one-line record is sufficient. Do
+not require cryptographic timestamps, stronger identity proof, or automated
+evidence ingestion.
 
-The included CLI binds the review to the exact report bytes:
+## Optional structured adjudication
+
+The existing CLI can bind a later structured review to the exact report bytes.
+It is optional for the initial 0-to-3 evidence gate and should not replace the
+simple public record above.
 
 ```bash
 go run ./runtime/cyonic-service adjudicate \
@@ -106,7 +178,7 @@ go run ./runtime/cyonic-service adjudicate `
   -notes "Participant relationship and source ref checked independently."
 ```
 
-The command does not edit the report. It records:
+When used, the command does not edit the report. It records:
 
 - `sha256` of the exact report bytes;
 - reviewer findings as explicit attestations;
@@ -121,7 +193,7 @@ Evidence outputs are create-only. The CLI refuses to overwrite participant
 reports, rejects an adjudication output path that equals its participant
 report, and refuses to overwrite any existing adjudication or summary file.
 
-When multiple additive adjudications have been collected:
+If structured adjudications are later collected, they can be summarized:
 
 ```bash
 go run ./runtime/cyonic-service summarize-trials \
@@ -129,11 +201,9 @@ go run ./runtime/cyonic-service summarize-trials \
   -out cyonic-first-contact-summary-01.json
 ```
 
-The summary deduplicates qualifying participants by `participantRef` and
-friction events by report digest. It reports `FIRST_CONTACT_VALIDATED` only
-when there are at least three qualifying participants and at least one
-verified external friction event. This status is a Phase 1 evidence threshold,
-not adoption, certification, canon elevation, or authority.
+The automated summary is not required for Phase 1. Its threshold remains three
+qualifying participants and at least one verified external friction event.
+That threshold is not adoption, certification, canon elevation, or authority.
 
 ## Evidence limits
 
@@ -143,14 +213,23 @@ required for `FIRST_CONTACT_VALIDATED`.
 An external friction event requires both:
 
 - a qualifying external participant;
-- a concrete friction description that an independent reviewer accepts.
+- a concrete limitation or confusion affecting use of the published surface;
+- independent reproduction or verification of that limitation or confusion.
 
-Internal runs, project-authored answers, and model-generated rehearsals do not
-count.
+A preference or feature request alone is not friction. A friction record is
+evidence input and does not authorize a design change.
+
+Internal runs, project-authored answers, model-generated rehearsals, runs
+against unpublished or locally modified surfaces, and incomplete reports do
+not count.
 
 Reviewer findings are attestations, not self-proving facts. Until a signature
 profile is separately specified, retain the reviewer record and its delivery
 context with the adjudication file.
+
+Do not add evidence-collection automation before at least one real external
+report exists. Issue #2 comments and the minimum project record are sufficient
+for the current gate.
 
 ## Current evidence state
 
