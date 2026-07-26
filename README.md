@@ -1,13 +1,35 @@
 # Logos-Formal
 
-**Fail-closed separation of AI interpretation from human authorization.**
+**A read-only boundary separating interpretation, external authorization
+evidence, and effect.**
 
-An AI agent operating under this architecture cannot authorize or execute its own plans. Every effectual action requires a cryptographically bound permit issued by a human operator or external policy engine.
+The reference service verifies that an externally signed permit is bound to an
+exact artifact proposal. It does not issue permits and has no Apply or actuator
+capability.
 
 [![Validate Canon](https://github.com/XRastlinX/logos-formal/actions/workflows/validate.yml/badge.svg)](https://github.com/XRastlinX/logos-formal/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
+
+## Start Here: Call the Boundary
+
+Requires [Go 1.24+](https://go.dev/dl/).
+
+```bash
+go run ./runtime/cyonic-service demo
+```
+
+The receipt separates:
+
+```text
+interpretation: structurally validated
+authorization: external permit evidence verified
+effect: NOT_PERFORMED
+```
+
+See [Cyonic Service Surface](docs/SERVICE_SURFACE.md) for the external client
+path, interaction receipts, limits, and non-claims.
 
 ## The Problem
 
@@ -55,7 +77,8 @@ cd logos-formal
 Or run individually:
 
 ```bash
-go test ./...                              # Run all 14 tests
+go test ./...                              # Run the complete test suite
+go run ./runtime/cyonic-service demo       # Read-only Ed25519 boundary service
 cd runtime/demonstrator && go run .        # Permit-gated actuation
 cd runtime/dcif-membrane && go run .       # Bleed-over epistemic membrane
 cd runtime/autophagic-decay && go run .    # Autophagic decay (PROPOSED)
@@ -65,6 +88,7 @@ cd runtime/autophagic-decay && go run .    # Autophagic decay (PROPOSED)
 
 | Demonstrator | Tests | Status |
 |---|---|---|
+| **Cyonic Boundary Service** | Ed25519 binding, expiry, issuer, scope, fail-closed effect | Reference service |
 | **Permit-Gated Cell** | Replay attacks, wrong targets, tampered artifacts, expired nonces | Reference |
 | **Bleed-Over (β) Membrane** | Certainty inflation, provenance erasure, authority escalation | Reference |
 | **Autophagic Decay (α)** | Echo-chamber collapse in recursive RAG loops | PROPOSED |
@@ -104,6 +128,8 @@ The α operator is under active research. It is used as a practical filter but h
 - [Architecture Diagrams](docs/ARCHITECTURE.md) — Visual system overview
 - [Positioning](docs/POSITIONING.md) — How PIC-4 addresses funded problem domains
 - [Session Anchor](docs/SESSION_ANCHOR.md) — Start-here prompt for new AI sessions
+- [Cyonic Service Surface](docs/SERVICE_SURFACE.md) - External CLI and evidence contract
+- [Guarded Builder Session](docs/BUILDER_SESSION.md) - Local builder guardrail and sandbox limits
 - [Contributing](CONTRIBUTING.md)
 
 ## Repository Structure
@@ -132,12 +158,18 @@ logos-formal/
 ## What Is Not Claimed
 
 - The demonstrators are **reference implementations**, not production-hardened systems.
-- Signatures are currently **simulated** (literal string comparison, not Ed25519/ECDSA).
+- The Cyonic Boundary Service uses Ed25519. Older actuation demonstrators still
+  use simulated signatures and must not be represented as cryptographic
+  enforcement.
+- The service verifies permit evidence but does not issue, consume, revoke, or
+  Apply permits.
 - The Autophagic Operator (α) is **PROPOSED research**, not proven.
 - The architecture is a **framework and formal boundary**, not a finished product.
 - Independent custody separation (separate issuer/verifier processes) is **not yet implemented**.
 
-The next assurance tier requires real cryptographic signatures, canonical serialization, separate trust domains, and persistent nonce storage.
+The next assurance tier requires canonical serialization, separate trust
+domains, persistent nonce consumption at an external actuator, and independent
+security review.
 
 ## License
 

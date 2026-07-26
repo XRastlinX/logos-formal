@@ -26,3 +26,5 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.cyonic-fixture/
+cyonic-evidence.jsonl
