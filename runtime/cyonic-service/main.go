@@ -20,6 +20,9 @@ The service never issues a permit and never performs an effect.
 
 Usage:
   cyonic-service demo
+  cyonic-service serve-demo [-listen 127.0.0.1:8787]
+  cyonic-service serve -trust-key <public.key> -issuer <issuer> [-listen 127.0.0.1:8787]
+  cyonic-service probe-http [-base-url http://127.0.0.1:8787]
   cyonic-service trial    -report <trial-report.json> [-origin external]
   cyonic-service adjudicate -report <trial-report.json> -out <adjudication.json> -reviewer <ref> [review options]
   cyonic-service summarize-trials -dir <adjudication-dir> -out <summary.json>
@@ -195,6 +198,12 @@ func main() {
 	switch os.Args[1] {
 	case "demo":
 		code = runDemo()
+	case "serve-demo":
+		code = runServeDemo(os.Args[2:])
+	case "serve":
+		code = runServe(os.Args[2:])
+	case "probe-http":
+		code = runProbeHTTP(os.Args[2:])
 	case "trial":
 		code = runTrial(os.Args[2:])
 	case "adjudicate":

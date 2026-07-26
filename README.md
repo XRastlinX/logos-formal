@@ -17,10 +17,16 @@ capability.
 Requires [Go 1.24+](https://go.dev/dl/).
 
 ```bash
-go run ./runtime/cyonic-service demo
+go run ./runtime/cyonic-service serve-demo
 ```
 
-The receipt separates:
+In a second terminal:
+
+```bash
+go run ./runtime/cyonic-service probe-http
+```
+
+The network response separates:
 
 ```text
 interpretation: structurally validated
@@ -83,6 +89,8 @@ Or run individually:
 ```bash
 go test ./...                              # Run the complete test suite
 go run ./runtime/cyonic-service demo       # Read-only Ed25519 boundary service
+go run ./runtime/cyonic-service serve-demo # Standalone HTTP surface on localhost
+go run ./runtime/cyonic-service probe-http # Dependency-free cold-call probe
 cd runtime/demonstrator && go run .        # Permit-gated actuation
 cd runtime/dcif-membrane && go run .       # Bleed-over epistemic membrane
 cd runtime/autophagic-decay && go run .    # Autophagic decay (PROPOSED)

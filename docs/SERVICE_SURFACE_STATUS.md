@@ -9,6 +9,11 @@
 | Requirement | Current evidence | Result |
 |---|---|---|
 | Single entry point | `go run ./runtime/cyonic-service demo` | Implemented |
+| Standalone HTTP entry point | `go run ./runtime/cyonic-service serve-demo` | Implemented |
+| Cold-call network probe | `go run ./runtime/cyonic-service probe-http` | Implemented |
+| Stable validation aliases | `/api/service/cyonic-validate` and `/api/cyonic/validate` | Implemented |
+| Governance headers on every HTTP response | `010`, `NONE`, `NOT_PERFORMED`, `forwarded=false`, bounded router decision | Implemented |
+| Apply compatibility boundary | HTTP 405 before body or permit parsing | Implemented |
 | External CLI path | `fixture` then `evaluate` commands | Implemented |
 | Minimal client | PowerShell and shell client examples | Implemented |
 | Interpretation separated | Receipt has an `interpretation` record | Implemented |
@@ -32,6 +37,15 @@ Observed on 2026-07-26:
 ```text
 go test ./...: PASS
 go vet ./...: PASS
+standalone HTTP live probe: PASS
+  validate aliases: 2/2
+  governance state: 010
+  authority effect: NONE
+  effect: NOT_PERFORMED
+  forwarded: false
+  Apply compatibility status: 405
+  Apply rejection: EFFECT_ROUTE_FORBIDDEN
+  externality status: NOT_ADJUDICATED
 PowerShell client example: PASS
 First Contact trial rehearsal: PASS (internal evidence only)
 adjudication + summary rehearsal: PASS
@@ -65,7 +79,7 @@ codex/cyonic-service-surface-v1
 
 | Goal requirement | Status |
 |---|---|
-| Outsider can call in under ten minutes | Clean internal clone completed in 3.36 seconds; not externally verified |
+| Outsider can call in under ten minutes | Standalone HTTP path and native probe pass internally; not externally verified |
 | Outsider can articulate the separation | No qualifying external evidence |
 | Three cold users complete First Contact | Not achieved |
 | At least one external friction event recorded | Not achieved |

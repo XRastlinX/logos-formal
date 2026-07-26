@@ -46,6 +46,70 @@ still reports:
 The demo is an internal interaction. It must not be counted as external
 adoption evidence.
 
+## Standalone HTTP surface
+
+Start the isolated demonstration server from the repository root:
+
+```bash
+go run ./runtime/cyonic-service serve-demo
+```
+
+It listens on `127.0.0.1:8787` by default and exposes:
+
+```text
+GET  /health
+GET  /api/demo/request
+POST /api/service/cyonic-validate
+POST /api/cyonic/validate
+POST /api/service/apply              always rejects before body parsing
+```
+
+Every response carries:
+
+```text
+X-Cubed-Bit: 010
+X-Authority-Effect: NONE
+X-Router-Decision: OBSERVE_ONLY | REJECT
+X-Effect: NOT_PERFORMED
+X-Forwarded: false
+```
+
+The demo request contains a signed, ephemeral permit-evidence fixture. The
+private key is discarded before the server begins listening. The fixture can
+exercise the verifier but cannot cause an effect.
+
+In another terminal, run the dependency-free cold-call probe:
+
+```bash
+go run ./runtime/cyonic-service probe-http
+```
+
+It exercises both validate aliases and the fail-closed Apply compatibility
+path. Its output remains `externalityStatus: NOT_ADJUDICATED`; an internal
+probe is not external adoption evidence.
+
+You can also use `curl`:
+
+```bash
+curl -s http://127.0.0.1:8787/api/demo/request |
+  curl -sS \
+    -H 'Content-Type: application/json' \
+    --data-binary @- \
+    http://127.0.0.1:8787/api/service/cyonic-validate
+```
+
+For a caller-supplied trust anchor instead of the ephemeral demo fixture:
+
+```bash
+go run ./runtime/cyonic-service serve \
+  -trust-key ./trusted-public.key \
+  -issuer example-principal
+```
+
+The HTTP process is intentionally not an Apply gateway. Its compatibility
+`/api/service/apply` path always returns `405 EFFECT_ROUTE_FORBIDDEN` before
+reading the body, permit material, or credentials.
+
 ## First Contact trial
 
 An independent tester can run:

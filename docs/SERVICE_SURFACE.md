@@ -34,20 +34,52 @@ signature verification does not perform an effect
 invalid or mismatched permit evidence fails closed
 ```
 
-## Run in one command
+## Standalone HTTP surface
+
+```bash
+go run ./runtime/cyonic-service serve-demo
+```
+
+In a second terminal:
+
+```bash
+go run ./runtime/cyonic-service probe-http
+```
+
+The two stable validation aliases are:
+
+```text
+POST /api/service/cyonic-validate
+POST /api/cyonic/validate
+```
+
+The probe fetches the server's ephemeral signed fixture, calls both aliases,
+and verifies the governance headers and receipt. It also sends a sentinel body
+to `/api/service/apply` and requires:
+
+```text
+HTTP 405
+reasonCode: EFFECT_ROUTE_FORBIDDEN
+X-Cubed-Bit: 010
+X-Authority-Effect: NONE
+X-Effect: NOT_PERFORMED
+X-Forwarded: false
+```
+
+The Apply route rejects before reading the body, permit material, or
+credentials.
+
+The original one-command CLI remains available:
 
 ```bash
 go run ./runtime/cyonic-service demo
 ```
 
-Or run the minimal client:
+Minimal CLI clients are also included:
 
-```bash
-./runtime/cyonic-service/examples/client.sh
-```
-
-```powershell
-.\runtime\cyonic-service\examples\client.ps1
+```text
+runtime/cyonic-service/examples/client.sh
+runtime/cyonic-service/examples/client.ps1
 ```
 
 For an independent usability trial:
@@ -85,6 +117,18 @@ Receipt schema:
 
 ```text
 urn:cyonic:boundary-receipt:v1
+```
+
+HTTP wrapper schema:
+
+```text
+urn:cyonic:http-response:v1
+```
+
+HTTP probe schema:
+
+```text
+urn:cyonic:http-probe:v1
 ```
 
 The trust key and trusted issuer are service configuration. The request cannot
