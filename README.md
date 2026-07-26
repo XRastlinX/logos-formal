@@ -39,27 +39,26 @@ AI (010)          Validator          Attester          Human/Policy (101)     Ac
 
 The AI operates at coordinate **010** (pure interpretation). Only a human authority at **101** can issue a permit. If any stage fails, the actuator fails closed — it does nothing.
 
-## Run It (< 5 minutes)
+## Run It (< 2 minutes)
 
 Requires [Go 1.24+](https://go.dev/dl/).
 
 ```bash
 git clone https://github.com/XRastlinX/logos-formal.git
 cd logos-formal
-go test ./...        # Run all tests
+
+# Run everything — all three demos + full test suite:
+./demo.sh          # Linux / macOS
+.\demo.ps1         # Windows PowerShell
 ```
 
-Or run the demonstrators individually:
+Or run individually:
 
 ```bash
-# 1. Permit-Gated Cell — shows fail-closed actuation
-cd runtime/demonstrator && go run .
-
-# 2. Bleed-Over Membrane — shows epistemic transport invariants
-cd runtime/dcif-membrane && go run .
-
-# 3. Autophagic Decay — shows certainty collapse in recursive AI loops
-cd runtime/autophagic-decay && go run .
+go test ./...                              # Run all 14 tests
+cd runtime/demonstrator && go run .        # Permit-gated actuation
+cd runtime/dcif-membrane && go run .       # Bleed-over epistemic membrane
+cd runtime/autophagic-decay && go run .    # Autophagic decay (PROPOSED)
 ```
 
 ### What the Demonstrators Show
