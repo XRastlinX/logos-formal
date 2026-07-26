@@ -102,7 +102,7 @@ jobs:
         run: |
           set "receipt=%RUNNER_TEMP%\cyonic-validation-windows.json"
           set "partial=%RUNNER_TEMP%\cyonic-validation-windows.json.partial"
-          scripts\validate.cmd -Format json > "%partial%"
+          call scripts\validate.cmd -Format json > "%partial%"
           set "validator_status=%ERRORLEVEL%"
           for %%I in ("%partial%") do if %%~zI GTR 0 move /Y "%partial%" "%receipt%" >NUL
           exit /B %validator_status%
