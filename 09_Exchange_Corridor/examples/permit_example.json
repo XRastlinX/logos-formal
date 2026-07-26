@@ -1,0 +1,11 @@
+{
+  "permit_id": "PRM-20260726-89A4F",
+  "issuer_did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+  "target_did": "did:key:z6Mkq4G6mX2E4r6W4Ww2tK8r5h8DnP3N8V7tL9Zq2Yv1Wk3X",
+  "artifact_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "action_scope": "mutate:postgres",
+  "valid_from_utc": 1785081600,
+  "expires_at_utc": 1785085200,
+  "nonce": "NNC-8a7b6c5d4e3f2a1",
+  "signature_ed25519": "1f2e3d4c5b6a79880f1e2d3c4b5a69788f9e0d1c2b3a495867768594a3b2c1d0..."
+}

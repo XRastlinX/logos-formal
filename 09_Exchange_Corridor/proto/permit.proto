@@ -1,0 +1,24 @@
+syntax = "proto3";
+
+package cyexchange.v1;
+
+option go_package = "logos-formal/pkg/cyexchange/proto;cyexchangepb";
+
+// PROPOSED: Sovereign Apply Permit V0.1
+// authority_effect: NONE
+// The strict cryptographic authorization required to cross the Apply Boundary into 101.
+
+message SovereignApplyPermit {
+    string permit_id = 1;           // Unique identifier for this permit issuance
+    string issuer_did = 2;          // DID of the authorized human/Sovereign principal
+    string target_did = 3;          // DID of the 101 Actuator node authorized to execute
+    
+    string artifact_hash = 4;       // SHA-256 of the exact payload/blueprint to be applied
+    string action_scope = 5;        // E.g., "deploy:kubernetes", "mutate:postgres"
+    
+    int64 valid_from_utc = 6;       // Timestamp when permit becomes valid
+    int64 expires_at_utc = 7;       // Timestamp when permit strictly expires
+    string nonce = 8;               // Unique anti-replay nonce
+    
+    bytes signature_ed25519 = 9;    // Signature covering all preceding fields
+}

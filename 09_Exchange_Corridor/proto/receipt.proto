@@ -1,0 +1,43 @@
+syntax = "proto3";
+
+package cyexchange.v1;
+
+option go_package = "logos-formal/pkg/cyexchange/proto;cyexchangepb";
+
+// PROPOSED: CyExchange Receipt V0.1
+// authority_effect: NONE
+// Receipts acknowledge delivery and evaluation states across the corridor.
+
+message DeliveryReceipt {
+    string receipt_id = 1;          // UUIDv4
+    string original_envelope_id = 2;// Envelope ID being acknowledged
+    string receiver_did = 3;        // DID of the NodeCard returning the receipt
+    
+    enum DeliveryStatus {
+        STATUS_UNKNOWN = 0;
+        STATUS_RECEIVED = 1;        // Ingested into durable Inbox
+        STATUS_REJECTED_SIG = 2;    // Rejected due to invalid Ed25519 signature
+        STATUS_REJECTED_MAL = 3;    // Rejected due to malformed payload
+    }
+    
+    DeliveryStatus status = 4;
+    int64 timestamp_utc = 5;
+    bytes signature_ed25519 = 6;    // Signature over (original_envelope_id + status)
+}
+
+message EvaluationReceipt {
+    string receipt_id = 1;
+    string original_envelope_id = 2;
+    string evaluator_did = 3;       // DID of the 010 evaluating Node
+    
+    enum EvaluationOutcome {
+        OUTCOME_UNKNOWN = 0;
+        OUTCOME_OBSERVE_ONLY = 1;   // 010 evaluation completed without incident
+        OUTCOME_REJECT = 2;         // 010 evaluation failed constraints
+        OUTCOME_APPLIED = 3;        // 101 effect applied successfully (requires Permit)
+    }
+    
+    EvaluationOutcome outcome = 4;
+    string evaluation_log_cid = 5;  // IPFS CID or local hash of the diagnostic log
+    bytes signature_ed25519 = 6;
+}
