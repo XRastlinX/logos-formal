@@ -3,6 +3,28 @@
 This trial is for a person who did not help build Logos-Formal and has not been
 briefed on its private terminology.
 
+## First Contact Evidence Log
+
+| # | Date (UTC) | Actor | Trial version / hash | Elapsed | What they said it does (short) | Friction? | Link |
+|---|------------|-------|----------------------|---------|--------------------------------|-----------|------|
+| 1 | — | — | — | — | — | — | — |
+| 2 | — | — | — | — | — | — | — |
+| 3 | — | — | — | — | — | — | — |
+
+**Contract status**
+
+- Qualifying participants: **0 / 3**
+- Verified friction events: **0 / 1**
+- Overall: **`EVIDENCE_INCOMPLETE`**
+
+**Rules**
+
+- Only independent actors count.
+- Internal CI and Principal runs do not count.
+- Friction must be reproducible against the published surface.
+- Duplicate identities—one person using different handles—count as one
+  participant unless they are shown to be distinct actors.
+
 ## Qualifying participant
 
 A report counts toward the First Contact threshold only when all of these
@@ -121,11 +143,8 @@ The report records:
 
 Do not edit the participant's original report.
 
-For each report, retain one line:
-
-```text
-date | handle-or-name | trial version/hash | elapsed | friction? (y/n) | link-or-location
-```
+For each qualifying report, fill exactly one row in the First Contact Evidence
+Log above. Keep the participant's short explanation in their own words.
 
 Before counting the line, check:
 
