@@ -6,14 +6,12 @@ import (
 
 type Lexer struct {
 	input        []byte
-	position     int // current position in input (points to current char)
-	readPosition int // current reading position in input (after current char)
+	position     int
+	readPosition int
 	ch           byte
 
-	// Tracking positions for SourceSpan
-	line   int
-	column int
-
+	line       int
+	column     int
 	prevLine   int
 	prevColumn int
 }
@@ -58,7 +56,9 @@ func (l *Lexer) peekChar() byte {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 
-	l.skipWhitespaceAndComments()
+	if errTok, ok := l.skipWhitespaceAndComments(); ok {
+		return errTok
+	}
 
 	startByte := l.position
 	startLine := l.line
@@ -130,25 +130,18 @@ func (l *Lexer) NextToken() token.Token {
 		tok.Type = token.EOF
 	default:
 		if isDigit(l.ch) {
-			tok.Literal = l.readNumberOrUnit()
-			// Check if it has a unit suffix [xxx] included
-			if len(tok.Literal) > 0 && tok.Literal[len(tok.Literal)-1] == ']' {
-				tok.Type = token.UNIT
-			} else {
-				tok.Type = token.NUMBER
-			}
+			literal, tokType := l.readNumberOrUnit()
+			tok.Type = tokType
+			tok.Literal = literal
 			tok.Start = startByte
-			tok.End = l.position // l.position is currently the char AFTER the number/unit because readNumberOrUnit advances
+			tok.End = l.position
 			tok.Line = startLine
 			tok.Column = startColumn
 			return tok
 		} else if isLetter(l.ch) {
-			tok.Literal = l.readIdentifier()
-			if isQualified(tok.Literal) {
-				tok.Type = token.QIDENT
-			} else {
-				tok.Type = token.LookupIdent(tok.Literal)
-			}
+			literal, tokType := l.readIdentifier()
+			tok.Type = tokType
+			tok.Literal = literal
 			tok.Start = startByte
 			tok.End = l.position
 			tok.Line = startLine
@@ -175,52 +168,83 @@ func newToken(tokenType token.TokenType, ch byte) token.Token {
 	return token.Token{Type: tokenType, Literal: string(ch)}
 }
 
-func (l *Lexer) skipWhitespaceAndComments() {
+func (l *Lexer) skipWhitespaceAndComments() (token.Token, bool) {
 	for {
 		if l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 			l.readChar()
 			continue
 		}
-		// Check for // comment
 		if l.ch == '/' && l.peekChar() == '/' {
 			for l.ch != '\n' && l.ch != 0 {
 				l.readChar()
 			}
 			continue
 		}
-		// Check for /* comment */
 		if l.ch == '/' && l.peekChar() == '*' {
+			startByte := l.position
+			startLine := l.line
+			startCol := l.column
 			l.readChar()
 			l.readChar()
+			terminated := false
 			for l.ch != 0 {
 				if l.ch == '*' && l.peekChar() == '/' {
 					l.readChar()
 					l.readChar()
+					terminated = true
 					break
 				}
 				l.readChar()
+			}
+			if !terminated {
+				return token.Token{
+					Type:    token.ILLEGAL,
+					Literal: "unterminated block comment",
+					Line:    startLine,
+					Column:  startCol,
+					Start:   startByte,
+					End:     l.position,
+				}, true
 			}
 			continue
 		}
 		break
 	}
+	return token.Token{}, false
 }
 
-func (l *Lexer) readIdentifier() string {
+func (l *Lexer) readIdentifier() (string, token.TokenType) {
 	position := l.position
-	for isLetter(l.ch) || isDigit(l.ch) || l.ch == ':' {
-		l.readChar()
-	}
-	return string(l.input[position:l.position])
-}
+	hasColons := false
 
-func isQualified(ident string) bool {
-	for i := 0; i < len(ident)-1; i++ {
-		if ident[i] == ':' && ident[i+1] == ':' {
-			return true
+	for {
+		for isLetter(l.ch) || isDigit(l.ch) {
+			l.readChar()
 		}
+		
+		// If we see ::, we might have a qualified identifier
+		if l.ch == ':' && l.peekChar() == ':' {
+			hasColons = true
+			l.readChar() // consume :
+			l.readChar() // consume :
+			// After :: we MUST have a letter
+			if !isLetter(l.ch) {
+				// If not a letter, this is malformed. Just return ILLEGAL
+				for isLetter(l.ch) || isDigit(l.ch) || l.ch == ':' {
+					l.readChar()
+				}
+				return string(l.input[position:l.position]), token.ILLEGAL
+			}
+			continue
+		}
+		break
 	}
-	return false
+
+	literal := string(l.input[position:l.position])
+	if hasColons {
+		return literal, token.QIDENT
+	}
+	return literal, token.LookupIdent(literal)
 }
 
 func isLetter(ch byte) bool {
@@ -231,22 +255,34 @@ func isDigit(ch byte) bool {
 	return '0' <= ch && ch <= '9'
 }
 
-func (l *Lexer) readNumberOrUnit() string {
+func (l *Lexer) readNumberOrUnit() (string, token.TokenType) {
 	position := l.position
-	// Read number part
+	dotCount := 0
+
 	for isDigit(l.ch) || l.ch == '.' {
+		if l.ch == '.' {
+			dotCount++
+		}
 		l.readChar()
 	}
-	// Check if unit syntax [km] follows immediately
+
+	if dotCount > 1 {
+		return string(l.input[position:l.position]), token.ILLEGAL
+	}
+
 	if l.ch == '[' {
 		l.readChar()
-		for l.ch != ']' && l.ch != 0 {
+		for l.ch != ']' && l.ch != 0 && l.ch != '\n' {
 			l.readChar()
 		}
 		if l.ch == ']' {
 			l.readChar() // consume ']'
+			return string(l.input[position:l.position]), token.UNIT
 		}
+		// Unterminated unit
+		return string(l.input[position:l.position]), token.ILLEGAL
 	}
-	return string(l.input[position:l.position])
+
+	return string(l.input[position:l.position]), token.NUMBER
 }
 
