@@ -1,0 +1,40 @@
+{
+  "schema": "ark.external-review-deposit-receipt",
+  "schemaVersion": "1.0.0",
+  "eventType": "REVIEW_PACKET_DEPOSITED",
+  "status": "DEPOSITED_VERIFIED",
+  "governanceState": "010",
+  "authorityEffect": "NONE",
+  "packet": {
+    "name": "grok-rite-normalization-review-v1.zip",
+    "packetId": "sha256:12c2f77f1686c11d754b6beac028f935a7ce823ebb890ea5a75ec8c4779da4e5",
+    "archiveSha256": "sha256:c976e837a06907f08a9dfbcaa6b52ee32d064229df3d620a72e6077e62456cc7",
+    "bytes": 21999
+  },
+  "deposit": {
+    "provider": "GOOGLE_DRIVE",
+    "fileId": "1OHvtJaU29VZ4gV6CNz9oPaFNBvzONu2b",
+    "url": "https://drive.google.com/file/d/1OHvtJaU29VZ4gV6CNz9oPaFNBvzONu2b/view?usp=drivesdk",
+    "mimeType": "application/zip",
+    "createdAt": "2026-07-26T10:36:18.526Z"
+  },
+  "readback": {
+    "performed": true,
+    "titleMatched": true,
+    "mimeTypeMatched": true,
+    "byteLengthMatched": true,
+    "rawBytesAvailable": true
+  },
+  "boundaries": {
+    "ownerAuthorityTransferred": false,
+    "applyAuthorityTransferred": false,
+    "publicSharingAsserted": false,
+    "recipientExecutionAuthorized": false,
+    "responseAutoApplied": false
+  },
+  "epistemicLimits": [
+    "The receipt proves the local packet roots and observed Drive object metadata.",
+    "It does not prove that Grok has opened, reviewed, or accepted the packet.",
+    "It does not grant Owner, Seal, Apply, or state-commit authority."
+  ]
+}

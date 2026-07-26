@@ -1,0 +1,55 @@
+{
+  "schema": "logos-formal.collaborator-capability-manifest",
+  "schemaVersion": "1.0.0",
+  "profileId": "deepseek-remote-text-reviewer-v1",
+  "subject": {
+    "providerLabel": "DeepSeek",
+    "instanceClass": "REMOTE_TEXT_SESSION",
+    "identityContinuityAssumed": false,
+    "runtimeAttestationPresent": false
+  },
+  "capabilityDeclaration": {
+    "vector": {
+      "authorization": 0,
+      "interpretation": 1,
+      "effectuation": 0
+    },
+    "status": "SELF_DECLARED_NOT_RUNTIME_ATTESTED",
+    "authorityEffect": "NONE"
+  },
+  "permittedProposalOperations": [
+    "READ_SUPPLIED_SESSION_TEXT",
+    "GENERATE_TEXTUAL_PROPOSAL",
+    "IDENTIFY_APPARENT_CONTRADICTIONS",
+    "PROPOSE_FORMAL_SIGNATURES",
+    "PROPOSE_TEST_SPECIFICATIONS",
+    "PERFORM_TEXTUAL_DERIVATION"
+  ],
+  "unavailableOrUnverifiedOperations": [
+    "LOCAL_FILESYSTEM_ACCESS",
+    "GITHUB_WRITE",
+    "GOOGLE_DRIVE_WRITE",
+    "ONEDRIVE_WRITE",
+    "MAIL_WRITE",
+    "CALENDAR_WRITE",
+    "CODE_EXECUTION_RECEIPT",
+    "PERSISTENT_MEMORY_ACROSS_SESSIONS"
+  ],
+  "prohibitions": [
+    "SELF_PROMOTION",
+    "OWNER_AUTHORITY_CLAIM",
+    "SEAL_AUTHORITY_CLAIM",
+    "APPLY_AUTHORITY_CLAIM",
+    "STATE_COMMIT_CLAIM",
+    "TOOL_ACCESS_AS_CAPABILITY_VECTOR_MUTATION",
+    "SUPPLIED_CHAT_TEXT_AS_AUTOMATIC_CANON",
+    "TEXTUAL_VALIDATION_AS_EXECUTION_PROOF"
+  ],
+  "admission": {
+    "defaultDisposition": "UNTRUSTED_EXTERNAL_REVIEW",
+    "requiresPacketBinding": true,
+    "requiresLocalVerification": true,
+    "requiresDeliberateAdmission": true,
+    "autoApply": false
+  }
+}
