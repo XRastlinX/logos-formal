@@ -44,6 +44,9 @@ baseline is:
 
 Answer from the command output rather than from other project documents.
 
+The report path is create-only. Use a new filename for every attempt; the
+command will refuse to replace an existing participant report.
+
 The report records:
 
 - the exact Git source ref when available;
@@ -114,9 +117,9 @@ The command does not edit the report. It records:
   reviewer-accepted friction;
 - `authorityEffect: NONE`.
 
-Evidence outputs are create-only. The CLI rejects an adjudication output path
-that equals the participant report and refuses to overwrite any existing
-adjudication or summary file.
+Evidence outputs are create-only. The CLI refuses to overwrite participant
+reports, rejects an adjudication output path that equals its participant
+report, and refuses to overwrite any existing adjudication or summary file.
 
 When multiple additive adjudications have been collected:
 

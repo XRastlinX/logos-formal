@@ -27,6 +27,7 @@
 | Internal/external distinction | External is recorded only as `CLAIMED_EXTERNAL` pending separate adjudication | Implemented |
 | Friction classification | Rejections carry category, code, and message | Implemented |
 | First Contact capture | Interactive trial records setup time, articulation, friction, source ref, and pending adjudication | Implemented |
+| Participant evidence immutability | Trial reports are create-only and existing report paths fail before prompting | Implemented |
 | Additive adjudication | Exact report-byte hash + explicit reviewer findings + mechanical receipt/time checks | Implemented |
 | Evidence threshold summary | Deduplicates participant and friction evidence; cannot issue authority | Implemented |
 | Fail-closed tests | Signature, issuer, expiry, scope, digest, malformed input, and effect-route tests | Implemented |
@@ -49,6 +50,9 @@ standalone HTTP live probe: PASS
   externality status: NOT_ADJUDICATED
 PowerShell client example: PASS
 First Contact trial rehearsal: PASS (internal evidence only)
+participant report create-only guard: PASS
+  existing report path: rejected before prompting
+  existing report bytes: unchanged
 adjudication + summary rehearsal: PASS
   qualification: NOT_QUALIFYING
   qualifying external participants: 0/3

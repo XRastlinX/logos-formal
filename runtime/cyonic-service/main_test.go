@@ -211,6 +211,50 @@ func TestFirstContactTrialNeverSelfAdjudicates(t *testing.T) {
 	}
 }
 
+func TestFirstContactReportIsCreateOnly(t *testing.T) {
+	report, _ := testFirstContactReport(t, "cold-user-create-only", 4.5)
+	path := filepath.Join(t.TempDir(), "participant-report.json")
+
+	if err := writeFirstContactReport(path, report); err != nil {
+		t.Fatal(err)
+	}
+	original, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	report.ParticipantRef = "replacement-attempt"
+	if err := writeFirstContactReport(path, report); err == nil {
+		t.Fatal("existing participant report was overwritten")
+	}
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(original, after) {
+		t.Fatal("participant report bytes changed after overwrite attempt")
+	}
+}
+
+func TestRunTrialRejectsExistingReportBeforeInteraction(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "participant-report.json")
+	original := []byte("existing participant evidence\n")
+	if err := os.WriteFile(path, original, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	if code := runTrial([]string{"-report", path, "-origin", "external"}); code != 2 {
+		t.Fatalf("existing report path returned exit code %d, want 2", code)
+	}
+	after, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(original, after) {
+		t.Fatal("participant report bytes changed")
+	}
+}
+
 func testFirstContactReport(t *testing.T, participant string, minutes float64) (FirstContactReport, []byte) {
 	t.Helper()
 	now := time.Date(2026, 7, 26, 12, 0, 0, 0, time.UTC)

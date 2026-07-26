@@ -164,6 +164,10 @@ The adjudication is still `authorityEffect: NONE`. It records reviewer
 attestations; it does not make them self-proving facts or modify the original
 participant report.
 
+Participant reports are create-only: the trial command refuses to overwrite an
+existing report path. Choose a new filename for every run and retain the
+original bytes for additive adjudication.
+
 ## External CLI evaluation
 
 Create a short-lived fixture:

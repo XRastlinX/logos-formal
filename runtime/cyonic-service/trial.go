@@ -2,7 +2,6 @@ package main
 
 import (
 	"bufio"
-	"encoding/json"
 	"flag"
 	"fmt"
 	"io"
@@ -192,19 +191,17 @@ func runTrial(args []string) int {
 		fmt.Fprintln(os.Stderr, "trial: -report is required")
 		return 2
 	}
+	if err := requireNewReportPath(*reportPath); err != nil {
+		fmt.Fprintln(os.Stderr, "trial:", err)
+		return 2
+	}
 
 	report, err := conductTrial(os.Stdin, os.Stdout, time.Now().UTC(), *origin, detectSourceRef())
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "trial:", err)
 		return 2
 	}
-	raw, err := json.MarshalIndent(report, "", "  ")
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "trial encode:", err)
-		return 2
-	}
-	raw = append(raw, '\n')
-	if err := os.WriteFile(*reportPath, raw, 0o600); err != nil {
+	if err := writeFirstContactReport(*reportPath, report); err != nil {
 		fmt.Fprintln(os.Stderr, "trial write:", err)
 		return 2
 	}
@@ -212,4 +209,19 @@ func runTrial(args []string) int {
 	fmt.Fprintf(os.Stdout, "\nWrote trial report: %s\n", *reportPath)
 	fmt.Fprintln(os.Stdout, "Status remains PENDING_EXTERNAL_REVIEW.")
 	return 0
+}
+
+func writeFirstContactReport(path string, report FirstContactReport) error {
+	return writeNewIndentedJSON(path, report)
+}
+
+func requireNewReportPath(path string) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		return fmt.Errorf("report path already exists; choose a new filename: %s", path)
+	}
+	if !os.IsNotExist(err) {
+		return fmt.Errorf("inspect report path: %w", err)
+	}
+	return nil
 }
