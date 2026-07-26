@@ -21,6 +21,8 @@ The service never issues a permit and never performs an effect.
 Usage:
   cyonic-service demo
   cyonic-service trial    -report <trial-report.json> [-origin external]
+  cyonic-service adjudicate -report <trial-report.json> -out <adjudication.json> -reviewer <ref> [review options]
+  cyonic-service summarize-trials -dir <adjudication-dir> -out <summary.json>
   cyonic-service fixture  -dir <directory>
   cyonic-service evaluate -request <request.json> -trust-key <public.key> -issuer <issuer> [options]
 
@@ -195,6 +197,10 @@ func main() {
 		code = runDemo()
 	case "trial":
 		code = runTrial(os.Args[2:])
+	case "adjudicate":
+		code = runAdjudicate(os.Args[2:])
+	case "summarize-trials":
+		code = runSummarizeTrials(os.Args[2:])
 	case "fixture":
 		code = runFixture(os.Args[2:])
 	case "evaluate":

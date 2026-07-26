@@ -69,6 +69,24 @@ authorityEffect: NONE
 
 See [`docs/FIRST_CONTACT_TRIAL.md`](../../docs/FIRST_CONTACT_TRIAL.md).
 
+An independent reviewer can bind an additive adjudication to the participant
+report's exact bytes:
+
+```bash
+go run ./runtime/cyonic-service adjudicate \
+  -report cyonic-first-contact-report-01.json \
+  -out cyonic-first-contact-adjudication-01.json \
+  -reviewer independent-reviewer-01 \
+  -externality VERIFIED_EXTERNAL \
+  -source VERIFIED \
+  -comprehension ACCEPTED \
+  -friction ACCEPTED
+```
+
+The adjudication is still `authorityEffect: NONE`. It records reviewer
+attestations; it does not make them self-proving facts or modify the original
+participant report.
+
 ## External CLI evaluation
 
 Create a short-lived fixture:

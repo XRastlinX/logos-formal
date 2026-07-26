@@ -108,6 +108,23 @@ forwarded: false
 are rejected. A valid permit is necessary evidence for an external Apply
 system; it is not sufficient, and this service has no Apply system.
 
+## Runtime and exchange boundary
+
+This surface is not a message broker, local exchange daemon, or Git-backed
+runtime queue.
+
+```text
+Git canon != runtime state != exchange transport
+Send != Apply
+Authenticated peer != authorized effect
+```
+
+Git remains the versioned specification and provenance surface. Runtime state,
+private keys, credentials, transient payloads, and live queues do not belong
+in Git. A future peer-exchange corridor would be a separate PROPOSED service
+with its own threat model and conformance evidence; it must not silently widen
+this verifier's read-only 010 boundary.
+
 The service deliberately omits generational-depth and effective-uncertainty
 fields because the alpha boundary remains PROPOSED.
 

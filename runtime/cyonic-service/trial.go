@@ -150,7 +150,7 @@ func conductTrial(
 
 	trialID := "trial-" + now.UTC().Format("20060102T150405.000000000Z")
 	return FirstContactReport{
-		Schema:                       "urn:cyonic:first-contact-report:v1",
+		Schema:                       firstContactReportSchema,
 		TrialID:                      trialID,
 		RecordedAt:                   now.UTC().Format(time.RFC3339Nano),
 		SourceRef:                    sourceRef,

@@ -6,6 +6,9 @@ import (
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 	"time"
@@ -205,5 +208,234 @@ func TestFirstContactTrialNeverSelfAdjudicates(t *testing.T) {
 	}
 	if report.Friction.Category != "TRYABILITY" {
 		t.Fatalf("friction was not preserved: %+v", report.Friction)
+	}
+}
+
+func testFirstContactReport(t *testing.T, participant string, minutes float64) (FirstContactReport, []byte) {
+	t.Helper()
+	now := time.Date(2026, 7, 26, 12, 0, 0, 0, time.UTC)
+	input := strings.NewReader(strings.Join([]string{
+		participant,
+		"4.5",
+		"it checked proposal structure and separately verified external authorization evidence",
+		"an external configured principal",
+		"no; it observed only and did not forward anything",
+		"TRYABILITY",
+		"the required Go version was not visible above the first command",
+		"",
+	}, "\n"))
+	var output bytes.Buffer
+	report, err := conductTrial(input, &output, now, "external", "candidate-sha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	report.SelfReportedMinutesFromClone = &minutes
+	raw, err := json.MarshalIndent(report, "", "  ")
+	if err != nil {
+		t.Fatal(err)
+	}
+	raw = append(raw, '\n')
+	return report, raw
+}
+
+func acceptedAdjudicationInput() AdjudicationInput {
+	return AdjudicationInput{
+		ReviewerRef:   "independent-reviewer-01",
+		Externality:   "VERIFIED_EXTERNAL",
+		Source:        "VERIFIED",
+		Comprehension: "ACCEPTED",
+		Friction:      "ACCEPTED",
+		Notes:         "cold participant and source ref checked separately",
+	}
+}
+
+func TestAdjudicationBindsExactReportWithoutAuthority(t *testing.T) {
+	report, raw := testFirstContactReport(t, "cold-user-01", 4.5)
+	record, err := adjudicateFirstContact(
+		report,
+		raw,
+		acceptedAdjudicationInput(),
+		time.Date(2026, 7, 26, 13, 0, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.ReportDigest != digestBytes(raw) {
+		t.Fatalf("adjudication does not bind exact report bytes: %q", record.ReportDigest)
+	}
+	if record.QualificationStatus != "QUALIFYING_EXTERNAL" {
+		t.Fatalf("expected qualifying external record, got %+v", record)
+	}
+	if record.FrictionEventStatus != "VERIFIED_EXTERNAL_FRICTION" {
+		t.Fatalf("expected accepted friction event, got %+v", record.Friction)
+	}
+	if record.AuthorityEffect != "NONE" {
+		t.Fatal("adjudication claimed authority")
+	}
+
+	tampered := append([]byte(nil), raw...)
+	tampered[len(tampered)-2] ^= 1
+	if digestBytes(tampered) == record.ReportDigest {
+		t.Fatal("report digest did not change after byte alteration")
+	}
+}
+
+func TestAdjudicationFailsClosedOnReceiptDrift(t *testing.T) {
+	report, _ := testFirstContactReport(t, "cold-user-02", 4.5)
+	report.BoundaryReceipt.Routing.Forwarded = true
+	raw, err := json.Marshal(report)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record, err := adjudicateFirstContact(
+		report,
+		raw,
+		acceptedAdjudicationInput(),
+		time.Date(2026, 7, 26, 13, 0, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.Receipt.Status != "REJECTED" ||
+		record.QualificationStatus != "NOT_QUALIFYING" {
+		t.Fatalf("drifted receipt qualified: %+v", record)
+	}
+}
+
+func TestAdjudicationRequiresReviewerFindingsAndTenMinuteRun(t *testing.T) {
+	report, raw := testFirstContactReport(t, "cold-user-03", 10)
+	input := acceptedAdjudicationInput()
+	input.Externality = "UNDETERMINED"
+	record, err := adjudicateFirstContact(
+		report,
+		raw,
+		input,
+		time.Date(2026, 7, 26, 13, 0, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.TenMinuteFirstRun.Status != "NOT_WITHIN_TEN_MINUTES" ||
+		record.QualificationStatus != "NOT_QUALIFYING" {
+		t.Fatalf("unverified or slow report qualified: %+v", record)
+	}
+}
+
+func TestAdjudicationCannotRelabelInternalReportAsExternal(t *testing.T) {
+	report, _ := testFirstContactReport(t, "internal-user", 4.5)
+	report.RelationshipClaim = "INTERNAL"
+	report.ExternalityStatus = "INTERNAL"
+	raw, err := json.Marshal(report)
+	if err != nil {
+		t.Fatal(err)
+	}
+	record, err := adjudicateFirstContact(
+		report,
+		raw,
+		acceptedAdjudicationInput(),
+		time.Date(2026, 7, 26, 13, 0, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if record.Externality.Status != "REJECTED" ||
+		record.QualificationStatus != "NOT_QUALIFYING" {
+		t.Fatalf("internal report was relabeled as external: %+v", record)
+	}
+}
+
+func TestAdjudicationCannotOverwriteSourceOrExistingEvidence(t *testing.T) {
+	report, raw := testFirstContactReport(t, "cold-user-04", 4.5)
+	dir := t.TempDir()
+	reportPath := filepath.Join(dir, "report.json")
+	if err := os.WriteFile(reportPath, raw, 0o600); err != nil {
+		t.Fatal(err)
+	}
+
+	code := runAdjudicate([]string{
+		"-report", reportPath,
+		"-out", reportPath,
+		"-reviewer", "reviewer",
+	})
+	if code != 2 {
+		t.Fatalf("same-path overwrite was not rejected, code=%d", code)
+	}
+	after, err := os.ReadFile(reportPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if !bytes.Equal(raw, after) {
+		t.Fatal("participant report bytes changed")
+	}
+
+	existingPath := filepath.Join(dir, "adjudication.json")
+	if err := os.WriteFile(existingPath, []byte("existing"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	record, err := adjudicateFirstContact(
+		report,
+		raw,
+		acceptedAdjudicationInput(),
+		time.Date(2026, 7, 26, 13, 0, 0, 0, time.UTC),
+	)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := writeNewIndentedJSON(existingPath, record); err == nil {
+		t.Fatal("existing adjudication evidence was overwritten")
+	}
+	existing, err := os.ReadFile(existingPath)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if string(existing) != "existing" {
+		t.Fatal("existing evidence bytes changed")
+	}
+}
+
+func TestSummaryRequiresThreeDistinctParticipantsAndOneFriction(t *testing.T) {
+	now := time.Date(2026, 7, 26, 14, 0, 0, 0, time.UTC)
+	var records []FirstContactAdjudication
+	for index, participant := range []string{"cold-user-01", "cold-user-02", "cold-user-03"} {
+		report, raw := testFirstContactReport(t, participant, 4.5)
+		input := acceptedAdjudicationInput()
+		if index > 0 {
+			input.Friction = "NONE"
+		}
+		record, err := adjudicateFirstContact(report, raw, input, now)
+		if err != nil {
+			t.Fatal(err)
+		}
+		records = append(records, record)
+	}
+
+	summary := summarizeFirstContact(records, "evidence", now)
+	if summary.Status != "FIRST_CONTACT_VALIDATED" {
+		t.Fatalf("expected validated First Contact threshold, got %+v", summary)
+	}
+	if summary.QualifyingExternalParticipants != 3 ||
+		summary.VerifiedExternalFrictionEvents != 1 ||
+		summary.AuthorityEffect != "NONE" {
+		t.Fatalf("unexpected summary counts: %+v", summary)
+	}
+
+	records = append(records, records[0])
+	duplicateSummary := summarizeFirstContact(records, "evidence", now)
+	if duplicateSummary.QualifyingExternalParticipants != 3 ||
+		duplicateSummary.VerifiedExternalFrictionEvents != 1 {
+		t.Fatalf("duplicate evidence inflated counts: %+v", duplicateSummary)
+	}
+
+	tampered := records[0]
+	tampered.ParticipantRef = "forged-user"
+	tampered.Externality.Status = "UNDETERMINED"
+	tampered.QualificationStatus = "QUALIFYING_EXTERNAL"
+	tamperedSummary := summarizeFirstContact(
+		[]FirstContactAdjudication{tampered},
+		"evidence",
+		now,
+	)
+	if tamperedSummary.QualifyingExternalParticipants != 0 {
+		t.Fatalf("summary trusted mutable qualification string: %+v", tamperedSummary)
 	}
 }
