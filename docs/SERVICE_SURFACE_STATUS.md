@@ -89,12 +89,13 @@ The exact implementation is published on the public pull-request branch:
 
 ```text
 codex/cyonic-service-surface-v1
-3a5b0801bc243a1716273dfe98acc5265e6c6882
+87633c4f8757d1c03e328067343330e524b52f05
 ```
 
-GitHub Actions run 16 passed independent validator-conformance jobs on Windows
-and Ubuntu, followed by the public Windows and Unix validation scripts. This is
-implementation evidence, not independent First Contact evidence.
+GitHub Actions run 32 (run ID `30216090500`) passed independent
+validator-conformance jobs on Windows and Ubuntu, followed by the public
+Windows and Unix validation scripts at that exact head. This is implementation
+evidence, not independent First Contact evidence.
 
 ## Adoption-arc audit
 
