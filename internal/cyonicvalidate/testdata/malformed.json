@@ -1,0 +1,9 @@
+{
+  "schema": "urn:cyonic:validation-manifest:v1",
+  "version": "1.0",
+  "profile": "malformed-fixture",
+  "target": ".",
+  "requiredPaths": [],
+  "checks": [],
+  "arbitraryCommand": "not permitted"
+}
