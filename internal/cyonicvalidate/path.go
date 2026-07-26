@@ -9,8 +9,16 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
+	"unicode/utf8"
 )
+
+type treeEntry struct {
+	absolutePath  string
+	canonicalPath string
+	kind          string
+}
 
 func FindRepositoryRoot(start string) (string, error) {
 	current, err := filepath.Abs(start)
@@ -50,6 +58,9 @@ func ResolveBoundPath(repoRoot, candidate string) (string, string, error) {
 	if err != nil {
 		return "", "", fmt.Errorf("resolve target path: %w", err)
 	}
+	if err := rejectSymlinkComponents(root, path); err != nil {
+		return "", "", err
+	}
 	path, err = filepath.EvalSymlinks(path)
 	if err != nil {
 		return "", "", fmt.Errorf("resolve target symlinks: %w", err)
@@ -87,6 +98,9 @@ func ResolveBoundFile(repoRoot, candidate string) (string, error) {
 	path, err = filepath.Abs(path)
 	if err != nil {
 		return "", fmt.Errorf("resolve file path: %w", err)
+	}
+	if err := rejectSymlinkComponents(root, path); err != nil {
+		return "", err
 	}
 	path, err = filepath.EvalSymlinks(path)
 	if err != nil {
@@ -128,9 +142,37 @@ func startsWithParent(path string) bool {
 	return strings.HasPrefix(path, ".."+string(filepath.Separator))
 }
 
+func rejectSymlinkComponents(root, candidate string) error {
+	relative, err := filepath.Rel(root, candidate)
+	if err != nil {
+		return fmt.Errorf("derive path components: %w", err)
+	}
+	if relative == "." {
+		return nil
+	}
+	if relative == ".." || startsWithParent(relative) || filepath.IsAbs(relative) {
+		return fmt.Errorf("path %q escapes repository boundary %q", candidate, root)
+	}
+	current := root
+	for _, component := range strings.Split(relative, string(filepath.Separator)) {
+		current = filepath.Join(current, component)
+		info, err := os.Lstat(current)
+		if err != nil {
+			return fmt.Errorf("inspect path component %q: %w", current, err)
+		}
+		if info.Mode()&os.ModeSymlink != 0 {
+			return fmt.Errorf("symlink or reparse-point path component %q is forbidden", current)
+		}
+	}
+	return nil
+}
+
 func ValidateRequiredPaths(repoRoot string, required []string) error {
 	for _, requiredPath := range required {
 		candidate := filepath.Join(repoRoot, filepath.FromSlash(requiredPath))
+		if err := rejectSymlinkComponents(repoRoot, candidate); err != nil {
+			return fmt.Errorf("required path %q: %w", requiredPath, err)
+		}
 		resolved, err := filepath.EvalSymlinks(candidate)
 		if err != nil {
 			return fmt.Errorf("required path %q: %w", requiredPath, err)
@@ -158,15 +200,18 @@ func HashTree(repoRoot, target string) (string, error) {
 		return "", err
 	}
 
-	digest := sha256.New()
-	writeHashField(digest, "logos-formal.validation-tree.v1")
+	entries := make([]treeEntry, 0, 128)
+	caseFoldedPaths := map[string]string{}
 
 	err = filepath.WalkDir(target, func(path string, entry fs.DirEntry, walkErr error) error {
 		if walkErr != nil {
 			return walkErr
 		}
-		if path == filepath.Join(root, ".git") {
+		if path != target && entry.Name() == ".git" && entry.IsDir() {
 			return filepath.SkipDir
+		}
+		if entry.Type()&os.ModeSymlink != 0 {
+			return fmt.Errorf("symlink or reparse point %q is forbidden", path)
 		}
 
 		relative, err := filepath.Rel(target, path)
@@ -177,56 +222,74 @@ func HashTree(repoRoot, target string) (string, error) {
 		if relative == "." {
 			return nil
 		}
+		if !utf8.ValidString(relative) {
+			return fmt.Errorf("path %q is not valid UTF-8", relative)
+		}
 
 		info, err := entry.Info()
 		if err != nil {
 			return err
 		}
-		writeHashField(digest, relative)
-
-		if info.Mode()&os.ModeSymlink != 0 {
-			linkTarget, err := os.Readlink(path)
-			if err != nil {
-				return err
-			}
-			resolved, err := filepath.EvalSymlinks(path)
-			if err != nil {
-				return fmt.Errorf("resolve symlink %q: %w", relative, err)
-			}
-			if err := ensureWithin(root, resolved); err != nil {
-				return fmt.Errorf("symlink %q: %w", relative, err)
-			}
-			writeHashField(digest, "symlink")
-			writeHashField(digest, filepath.ToSlash(linkTarget))
-			return nil
-		}
+		kind := ""
 		if info.IsDir() {
-			writeHashField(digest, "directory")
-			return nil
-		}
-		if !info.Mode().IsRegular() {
+			kind = "directory"
+		} else if info.Mode().IsRegular() {
+			kind = "file"
+		} else {
 			return fmt.Errorf("unsupported filesystem object %q with mode %s", relative, info.Mode())
 		}
 
-		writeHashField(digest, "file")
-		file, err := os.Open(path)
+		folded := strings.ToLower(relative)
+		if prior, exists := caseFoldedPaths[folded]; exists && prior != relative {
+			return fmt.Errorf("case-colliding paths %q and %q are forbidden", prior, relative)
+		}
+		caseFoldedPaths[folded] = relative
+		entries = append(entries, treeEntry{
+			absolutePath:  path,
+			canonicalPath: relative,
+			kind:          kind,
+		})
+		return nil
+	})
+	if err != nil {
+		return "", fmt.Errorf("enumerate validation target: %w", err)
+	}
+
+	sort.Slice(entries, func(left, right int) bool {
+		return entries[left].canonicalPath < entries[right].canonicalPath
+	})
+
+	digest := sha256.New()
+	writeHashField(digest, "logos-formal.validation-tree.v1")
+	for _, entry := range entries {
+		writeHashField(digest, entry.canonicalPath)
+		writeHashField(digest, entry.kind)
+		if entry.kind != "file" {
+			continue
+		}
+
+		file, err := os.Open(entry.absolutePath)
 		if err != nil {
-			return err
+			return "", fmt.Errorf("open %q for hashing: %w", entry.canonicalPath, err)
+		}
+		info, err := file.Stat()
+		if err != nil {
+			_ = file.Close()
+			return "", fmt.Errorf("stat %q for hashing: %w", entry.canonicalPath, err)
 		}
 		var size [8]byte
 		binary.BigEndian.PutUint64(size[:], uint64(info.Size()))
 		if _, err := digest.Write(size[:]); err != nil {
 			_ = file.Close()
-			return err
+			return "", err
 		}
 		if _, err := io.Copy(digest, file); err != nil {
 			_ = file.Close()
-			return err
+			return "", fmt.Errorf("hash %q: %w", entry.canonicalPath, err)
 		}
-		return file.Close()
-	})
-	if err != nil {
-		return "", fmt.Errorf("hash validation target: %w", err)
+		if err := file.Close(); err != nil {
+			return "", fmt.Errorf("close %q after hashing: %w", entry.canonicalPath, err)
+		}
 	}
 	return "sha256:" + hex.EncodeToString(digest.Sum(nil)), nil
 }

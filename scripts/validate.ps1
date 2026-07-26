@@ -21,9 +21,22 @@ try {
     New-Item -ItemType Directory -Path $temporaryDirectory | Out-Null
     Push-Location $repositoryRoot
     try {
-        & go build -o $binary ./cmd/cyonic-validate
-        if ($LASTEXITCODE -ne 0) {
-            exit $LASTEXITCODE
+        $hadGOFLAGS = Test-Path Env:GOFLAGS
+        $savedGOFLAGS = $env:GOFLAGS
+        try {
+            $env:GOFLAGS = ""
+            & go build -o $binary ./cmd/cyonic-validate
+            if ($LASTEXITCODE -ne 0) {
+                exit $LASTEXITCODE
+            }
+        }
+        finally {
+            if ($hadGOFLAGS) {
+                $env:GOFLAGS = $savedGOFLAGS
+            }
+            else {
+                Remove-Item Env:GOFLAGS -ErrorAction SilentlyContinue
+            }
         }
 
         $arguments = @($Target, "--format", $Format)

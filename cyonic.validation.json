@@ -6,6 +6,7 @@
   "target": ".",
   "requiredPaths": [
     "README.md",
+    ".gitattributes",
     "go.mod",
     "01_Governance_Geometry",
     "08_Builder_Layer",

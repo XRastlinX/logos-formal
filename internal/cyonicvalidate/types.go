@@ -1,5 +1,7 @@
 package cyonicvalidate
 
+import "runtime"
+
 const (
 	ValidatorVersion = "0.1.0"
 
@@ -53,33 +55,47 @@ type CheckSummary struct {
 }
 
 type Result struct {
-	Schema            string       `json:"schema"`
-	Version           string       `json:"version"`
-	Status            string       `json:"status"`
-	ValidatorVersion  string       `json:"validatorVersion"`
-	CubedBit          string       `json:"cubedBit"`
-	ValidatorOperator string       `json:"validatorOperator"`
-	AuthorityEffect   string       `json:"authorityEffect"`
-	ValidationProfile string       `json:"validationProfile"`
-	MetadataScope     string       `json:"metadataScope"`
-	Target            string       `json:"target"`
-	TargetRoot        string       `json:"targetRoot,omitempty"`
-	Checks            CheckSummary `json:"checks"`
-	RouterDecision    string       `json:"routerDecision"`
-	RejectedInvariant string       `json:"rejectedInvariant,omitempty"`
-	DecisionRoot      string       `json:"decisionRoot,omitempty"`
+	Schema                    string       `json:"schema"`
+	Version                   string       `json:"version"`
+	Status                    string       `json:"status"`
+	ValidationStatus          string       `json:"validationStatus"`
+	ValidatorVersion          string       `json:"validatorVersion"`
+	ValidatorRuntimeRoot      string       `json:"validatorRuntimeRoot,omitempty"`
+	GoVersion                 string       `json:"goVersion"`
+	GOOS                      string       `json:"goos"`
+	GOARCH                    string       `json:"goarch"`
+	CubedBit                  string       `json:"cubedBit"`
+	ValidatorOperator         string       `json:"validatorOperator"`
+	GovernanceAuthorityEffect string       `json:"governanceAuthorityEffect"`
+	ExecutionContainment      string       `json:"executionContainment"`
+	ValidationProfile         string       `json:"validationProfile"`
+	ProfileRoot               string       `json:"profileRoot,omitempty"`
+	MetadataScope             string       `json:"metadataScope"`
+	Target                    string       `json:"target"`
+	TargetRoot                string       `json:"targetRoot,omitempty"`
+	Checks                    CheckSummary `json:"checks"`
+	RouterDecision            string       `json:"routerDecision"`
+	RejectedInvariant         string       `json:"rejectedInvariant,omitempty"`
+	FailureCode               string       `json:"failureCode,omitempty"`
+	DecisionRoot              string       `json:"decisionRoot,omitempty"`
 }
 
 func baseResult() Result {
 	return Result{
-		Schema:            ResultSchema,
-		Version:           "1.0",
-		Status:            "REJECTED",
-		ValidatorVersion:  ValidatorVersion,
-		CubedBit:          "010",
-		ValidatorOperator: "000",
-		AuthorityEffect:   "NONE",
-		MetadataScope:     "UNDECLARED",
-		RouterDecision:    "REJECT",
+		Schema:                    ResultSchema,
+		Version:                   "1.0",
+		Status:                    "NO_DECISION",
+		ValidationStatus:          "INTERNAL_ERROR",
+		ValidatorVersion:          ValidatorVersion,
+		GoVersion:                 runtime.Version(),
+		GOOS:                      runtime.GOOS,
+		GOARCH:                    runtime.GOARCH,
+		CubedBit:                  "010",
+		ValidatorOperator:         "000",
+		GovernanceAuthorityEffect: "NONE",
+		ExecutionContainment:      "HOST",
+		MetadataScope:             "UNDECLARED",
+		RouterDecision:            "NONE",
+		Checks:                    CheckSummary{Results: []CheckResult{}},
 	}
 }

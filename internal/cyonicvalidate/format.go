@@ -18,18 +18,30 @@ func WriteResult(writer io.Writer, result Result, format string) error {
 		if rejected == "" {
 			rejected = "none"
 		}
+		failureCode := result.FailureCode
+		if failureCode == "" {
+			failureCode = "none"
+		}
 		lines := [][2]string{
 			{"X-Cyonic-Validator-Version", result.ValidatorVersion},
+			{"X-Validation-Status", result.ValidationStatus},
 			{"X-Cubed-Bit", result.CubedBit},
 			{"X-Validator-Operator", result.ValidatorOperator},
-			{"X-Authority-Effect", result.AuthorityEffect},
+			{"X-Governance-Authority-Effect", result.GovernanceAuthorityEffect},
+			{"X-Execution-Containment", result.ExecutionContainment},
 			{"X-Validation-Profile", result.ValidationProfile},
+			{"X-Profile-Root", result.ProfileRoot},
+			{"X-Validator-Runtime-Root", result.ValidatorRuntimeRoot},
+			{"X-Go-Version", result.GoVersion},
+			{"X-GOOS", result.GOOS},
+			{"X-GOARCH", result.GOARCH},
 			{"X-Metadata-Scope", result.MetadataScope},
 			{"X-Target", result.Target},
 			{"X-Target-Root", result.TargetRoot},
 			{"X-Checks-Passed", fmt.Sprintf("%d/%d", result.Checks.Passed, result.Checks.Total)},
 			{"X-Router-Decision", result.RouterDecision},
 			{"X-Rejected-Invariant", rejected},
+			{"X-Failure-Code", failureCode},
 			{"X-Decision-Root", result.DecisionRoot},
 		}
 		for _, line := range lines {

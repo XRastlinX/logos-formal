@@ -13,7 +13,7 @@ trap cleanup EXIT
 binary="$temp_dir/cyonic-validate"
 (
   cd -- "$repo_root"
-  go build -o "$binary" ./cmd/cyonic-validate
+  GOFLAGS= go build -o "$binary" ./cmd/cyonic-validate
 )
 
 set +e

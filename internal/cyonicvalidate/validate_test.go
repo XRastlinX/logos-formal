@@ -2,6 +2,7 @@ package cyonicvalidate
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"os"
 	"path/filepath"
@@ -50,16 +51,23 @@ func TestValidateSuccess(t *testing.T) {
 	if exitCode != ExitValidated {
 		t.Fatalf("exit code = %d, want %d; result = %#v", exitCode, ExitValidated, result)
 	}
-	if result.Status != "VALIDATED" || result.RouterDecision != "OBSERVE_ONLY" {
+	if result.Status != "VALIDATED" ||
+		result.ValidationStatus != "COMPLETE" ||
+		result.RouterDecision != "OBSERVE_ONLY" {
 		t.Fatalf("unexpected successful result: %#v", result)
 	}
-	if result.AuthorityEffect != "NONE" || result.CubedBit != "010" || result.ValidatorOperator != "000" {
+	if result.GovernanceAuthorityEffect != "NONE" ||
+		result.ExecutionContainment != "HOST" ||
+		result.CubedBit != "010" ||
+		result.ValidatorOperator != "000" {
 		t.Fatalf("governance boundary changed: %#v", result)
 	}
 	if result.Checks.Passed != 5 || result.Checks.Total != 5 {
 		t.Fatalf("checks = %d/%d, want 5/5", result.Checks.Passed, result.Checks.Total)
 	}
 	if !strings.HasPrefix(result.TargetRoot, "sha256:") ||
+		!strings.HasPrefix(result.ProfileRoot, "sha256:") ||
+		!strings.HasPrefix(result.ValidatorRuntimeRoot, "sha256:") ||
 		!strings.HasPrefix(result.DecisionRoot, "sha256:") {
 		t.Fatalf("missing content roots: %#v", result)
 	}
@@ -93,8 +101,9 @@ func TestValidateRejectsMutation(t *testing.T) {
 		t.Fatalf("exit code = %d, want %d", exitCode, ExitRejected)
 	}
 	if result.RejectedInvariant != CheckTargetImmutability ||
+		result.ValidationStatus != "COMPLETE" ||
 		result.RouterDecision != "REJECT" ||
-		result.AuthorityEffect != "NONE" {
+		result.GovernanceAuthorityEffect != "NONE" {
 		t.Fatalf("mutation was not rejected correctly: %#v", result)
 	}
 }
@@ -108,7 +117,11 @@ func TestValidateReportsMissingGoDependency(t *testing.T) {
 	if exitCode != ExitMissingDependency {
 		t.Fatalf("exit code = %d, want %d", exitCode, ExitMissingDependency)
 	}
-	if result.RouterDecision != "REJECT" || result.AuthorityEffect != "NONE" {
+	if result.ValidationStatus != "ENVIRONMENT_ERROR" ||
+		result.Status != "NO_DECISION" ||
+		result.RouterDecision != "NONE" ||
+		result.FailureCode != "GO_TOOLCHAIN_UNAVAILABLE" ||
+		result.GovernanceAuthorityEffect != "NONE" {
 		t.Fatalf("dependency failure escaped governance boundary: %#v", result)
 	}
 }
@@ -135,8 +148,21 @@ func TestHashTreeRejectsEscapingSymlink(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	if _, err := HashTree(root, root); err == nil || !strings.Contains(err.Error(), "escapes repository boundary") {
-		t.Fatalf("expected symlink escape rejection, got %v", err)
+	if _, err := HashTree(root, root); err == nil || !strings.Contains(err.Error(), "forbidden") {
+		t.Fatalf("expected symlink rejection, got %v", err)
+	}
+}
+
+func TestHashTreeRejectsInternalSymlink(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("ordinary Windows CI users may not have symlink creation privilege")
+	}
+	root := newTestRepository(t)
+	if err := os.Symlink("README.md", filepath.Join(root, "alias")); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := HashTree(root, root); err == nil || !strings.Contains(err.Error(), "forbidden") {
+		t.Fatalf("expected all v0.1 symlinks to be rejected, got %v", err)
 	}
 }
 
@@ -183,6 +209,31 @@ func TestLoadManifestAcceptsOnlyApprovedCheckRegistry(t *testing.T) {
 	}
 }
 
+func TestLoadManifestRejectsDuplicateKeys(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	data := `{
+	  "schema":"urn:cyonic:validation-manifest:v1",
+	  "version":"1.0",
+	  "profile":"first",
+	  "profile":"second",
+	  "target":".",
+	  "requiredPaths":[],
+	  "checks":[
+	    "CV-TARGET-BOUNDARY",
+	    "CV-REQUIRED-PATHS",
+	    "CV-GO-VET",
+	    "CV-GO-TEST-FRESH",
+	    "CV-TARGET-IMMUTABILITY"
+	  ]
+	}`
+	if err := os.WriteFile(path, []byte(data), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadManifest(path); err == nil || !strings.Contains(err.Error(), `duplicate object key "profile"`) {
+		t.Fatalf("expected duplicate key rejection, got %v", err)
+	}
+}
+
 func TestHashTreeIsStableAndExcludesGitMetadata(t *testing.T) {
 	root := newTestRepository(t)
 	first, err := HashTree(root, root)
@@ -198,6 +249,52 @@ func TestHashTreeIsStableAndExcludesGitMetadata(t *testing.T) {
 	}
 	if first != second {
 		t.Fatalf(".git metadata changed tree root: %s != %s", first, second)
+	}
+}
+
+func TestHashTreeRejectsCaseCollisions(t *testing.T) {
+	if runtime.GOOS == "windows" {
+		t.Skip("the Windows filesystem cannot create this portable-collision fixture")
+	}
+	root := newTestRepository(t)
+	if err := os.WriteFile(filepath.Join(root, "Case.txt"), []byte("one"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if err := os.WriteFile(filepath.Join(root, "case.txt"), []byte("two"), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := HashTree(root, root); err == nil || !strings.Contains(err.Error(), "case-colliding") {
+		t.Fatalf("expected case-collision rejection, got %v", err)
+	}
+}
+
+func TestResultJSONOmitsProposedEpistemicAndPermitFields(t *testing.T) {
+	result := baseResult()
+	data, err := json.Marshal(result)
+	if err != nil {
+		t.Fatal(err)
+	}
+	text := string(data)
+	for _, forbidden := range []string{"generationalDepth", "effectiveUncertainty", "permitId"} {
+		if strings.Contains(text, forbidden) {
+			t.Fatalf("normative result contains proposed or irrelevant field %q: %s", forbidden, text)
+		}
+	}
+}
+
+func TestEnvironmentClearsAmbientGOFLAGS(t *testing.T) {
+	t.Setenv("GOFLAGS", "-run=Never")
+	found := false
+	for _, variable := range environmentWithoutGOFLAGS() {
+		if variable == "GOFLAGS=" {
+			found = true
+		}
+		if strings.HasPrefix(variable, "GOFLAGS=") && variable != "GOFLAGS=" {
+			t.Fatalf("ambient GOFLAGS leaked into check environment: %q", variable)
+		}
+	}
+	if !found {
+		t.Fatal("explicit empty GOFLAGS was not installed")
 	}
 }
 

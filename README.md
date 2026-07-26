@@ -45,8 +45,10 @@ exact tree root and rejects any observed in-run mutation:
 scripts\validate.cmd         # Windows
 ```
 
-Success is `010`, `authorityEffect: NONE`, and `OBSERVE_ONLY`—never a Permit,
-canon elevation, or truth claim. See
+Success is `010`, `governanceAuthorityEffect: NONE`, and `OBSERVE_ONLY`—never a
+Permit, canon elevation, or truth claim. The checks execute with the host
+process's ordinary OS capabilities; this reference validator is not a sandbox.
+See
 [Node Validation](docs/NODE_VALIDATION.md) for the result contract, exit codes,
 and known limits.
 

@@ -6,6 +6,8 @@ import (
 	"crypto/sha256"
 	"encoding/hex"
 	"fmt"
+	"io"
+	"os"
 	"os/exec"
 	"strings"
 )
@@ -24,11 +26,23 @@ func (ExecRunner) LookPath(name string) (string, error) {
 func (ExecRunner) Run(ctx context.Context, directory, name string, arguments ...string) (string, error) {
 	command := exec.CommandContext(ctx, name, arguments...)
 	command.Dir = directory
+	command.Env = environmentWithoutGOFLAGS()
 	var output bytes.Buffer
 	command.Stdout = &output
 	command.Stderr = &output
 	err := command.Run()
 	return output.String(), err
+}
+
+func environmentWithoutGOFLAGS() []string {
+	environment := make([]string, 0, len(os.Environ())+1)
+	for _, variable := range os.Environ() {
+		if strings.HasPrefix(strings.ToUpper(variable), "GOFLAGS=") {
+			continue
+		}
+		environment = append(environment, variable)
+	}
+	return append(environment, "GOFLAGS=")
 }
 
 type Validator struct {
@@ -45,14 +59,25 @@ func (validator Validator) Validate(
 ) (Result, int) {
 	result := baseResult()
 	result.ValidationProfile = manifest.Profile
+	result.ProfileRoot = ManifestRoot(manifest)
 	result.MetadataScope = metadataScope
 	result.Target = targetLabel
 	result.Checks.Total = len(requiredCheckOrder)
 	result.Checks.Results = make([]CheckResult, 0, len(requiredCheckOrder))
 
+	runtimeRoot, err := validatorRuntimeRoot()
+	if err != nil {
+		result.ValidationStatus = "INTERNAL_ERROR"
+		result.FailureCode = "VALIDATOR_RUNTIME_ROOT_UNAVAILABLE"
+		result.DecisionRoot = decisionRoot(result)
+		return result, ExitInternalFailure
+	}
+	result.ValidatorRuntimeRoot = runtimeRoot
+
 	beforeRoot, err := HashTree(repoRoot, target)
 	if err != nil {
-		result.RejectedInvariant = CheckTargetBoundary
+		result.ValidationStatus = "INPUT_ERROR"
+		result.FailureCode = "TARGET_HASH_FAILED"
 		result.Checks.Results = append(result.Checks.Results, failed(CheckTargetBoundary, err.Error()))
 		result.DecisionRoot = decisionRoot(result)
 		return result, ExitInvalidTarget
@@ -65,12 +90,17 @@ func (validator Validator) Validate(
 		runner = ExecRunner{}
 	}
 	if _, err := runner.LookPath("go"); err != nil {
-		result.RejectedInvariant = CheckGoVet
+		result.ValidationStatus = "ENVIRONMENT_ERROR"
+		result.FailureCode = "GO_TOOLCHAIN_UNAVAILABLE"
 		result.Checks.Results = append(result.Checks.Results, failed(CheckGoVet, "Go toolchain not found"))
 		countPassed(&result)
 		result.DecisionRoot = decisionRoot(result)
 		return result, ExitMissingDependency
 	}
+
+	result.Status = "REJECTED"
+	result.ValidationStatus = "COMPLETE"
+	result.RouterDecision = "REJECT"
 
 	if err := ValidateRequiredPaths(repoRoot, manifest.RequiredPaths); err != nil {
 		result.Checks.Results = append(result.Checks.Results, failed(CheckRequiredPaths, err.Error()))
@@ -104,7 +134,7 @@ func (validator Validator) Validate(
 		)
 		setFirstRejected(&result, CheckTargetImmutability)
 	} else {
-		result.Checks.Results = append(result.Checks.Results, passed(CheckTargetImmutability, "target root remained byte-stable during validation"))
+		result.Checks.Results = append(result.Checks.Results, passed(CheckTargetImmutability, "target roots were identical at validation entry and exit"))
 	}
 
 	countPassed(&result)
@@ -118,6 +148,25 @@ func (validator Validator) Validate(
 		return result, ExitValidated
 	}
 	return result, ExitRejected
+}
+
+func validatorRuntimeRoot() (string, error) {
+	executable, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+	file, err := os.Open(executable)
+	if err != nil {
+		return "", err
+	}
+	defer file.Close()
+
+	hasher := sha256.New()
+	writeHashField(hasher, "logos-formal.validator-runtime.v1")
+	if _, err := io.Copy(hasher, file); err != nil {
+		return "", err
+	}
+	return "sha256:" + hex.EncodeToString(hasher.Sum(nil)), nil
 }
 
 func countPassed(result *Result) {
@@ -162,16 +211,24 @@ func decisionRoot(result Result) string {
 		result.Schema,
 		result.Version,
 		result.ValidatorVersion,
+		result.ValidatorRuntimeRoot,
+		result.GoVersion,
+		result.GOOS,
+		result.GOARCH,
 		result.CubedBit,
 		result.ValidatorOperator,
-		result.AuthorityEffect,
+		result.GovernanceAuthorityEffect,
+		result.ExecutionContainment,
 		result.ValidationProfile,
+		result.ProfileRoot,
 		result.MetadataScope,
 		result.Target,
 		result.TargetRoot,
 		result.Status,
+		result.ValidationStatus,
 		result.RouterDecision,
 		result.RejectedInvariant,
+		result.FailureCode,
 	} {
 		writeHashField(hasher, value)
 	}

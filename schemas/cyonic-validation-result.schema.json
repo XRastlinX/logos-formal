@@ -8,10 +8,15 @@
     "schema",
     "version",
     "status",
+    "validationStatus",
     "validatorVersion",
+    "goVersion",
+    "goos",
+    "goarch",
     "cubedBit",
     "validatorOperator",
-    "authorityEffect",
+    "governanceAuthorityEffect",
+    "executionContainment",
     "validationProfile",
     "metadataScope",
     "target",
@@ -28,11 +33,36 @@
     "status": {
       "enum": [
         "VALIDATED",
-        "REJECTED"
+        "REJECTED",
+        "NO_DECISION"
+      ]
+    },
+    "validationStatus": {
+      "enum": [
+        "COMPLETE",
+        "INPUT_ERROR",
+        "PROFILE_ERROR",
+        "ENVIRONMENT_ERROR",
+        "INTERNAL_ERROR"
       ]
     },
     "validatorVersion": {
       "const": "0.1.0"
+    },
+    "validatorRuntimeRoot": {
+      "$ref": "#/$defs/sha256"
+    },
+    "goVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goos": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goarch": {
+      "type": "string",
+      "minLength": 1
     },
     "cubedBit": {
       "const": "010"
@@ -40,11 +70,17 @@
     "validatorOperator": {
       "const": "000"
     },
-    "authorityEffect": {
+    "governanceAuthorityEffect": {
       "const": "NONE"
+    },
+    "executionContainment": {
+      "const": "HOST"
     },
     "validationProfile": {
       "type": "string"
+    },
+    "profileRoot": {
+      "$ref": "#/$defs/sha256"
     },
     "metadataScope": {
       "enum": [
@@ -56,8 +92,7 @@
       "type": "string"
     },
     "targetRoot": {
-      "type": "string",
-      "pattern": "^sha256:[0-9a-f]{64}$"
+      "$ref": "#/$defs/sha256"
     },
     "checks": {
       "type": "object",
@@ -106,13 +141,22 @@
     "routerDecision": {
       "enum": [
         "OBSERVE_ONLY",
-        "REJECT"
+        "REJECT",
+        "NONE"
       ]
     },
     "rejectedInvariant": {
       "type": "string"
     },
+    "failureCode": {
+      "type": "string"
+    },
     "decisionRoot": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
       "type": "string",
       "pattern": "^sha256:[0-9a-f]{64}$"
     }
@@ -121,10 +165,17 @@
     {
       "if": {
         "properties": {
+          "validationStatus": {
+            "const": "COMPLETE"
+          },
           "status": {
             "const": "VALIDATED"
           }
-        }
+        },
+        "required": [
+          "validationStatus",
+          "status"
+        ]
       },
       "then": {
         "properties": {
@@ -134,7 +185,66 @@
         },
         "required": [
           "targetRoot",
+          "profileRoot",
+          "validatorRuntimeRoot",
           "decisionRoot"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validationStatus": {
+            "const": "COMPLETE"
+          },
+          "status": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "validationStatus",
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "routerDecision": {
+            "const": "REJECT"
+          }
+        },
+        "required": [
+          "rejectedInvariant",
+          "decisionRoot"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validationStatus": {
+            "enum": [
+              "INPUT_ERROR",
+              "PROFILE_ERROR",
+              "ENVIRONMENT_ERROR",
+              "INTERNAL_ERROR"
+            ]
+          }
+        },
+        "required": [
+          "validationStatus"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "NO_DECISION"
+          },
+          "routerDecision": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "failureCode"
         ]
       }
     }

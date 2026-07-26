@@ -6,7 +6,12 @@ rejects the run if the target changes while those checks execute.
 
 It does not issue a Permit, elevate canon, prove a claim true, or authorize an
 effect. A successful result is `OBSERVE_ONLY` under Cubed Bit `010` with
-`authorityEffect: NONE`.
+`governanceAuthorityEffect: NONE`.
+
+`go vet` and `go test` execute repository code with the host process's ordinary
+filesystem, process, and network capabilities. `executionContainment: HOST`
+makes that explicit. Governance authority `NONE` is not a claim of
+side-effect-free execution.
 
 ## One command
 
@@ -66,7 +71,9 @@ Successful text output includes:
 ```text
 X-Cubed-Bit: 010
 X-Validator-Operator: 000
-X-Authority-Effect: NONE
+X-Governance-Authority-Effect: NONE
+X-Execution-Containment: HOST
+X-Validation-Status: COMPLETE
 X-Target-Root: sha256:<tree-root>
 X-Checks-Passed: 5/5
 X-Router-Decision: OBSERVE_ONLY
@@ -75,34 +82,54 @@ X-Decision-Root: sha256:<decision-root>
 ```
 
 `Target-Root` is a domain-separated SHA-256 digest over repository-relative
-paths, file kinds, symlink targets, lengths, and bytes. `.git` metadata
-is excluded. Symlinks that resolve outside the repository are rejected.
+paths, file kinds, lengths, and bytes:
 
-`Decision-Root` binds the target root, declared profile and scope, fixed
-governance fields, final decision, and ordered check statuses. Human-readable
-details and civil timestamps are deliberately excluded so they cannot create
-cross-platform identity drift.
+- `.git` metadata is excluded;
+- canonical paths use `/` and valid UTF-8;
+- entries are sorted by canonical UTF-8 byte order before hashing;
+- directories and regular files are covered;
+- executable and other mode bits are not covered;
+- every symlink or reparse point is rejected in v0.1;
+- case-colliding paths are rejected for cross-platform portability;
+- tracked and untracked entries are covered;
+- `.gitattributes` fixes ordinary text line endings across checkouts.
+
+`Profile-Root` binds the declarative manifest without executing manifest
+content. `Validator-Runtime-Root` binds the local validator executable.
+`Decision-Root` binds those roots, the target root, declared profile and scope,
+fixed governance fields, runtime coordinates, final decision, and ordered
+check statuses. Human-readable details and civil timestamps are deliberately
+excluded so they cannot create cross-platform identity drift.
+
+These SHA-256 values are local integrity checksums. They are not signatures or
+external witness certificates.
 
 `VALIDATED` means only that the declared checks passed over the identified
 bytes. It does not establish semantic truth, lawful ownership, GTS/GMEOW
 compatibility, canon status, external witness independence, or Apply authority.
 
-The before/after immutability check is not an operating-system snapshot or file
-lock. A concurrent writer that changes bytes and restores them exactly between
-the two roots is outside this reference implementation's detection guarantee.
-Production use requires a read-only snapshot or equivalent filesystem
-isolation.
+The before/after check proves only that target roots were identical at
+validation entry and exit. It is not an operating-system snapshot or file lock.
+A concurrent writer that changes bytes and restores them exactly between the
+two roots is outside this reference implementation's detection guarantee.
+Production use requires a disposable read-only snapshot, constrained network,
+isolated temporary directories, or equivalent containment.
 
 ## Exit codes
 
 | Code | Meaning |
 | ---: | --- |
-| `0` | Checks passed; result is `VALIDATED` / `OBSERVE_ONLY`. |
-| `10` | A declared validation check rejected the target. |
-| `11` | Target is missing, invalid, or outside the repository. |
-| `12` | Manifest is missing or invalid. |
-| `13` | Required Go toolchain is unavailable. |
-| `14` | Internal validator or invocation failure. |
+| Code | Validation status | Router decision | Meaning |
+| ---: | --- | --- | --- |
+| `0` | `COMPLETE` | `OBSERVE_ONLY` | Checks passed over the exact target. |
+| `10` | `COMPLETE` | `REJECT` | A declared validation check rejected the target. |
+| `11` | `INPUT_ERROR` | `NONE` | Target is missing, invalid, or outside the repository. |
+| `12` | `PROFILE_ERROR` | `NONE` | Manifest is missing or invalid. |
+| `13` | `ENVIRONMENT_ERROR` | `NONE` | Required Go toolchain is unavailable. |
+| `14` | `INTERNAL_ERROR` | `NONE` | Internal validator or invocation failure. |
+
+Only exit `10` is an artifact rejection. Other nonzero exits fail closed
+without claiming that the artifact violated a declared invariant.
 
 ## External storage boundary
 

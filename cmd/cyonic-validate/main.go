@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 	"time"
 
@@ -40,7 +41,7 @@ func run() int {
 	}
 	target, targetLabel, err := cyonicvalidate.ResolveBoundPath(repoRoot, options.target)
 	if err != nil {
-		result := failureResult(targetLabel, "", "CV-TARGET-BOUNDARY")
+		result := failureResult(targetLabel, "", "INPUT_ERROR", "TARGET_INVALID")
 		result.Target = options.target
 		_ = cyonicvalidate.WriteResult(os.Stdout, result, options.format)
 		fmt.Fprintln(os.Stderr, err)
@@ -53,14 +54,14 @@ func run() int {
 	}
 	manifestPath, err = cyonicvalidate.ResolveBoundFile(repoRoot, manifestPath)
 	if err != nil {
-		result := failureResult(targetLabel, "", "CV-MANIFEST")
+		result := failureResult(targetLabel, "", "PROFILE_ERROR", "MANIFEST_UNAVAILABLE")
 		_ = cyonicvalidate.WriteResult(os.Stdout, result, options.format)
 		fmt.Fprintln(os.Stderr, "manifest path:", err)
 		return cyonicvalidate.ExitInvalidManifest
 	}
 	manifest, err := cyonicvalidate.LoadManifest(manifestPath)
 	if err != nil {
-		result := failureResult(targetLabel, "", "CV-MANIFEST")
+		result := failureResult(targetLabel, "", "PROFILE_ERROR", "MANIFEST_INVALID")
 		_ = cyonicvalidate.WriteResult(os.Stdout, result, options.format)
 		fmt.Fprintln(os.Stderr, err)
 		return cyonicvalidate.ExitInvalidManifest
@@ -69,7 +70,7 @@ func run() int {
 	metadataScope := "UNDECLARED"
 	manifestTarget, manifestLabel, resolveErr := cyonicvalidate.ResolveBoundPath(repoRoot, manifest.Target)
 	if resolveErr != nil {
-		result := failureResult(targetLabel, manifest.Profile, "CV-MANIFEST")
+		result := failureResult(targetLabel, manifest.Profile, "PROFILE_ERROR", "MANIFEST_TARGET_INVALID")
 		_ = cyonicvalidate.WriteResult(os.Stdout, result, options.format)
 		fmt.Fprintln(os.Stderr, "manifest target:", resolveErr)
 		return cyonicvalidate.ExitInvalidManifest
@@ -138,19 +139,25 @@ func parseArguments(arguments []string) (options, error) {
 	return parsed, nil
 }
 
-func failureResult(target, profile, invariant string) cyonicvalidate.Result {
+func failureResult(target, profile, validationStatus, failureCode string) cyonicvalidate.Result {
 	return cyonicvalidate.Result{
-		Schema:            cyonicvalidate.ResultSchema,
-		Version:           "1.0",
-		Status:            "REJECTED",
-		ValidatorVersion:  cyonicvalidate.ValidatorVersion,
-		CubedBit:          "010",
-		ValidatorOperator: "000",
-		AuthorityEffect:   "NONE",
-		ValidationProfile: profile,
-		MetadataScope:     "UNDECLARED",
-		Target:            target,
-		RouterDecision:    "REJECT",
-		RejectedInvariant: invariant,
+		Schema:                    cyonicvalidate.ResultSchema,
+		Version:                   "1.0",
+		Status:                    "NO_DECISION",
+		ValidationStatus:          validationStatus,
+		ValidatorVersion:          cyonicvalidate.ValidatorVersion,
+		GoVersion:                 runtime.Version(),
+		GOOS:                      runtime.GOOS,
+		GOARCH:                    runtime.GOARCH,
+		CubedBit:                  "010",
+		ValidatorOperator:         "000",
+		GovernanceAuthorityEffect: "NONE",
+		ExecutionContainment:      "HOST",
+		ValidationProfile:         profile,
+		MetadataScope:             "UNDECLARED",
+		Target:                    target,
+		RouterDecision:            "NONE",
+		FailureCode:               failureCode,
+		Checks:                    cyonicvalidate.CheckSummary{Results: []cyonicvalidate.CheckResult{}},
 	}
 }
