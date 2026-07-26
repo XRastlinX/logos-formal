@@ -1,0 +1,30 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "Logos-Formal: Fail-Closed Separation of AI Interpretation from Authorization"
+authors:
+  - family-names: "McClure II"
+    given-names: "Charles LeRoy"
+repository-code: "https://github.com/XRastlinX/logos-formal"
+license: MIT
+version: "1.1.0"
+date-released: "2026-07-26"
+abstract: >-
+  A formal governance architecture that enforces fail-closed separation
+  between AI interpretation (planning, observation, estimation) and
+  authorization (human permission, systemic actuation). Implements the
+  PIC-4 (Pure Invariant Constructor) model, aligning agentic AI control
+  with IETF RATS (RFC 9334) and NIST ABAC (SP 800-162) standards.
+  Includes runnable Go demonstrators for permit-gated actuation,
+  cross-field epistemic translation, and autophagic decay simulation.
+keywords:
+  - ai-safety
+  - formal-methods
+  - capability-separation
+  - attestation
+  - remote-attestation
+  - access-control
+  - fail-closed
+  - governance
+  - supply-chain-security
+  - zero-trust

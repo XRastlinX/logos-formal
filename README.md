@@ -1,73 +1,159 @@
-# PIC-4 Governance Architecture (Logos-Formal)
+# Logos-Formal
 
-A rigorous, fail-closed security architecture that mathematically separates **interpretation** (AI planning, observation, estimation) from **authorization** (human permission, systemic actuation). 
+**Fail-closed separation of AI interpretation from human authorization.**
 
-This repository implements the **PIC-4 (Pure Invariant Constructor)** model, aligning agentic AI control systems with IETF RATS (Remote ATtestation procedureS) and NIST ABAC (Attribute-Based Access Control) standards.
+An AI agent operating under this architecture cannot authorize or execute its own plans. Every effectual action requires a cryptographically bound permit issued by a human operator or external policy engine.
 
-## The Engineering Claim
-
-Modern AI systems frequently conflate the ability to *plan* an action with the authority to *execute* it. The PIC-4 architecture solves this by enforcing a hard geometric boundary: **Q never sets Cy.** 
-
-Mathematical output, AI models, and interpretive logic (Q) can never autonomously write to the capability/authorization geometry (Cy).
-
-In this system:
-1. **AI Models (010)**: Produce *Candidate Artifacts* (plans, code, instructions) in a pure, effectless environment.
-2. **Validators**: Verify unit safety, boundaries, and limits, passing the artifact to an Attester.
-3. **Attesters**: Cryptographically seal the artifact alongside its runtime identity (Evidence).
-4. **Human/External Authority (101)**: Appraises the evidence and issues a one-shot cryptographic **Permit**.
-5. **Actuators (001)**: Energize the physical or systemic effect **only** if they receive a valid Permit bound to the exact artifact and their specific hardware ID.
-
-The result is a zero-trust execution envelope for autonomous agents, governed by the [Cubed Bit Safety Lattice](01_Governance_Geometry/governance_algebra_v1.md) and the formal [Bleed-Over Operator (β)](10_Elevation_Layer/ACTIVE_CANON_Bleed_Over_Operator_Beta_V1.md).
-
-## Quickstart: Runnable Demonstrators
-
-This repository contains two runnable Go demonstrators that prove these invariants:
-
-1. **Permit-Gated Cell (`runtime/demonstrator`)**: Demonstrates an AI planner cannot effectuate change without a human-issued permit. Tests replay attacks, expired nonces, and target mismatch.
-2. **Bleed-Over (DCIF) Membrane (`runtime/dcif-membrane`)**: Simulates the [Distributed Current Intelligence Fabric](08_Builder_Layer/BLEED_OVER_CURRENT_INTELLIGENCE_PROFILE_V0_1.md). Demonstrates that an AI agent translating a claim between fields cannot autonomously inflate its certainty or escalate its authority.
-3. **Autophagic Decay Simulator (`runtime/autophagic-decay`)**: Simulates the `PROPOSED` Autophagic Operator ($\alpha$). Demonstrates how local-first RAG loops collapse their own certainty matrix when recursively ingesting their own outputs, and mathematically forces the AI to reconnect to `D=0` (primary) roots.
-
-To run the demonstrators (requires Go):
-
-```bash
-cd runtime/demonstrator
-go run .
-
-cd ../dcif-membrane
-go run .
-
-cd ../autophagic-decay
-go run .
-```
-
-The demonstrator tests the following fail-closed negative vectors:
-- Replay attacks on permits
-- Incorrect actuator target IDs
-- Bypassed validators
-- Expired nonces
-
-*(See `08_Builder_Layer/Demonstrator_Architecture.md` for complete architectural details of the cell).*
+[![Validate Canon](https://github.com/XRastlinX/logos-formal/actions/workflows/validate.yml/badge.svg)](https://github.com/XRastlinX/logos-formal/actions/workflows/validate.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 ---
 
-## The 12+1 Internal Ontology (Formal Geometry)
+## The Problem
 
-Under the hood, the system is exhaustively partitioned into 12 physical domains centered around a Master Codex. This topology explicitly defines the capability limits and developmental lifecycles of all agents and artifacts.
+Modern AI systems increasingly conflate the ability to *plan* an action with the authority to *execute* it. Tool-calling LLMs can generate infrastructure commands, deployment scripts, and database mutations — and tooling increasingly lets them run those plans autonomously. The boundary between "what should we do?" and "do it" is collapsing.
 
-- **`00_Master_Codex`**: The core transparency manifest and central integration hub.
-- **`01_Governance_Geometry`**: Defines **where** a cord sits in the governance landscape (Cubed Bit, capability locks).
-- **`02_Cord_Algebra`**: Defines **what** a cord is and how it matures (interior, residual, frame).
-- **`03_Q_Taxonomy`**: Defines **what kind** of content (interior/residual) a cord contains.
-- **`04_Dual_Projection`**: Defines **how** a cord is observed without being altered ($\{q\}/\{cy\}$).
-- **`05_Rite_Machine`**: Defines **how** a cord matures safely (Seven-Stage Transition).
-- **`06_Prime_Root_Field`**: Defines the **input structure** for developmental analysis.
-- **`07_Antigravity_Capability`**: Operational bounds of the local agent/Copilot (native tool-lift capability).
-- **`08_Builder_Layer`**: Repository structure, schemas, and integration docs (PIC-4 standards mapping).
-- **`09_Exchange_Corridor`**: The secure cross-platform packet exchange layer.
-- **`10_Elevation_Layer`**: The formal registry for elevated `ACTIVE_CANON` artifacts (e.g., Normalization).
-- **`11_DeepSeek_Reach`**: The capability boundaries of the DeepSeek external LLM.
-- **`12_Grok_Reach`**: The capability boundaries of the Grok external synthesis LLM.
+In safety-critical domains — industrial control, medical devices, supply-chain integrity, autonomous vehicles — this collapse is unacceptable.
+
+## The Architecture
+
+This repository implements **PIC-4** (Pure Invariant Constructor), a governance architecture built on a single hard invariant:
+
+> **Q never sets Cy.**
+>
+> Mathematical output, AI models, and interpretive logic (Q) can never autonomously write to the capability/authorization geometry (Cy).
+
+The system enforces this through a five-stage pipeline aligned with [IETF RATS](https://datatracker.ietf.org/doc/rfc9334/) and [NIST ABAC](https://csrc.nist.gov/pubs/sp/800/162/final):
+
+```
+AI (010)          Validator          Attester          Human/Policy (101)     Actuator (001)
+   │                  │                 │                    │                    │
+   ├─ Propose ───────►│                 │                    │                    │
+   │                  ├─ Check ────────►│                    │                    │
+   │                  │                 ├─ Seal Evidence ───►│                    │
+   │                  │                 │                    ├─ Issue Permit ────►│
+   │                  │                 │                    │                    ├─ Execute
+   │                  │                 │                    │                    │
+   │            REJECT if unsafe  REJECT if untested  REJECT if unauthorized  FAIL CLOSED
+```
+
+The AI operates at coordinate **010** (pure interpretation). Only a human authority at **101** can issue a permit. If any stage fails, the actuator fails closed — it does nothing.
+
+## Run It (< 5 minutes)
+
+Requires [Go 1.24+](https://go.dev/dl/).
+
+```bash
+git clone https://github.com/XRastlinX/logos-formal.git
+cd logos-formal
+go test ./...        # Run all tests
+```
+
+Or run the demonstrators individually:
+
+```bash
+# 1. Permit-Gated Cell — shows fail-closed actuation
+cd runtime/demonstrator && go run .
+
+# 2. Bleed-Over Membrane — shows epistemic transport invariants
+cd runtime/dcif-membrane && go run .
+
+# 3. Autophagic Decay — shows certainty collapse in recursive AI loops
+cd runtime/autophagic-decay && go run .
+```
+
+### What the Demonstrators Show
+
+| Demonstrator | Tests | Status |
+|---|---|---|
+| **Permit-Gated Cell** | Replay attacks, wrong targets, tampered artifacts, expired nonces | Reference |
+| **Bleed-Over (β) Membrane** | Certainty inflation, provenance erasure, authority escalation | Reference |
+| **Autophagic Decay (α)** | Echo-chamber collapse in recursive RAG loops | PROPOSED |
+
+## Formal Boundaries (ACTIVE_CANON)
+
+These documents define the system's mathematical invariants:
+
+| Document | Description |
+|---|---|
+| [Cubed Bit Safety Lattice](01_Governance_Geometry/governance_algebra_v1.md) | The (A, I, E) state lattice — 8 vertices of governance |
+| [Bleed-Over Operator β](10_Elevation_Layer/ACTIVE_CANON_Bleed_Over_Operator_Beta_V1.md) | Governed cross-field translation preserving provenance and uncertainty |
+| [Normalization Criteria](10_Elevation_Layer/ACTIVE_CANON_Normalization_Criteria_v1.md) | Conditions for elevating artifacts through the Rite Machine |
+| [PIC-4 Standards Mapping](08_Builder_Layer/PIC4_STANDARDS_MAPPING_V1.md) | Bridge to IETF RATS, NIST ABAC, SLSA, in-toto |
+| [Cybot Pattern](08_Builder_Layer/CYBOT_PATTERN_V1.md) | Local-first AI assistant architecture |
+
+### Research (PROPOSED — not elevated)
+
+| Document | Description |
+|---|---|
+| Autophagic Operator (α) | Epistemic half-life boundary for recursive AI self-ingestion |
+
+The α operator is under active research. It is used as a practical filter but has not been elevated to ACTIVE_CANON. See [docs/WHY_THIS_MATTERS.md](docs/WHY_THIS_MATTERS.md) for context.
+
+## Standards Alignment
+
+| Standard | PIC-4 Role |
+|---|---|
+| [IETF RATS (RFC 9334)](https://datatracker.ietf.org/doc/rfc9334/) | Attester/Verifier/Relying Party architecture |
+| [NIST ABAC (SP 800-162)](https://csrc.nist.gov/pubs/sp/800/162/final) | Attribute-based permit issuance |
+| [in-toto](https://in-toto.io/) | Supply-chain attestation layout |
+| [SLSA](https://slsa.dev/) | Build provenance and source integrity |
+
+## Documentation
+
+- [Why This Matters](docs/WHY_THIS_MATTERS.md) — Plain-language explainer
+- [Architecture Diagrams](docs/ARCHITECTURE.md) — Visual system overview
+- [Positioning](docs/POSITIONING.md) — How PIC-4 addresses funded problem domains
+- [Session Anchor](docs/SESSION_ANCHOR.md) — Start-here prompt for new AI sessions
+- [Contributing](CONTRIBUTING.md)
+
+## Repository Structure
+
+```
+logos-formal/
+├── 00_Master_Codex/           # Core transparency manifest
+├── 01_Governance_Geometry/    # Cubed Bit Safety Lattice (A, I, E)
+├── 02_Cord_Algebra/           # Structural algebra (interior, residual, frame)
+├── 03_Q_Taxonomy/             # Content taxonomy
+├── 04_Dual_Projection/        # Observation without mutation
+├── 05_Rite_Machine/           # Seven-stage artifact maturation
+├── 06_Prime_Root_Field/       # Input structure for developmental analysis
+├── 07_Antigravity_Capability/ # Local agent operational bounds
+├── 08_Builder_Layer/          # Standards mapping, schemas, Cybot pattern
+├── 09_Exchange_Corridor/      # Cross-platform packet exchange
+├── 10_Elevation_Layer/        # ACTIVE_CANON registry
+├── runtime/
+│   ├── demonstrator/          # Permit-Gated Cell
+│   ├── dcif-membrane/         # Bleed-Over Membrane
+│   └── autophagic-decay/      # Epistemic Decay Simulator
+├── docs/                      # Plain-language documentation
+└── go.mod
+```
+
+## What Is Not Claimed
+
+- The demonstrators are **reference implementations**, not production-hardened systems.
+- Signatures are currently **simulated** (literal string comparison, not Ed25519/ECDSA).
+- The Autophagic Operator (α) is **PROPOSED research**, not proven.
+- The architecture is a **framework and formal boundary**, not a finished product.
+- Independent custody separation (separate issuer/verifier processes) is **not yet implemented**.
+
+The next assurance tier requires real cryptographic signatures, canonical serialization, separate trust domains, and persistent nonce storage.
 
 ## License
 
-This project is released under the MIT License.
+[MIT License](LICENSE) — Copyright (c) 2026 Charles LeRoy McClure II
+
+## Citation
+
+If you use this work in research, please cite:
+
+```bibtex
+@software{mcclure2026logosformal,
+  author = {McClure II, Charles LeRoy},
+  title = {Logos-Formal: Fail-Closed Separation of AI Interpretation from Authorization},
+  year = {2026},
+  url = {https://github.com/XRastlinX/logos-formal},
+  license = {MIT}
+}
+```
