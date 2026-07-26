@@ -39,18 +39,30 @@ AI (010)          Validator          Attester          Human/Policy (101)     Ac
 
 The AI operates at coordinate **010** (pure interpretation). Only a human authority at **101** can issue a permit. If any stage fails, the actuator fails closed — it does nothing.
 
-## Run It (< 2 minutes)
+## Try It in 10 Minutes (First Contact Protocol)
 
-Requires [Go 1.24+](https://go.dev/dl/).
+This repository enforces Phase 1 of the Cy-Egology adoption arc (external verification). The core `010` observer mechanism is published for independent cold-run verification. 
+
+This is not a request for endorsement or agreement. The trial makes no scientific or authority claim and performs no authorized effect.
+
+**Prerequisites:** [Go 1.24+](https://go.dev/dl/)
 
 ```bash
+# 1. Clone the repository and checkout the pinned trial commit
 git clone https://github.com/XRastlinX/logos-formal.git
 cd logos-formal
+git checkout 7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a
 
-# Run everything — all three demos + full test suite:
+# 2. Run the deterministic observer trial
 ./demo.sh          # Linux / macOS
 .\demo.ps1         # Windows PowerShell
 ```
+
+**Reporting Friction:**
+If you execute this trial, please log your result on [Issue #2](https://github.com/XRastlinX/logos-formal/issues/2) containing:
+- Elapsed time
+- One sentence explaining what you believe the surface does
+- Anything that blocked or confused you, or “none observed.”
 
 Or run individually:
 
