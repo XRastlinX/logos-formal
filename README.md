@@ -33,7 +33,9 @@ path, interaction receipts, limits, and non-claims.
 
 Independent testers can use the
 [First Contact Trial](docs/FIRST_CONTACT_TRIAL.md) to record setup time,
-comprehension, and friction without self-promoting the result.
+comprehension, and friction without self-promoting the result. The public
+coordination point is
+[Issue #2](https://github.com/XRastlinX/logos-formal/issues/2).
 
 ## Validate This Node
 

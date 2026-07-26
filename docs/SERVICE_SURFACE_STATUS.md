@@ -70,11 +70,16 @@ guarded builder clone:
 These are internal verification events. They do not count as external First
 Contact or First Friction evidence.
 
-The exact implementation is committed on the local candidate branch:
+The exact implementation is published on the public pull-request branch:
 
 ```text
 codex/cyonic-service-surface-v1
+3a5b0801bc243a1716273dfe98acc5265e6c6882
 ```
+
+GitHub Actions run 16 passed independent validator-conformance jobs on Windows
+and Ubuntu, followed by the public Windows and Unix validation scripts. This is
+implementation evidence, not independent First Contact evidence.
 
 ## Adoption-arc audit
 
@@ -84,15 +89,14 @@ codex/cyonic-service-surface-v1
 | Outsider can articulate the separation | No qualifying external evidence |
 | Three cold users complete First Contact | Not achieved |
 | At least one external friction event recorded | Not achieved |
-| Service is public primary discovery entry | Local candidate only; not published |
+| Service is public primary discovery entry | Public PR candidate and Issue #2 trial entry; not merged into `main` |
 | Phase 3+ claims withheld | Satisfied |
 
 ## Remaining gates
 
-1. Review the candidate branch against its exact bytes.
-2. Publish through an external Principal-controlled repository transition.
-3. Run three cold external trials and record their elapsed time and
+1. Review and merge the candidate through the protected repository path.
+2. Run three cold external trials and record their elapsed time and
    interpretation.
-4. Record the first independently verified external friction event.
+3. Record the first independently verified external friction event.
 
 No internal run may be relabeled as external evidence.

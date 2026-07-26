@@ -8,8 +8,12 @@ briefed on its private terminology.
 Start timing before cloning:
 
 ```bash
-git clone https://github.com/XRastlinX/logos-formal.git
+git clone \
+  --branch codex/cyonic-service-surface-v1 \
+  --single-branch \
+  https://github.com/XRastlinX/logos-formal.git
 cd logos-formal
+git rev-parse HEAD
 go run ./runtime/cyonic-service trial \
   -origin external \
   -report cyonic-first-contact-report-01.json
@@ -18,11 +22,24 @@ go run ./runtime/cyonic-service trial \
 PowerShell:
 
 ```powershell
-git clone https://github.com/XRastlinX/logos-formal.git
+git clone `
+  --branch codex/cyonic-service-surface-v1 `
+  --single-branch `
+  https://github.com/XRastlinX/logos-formal.git
 Set-Location logos-formal
+git rev-parse HEAD
 go run ./runtime/cyonic-service trial `
   -origin external `
   -report cyonic-first-contact-report-01.json
+```
+
+The service is currently a public pull-request candidate, not part of default
+`main`. Record the exact commit printed by `git rev-parse HEAD`; do not replace
+it with a branch name in the report. The current independently tested candidate
+baseline is:
+
+```text
+3a5b0801bc243a1716273dfe98acc5265e6c6882
 ```
 
 Answer from the command output rather than from other project documents.
@@ -131,3 +148,14 @@ count.
 Reviewer findings are attestations, not self-proving facts. Until a signature
 profile is separately specified, retain the reviewer record and its delivery
 context with the adjudication file.
+
+## Current evidence state
+
+Internal rehearsals and CI runs exist, but they do not satisfy this trial.
+Until participant reports and additive adjudications are present:
+
+```text
+qualifying external participants: 0/3
+verified external friction events: 0/1
+First Contact status: EVIDENCE_INCOMPLETE
+```
