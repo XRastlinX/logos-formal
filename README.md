@@ -36,6 +36,8 @@ Independent testers can use the
 comprehension, and friction without self-promoting the result. The public
 coordination point is
 [Issue #2](https://github.com/XRastlinX/logos-formal/issues/2).
+For a packaged setup pinned to the tested service commit, use the
+[portable First Contact package](dist/README.md).
 
 ## Validate This Node
 
