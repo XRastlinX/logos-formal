@@ -49,8 +49,33 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      - name: Capture checked-out commit
+        id: checkout
+        shell: bash
+        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
       - name: Run governed validator
-        run: bash scripts/validate.sh
+        shell: bash
+        run: |
+          receipt="$RUNNER_TEMP/cyonic-validation-linux.json"
+          partial="$receipt.partial"
+          set +e
+          bash scripts/validate.sh --format json > "$partial"
+          validator_status=$?
+          set -e
+          if [[ -s "$partial" ]]; then
+            mv "$partial" "$receipt"
+          fi
+          exit "$validator_status"
+      - name: Upload Linux validation receipt
+        id: upload-receipt
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cyonic-validation-linux-${{ steps.checkout.outputs.sha }}
+          path: ${{ runner.temp }}/cyonic-validation-linux.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
 
   validate-windows:
     needs: validator-conformance
@@ -66,6 +91,28 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      - name: Capture checked-out commit
+        id: checkout
+        shell: pwsh
+        run: |
+          $sha = (git rev-parse HEAD).Trim()
+          "sha=$sha" >> $env:GITHUB_OUTPUT
       - name: Run governed validator
         shell: cmd
-        run: scripts\validate.cmd
+        run: |
+          set "receipt=%RUNNER_TEMP%\cyonic-validation-windows.json"
+          set "partial=%RUNNER_TEMP%\cyonic-validation-windows.json.partial"
+          scripts\validate.cmd -Format json > "%partial%"
+          set "validator_status=%ERRORLEVEL%"
+          for %%I in ("%partial%") do if %%~zI GTR 0 move /Y "%partial%" "%receipt%" >NUL
+          exit /B %validator_status%
+      - name: Upload Windows validation receipt
+        id: upload-receipt
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cyonic-validation-windows-${{ steps.checkout.outputs.sha }}
+          path: ${{ runner.temp }}/cyonic-validation-windows.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
