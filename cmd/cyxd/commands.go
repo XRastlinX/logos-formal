@@ -12,11 +12,7 @@ func InitCommand() {
 	fmt.Println("[PROPOSED] Capability scope defaulted to 010-observer.")
 }
 
-func ServeCommand() {
-	fmt.Println("[PROPOSED] Starting CyExchange durable inbox loop.")
-	fmt.Println("[PROPOSED] Awaiting mTLS connections...")
-	// Simulated loop would go here
-}
+
 
 func RouteCommand() {
 	fmt.Println("[PROPOSED] Parsing envelope for routing...")

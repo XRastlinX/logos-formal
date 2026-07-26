@@ -23,7 +23,11 @@ func main() {
 	case "init":
 		InitCommand()
 	case "serve":
-		ServeCommand()
+		port := "8081"
+		if len(os.Args) > 2 {
+			port = os.Args[2]
+		}
+		ServeCommand(port)
 	case "route":
 		RouteCommand()
 	default:

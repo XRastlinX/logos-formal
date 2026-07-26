@@ -1,0 +1,7 @@
+node:
+  did: "did:key:z6Mkq4G6mX2E4r6W4Ww2tK8r5h8DnP3N8V7tL9Zq2Yv1Wk3X"
+  public_key_ed25519: "e81d7f8d6e3c5a2b1f0c4e9d7b5a3f1e0c8d6b4a2f9e7d5c3b1a0f8e6d4c2b0a"
+  capability_scope: "010-observer"
+transport:
+  port: 8082
+  mdns_enabled: true
