@@ -17,27 +17,27 @@ In this system:
 4. **Human/External Authority (101)**: Appraises the evidence and issues a one-shot cryptographic **Permit**.
 5. **Actuators (001)**: Energize the physical or systemic effect **only** if they receive a valid Permit bound to the exact artifact and their specific hardware ID.
 
-The result is a zero-trust execution envelope for autonomous agents, governed by the [Cubed Bit Safety Lattice](10_Elevation_Layer/ACTIVE_CANON_Bleed_Over_Operator_Beta_V1.md) and the formal **Bleed-Over Operator (β)**.
+The result is a zero-trust execution envelope for autonomous agents, governed by the [Cubed Bit Safety Lattice](01_Governance_Geometry/governance_algebra_v1.md) and the formal [Bleed-Over Operator (β)](10_Elevation_Layer/ACTIVE_CANON_Bleed_Over_Operator_Beta_V1.md).
 
 ## Quickstart: Runnable Demonstrators
 
 This repository contains two runnable Go demonstrators that prove these invariants:
 
-1. **Permit-Gated Cell (`runtime/demonstrator`)**: Proves an AI planner cannot effectuate change without a human-issued permit. Tests replay attacks, expired nonces, and target mismatch.
-2. **Bleed-Over (DCIF) Membrane (`runtime/dcif-membrane`)**: Simulates the [Distributed Current Intelligence Fabric](08_Builder_Layer/BLEED_OVER_CURRENT_INTELLIGENCE_PROFILE_V0_1.md). Proves that an AI agent translating a claim between fields cannot autonomously inflate its certainty or escalate its authority.
-3. **Autophagic Decay Simulator (`runtime/autophagic-decay`)**: Simulates the `PROPOSED` Autophagic Operator ($\alpha$). Proves how local-first RAG loops collapse their own certainty matrix when recursively ingesting their own outputs, and mathematically forces the AI to reconnect to `D=0` (primary) roots.
+1. **Permit-Gated Cell (`runtime/demonstrator`)**: Demonstrates an AI planner cannot effectuate change without a human-issued permit. Tests replay attacks, expired nonces, and target mismatch.
+2. **Bleed-Over (DCIF) Membrane (`runtime/dcif-membrane`)**: Simulates the [Distributed Current Intelligence Fabric](08_Builder_Layer/BLEED_OVER_CURRENT_INTELLIGENCE_PROFILE_V0_1.md). Demonstrates that an AI agent translating a claim between fields cannot autonomously inflate its certainty or escalate its authority.
+3. **Autophagic Decay Simulator (`runtime/autophagic-decay`)**: Simulates the `PROPOSED` Autophagic Operator ($\alpha$). Demonstrates how local-first RAG loops collapse their own certainty matrix when recursively ingesting their own outputs, and mathematically forces the AI to reconnect to `D=0` (primary) roots.
 
 To run the demonstrators (requires Go):
 
 ```bash
 cd runtime/demonstrator
-go run main.go
+go run .
 
 cd ../dcif-membrane
-go run main.go
+go run .
 
 cd ../autophagic-decay
-go run main.go
+go run .
 ```
 
 The demonstrator tests the following fail-closed negative vectors:

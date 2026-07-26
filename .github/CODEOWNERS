@@ -1,13 +1,2 @@
-*       @charl
-
-# Formal core – require specific review
-/unified_algebra_q_cy_v1.md    @charl
-/seven_stage_axiomatization_v1.md  @charl
-/ACTIVE_CANON_Rite_Machine_v1.md   @charl
-/prime_simulator_governance_schema_v1.md  @charl
-/governance_algebra_v1.md      @charl
-/CODEX_TRANSPARENCY_HANDOFF_V1.md @charl
-
-# Any future governance or schema files
-*.schema.json                  @charl
-/governance/                   @charl
+*           @XRastlinX
+/.github/   @XRastlinX
