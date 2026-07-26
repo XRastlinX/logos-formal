@@ -25,6 +25,7 @@ This repository contains two runnable Go demonstrators that prove these invarian
 
 1. **Permit-Gated Cell (`runtime/demonstrator`)**: Proves an AI planner cannot effectuate change without a human-issued permit. Tests replay attacks, expired nonces, and target mismatch.
 2. **Bleed-Over (DCIF) Membrane (`runtime/dcif-membrane`)**: Simulates the [Distributed Current Intelligence Fabric](08_Builder_Layer/BLEED_OVER_CURRENT_INTELLIGENCE_PROFILE_V0_1.md). Proves that an AI agent translating a claim between fields cannot autonomously inflate its certainty or escalate its authority.
+3. **Autophagic Decay Simulator (`runtime/autophagic-decay`)**: Simulates the `PROPOSED` Autophagic Operator ($\alpha$). Proves how local-first RAG loops collapse their own certainty matrix when recursively ingesting their own outputs, and mathematically forces the AI to reconnect to `D=0` (primary) roots.
 
 To run the demonstrators (requires Go):
 
@@ -33,6 +34,9 @@ cd runtime/demonstrator
 go run main.go
 
 cd ../dcif-membrane
+go run main.go
+
+cd ../autophagic-decay
 go run main.go
 ```
 
