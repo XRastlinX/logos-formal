@@ -3,8 +3,7 @@
 **Profile ID:** `ct-sysmlv2-scalar-chain-0.1.0`
 **Artifact Status:** `PROPOSED_FOR_010_EVALUATION`
 **Governance State:** `010`
-**Validator Operator:** `010` (Mechanical Evaluator)
-**Witness Operator:** `000` (Raw Attester / Cryptographic Anchor)
+**Validator Operator:** `000`
 **Governance Authority Effect:** `NONE`
 **SysML Basis:** OMG SysML v2.0, Language Specification `formal/26-03-02`
 **Scope:** Illustrative scalar altitude → pressure → drag chain only
