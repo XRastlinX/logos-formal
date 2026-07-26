@@ -1,10 +1,12 @@
 package main
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"crypto/rand"
 	"crypto/sha256"
 	"encoding/hex"
+	"strings"
 	"testing"
 	"time"
 )
@@ -172,5 +174,36 @@ func TestArtifactDigestDeterministic(t *testing.T) {
 	second := hashArtifact(artifact)
 	if first != second || !validSHA256Digest(first) {
 		t.Fatalf("artifact digest is not deterministic SHA-256: %q vs %q", first, second)
+	}
+}
+
+func TestFirstContactTrialNeverSelfAdjudicates(t *testing.T) {
+	now := time.Date(2026, 7, 26, 12, 0, 0, 0, time.UTC)
+	input := strings.NewReader(strings.Join([]string{
+		"cold-user-01",
+		"4.5",
+		"it checked an artifact-bound signature",
+		"an external configured principal",
+		"no",
+		"TRYABILITY",
+		"the Go requirement was not obvious",
+		"",
+	}, "\n"))
+	var output bytes.Buffer
+
+	report, err := conductTrial(input, &output, now, "external", "candidate-sha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.ExternalityStatus != "CLAIMED_EXTERNAL" ||
+		report.AdjudicationStatus != "PENDING_EXTERNAL_REVIEW" {
+		t.Fatalf("trial self-adjudicated external evidence: %+v", report)
+	}
+	if report.BoundaryReceipt.Effect.Status != "NOT_PERFORMED" ||
+		report.BoundaryReceipt.Routing.Forwarded {
+		t.Fatal("trial escaped the service effect boundary")
+	}
+	if report.Friction.Category != "TRYABILITY" {
+		t.Fatalf("friction was not preserved: %+v", report.Friction)
 	}
 }

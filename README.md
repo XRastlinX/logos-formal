@@ -31,6 +31,10 @@ effect: NOT_PERFORMED
 See [Cyonic Service Surface](docs/SERVICE_SURFACE.md) for the external client
 path, interaction receipts, limits, and non-claims.
 
+Independent testers can use the
+[First Contact Trial](docs/FIRST_CONTACT_TRIAL.md) to record setup time,
+comprehension, and friction without self-promoting the result.
+
 ## The Problem
 
 Modern AI systems increasingly conflate the ability to *plan* an action with the authority to *execute* it. Tool-calling LLMs can generate infrastructure commands, deployment scripts, and database mutations — and tooling increasingly lets them run those plans autonomously. The boundary between "what should we do?" and "do it" is collapsing.

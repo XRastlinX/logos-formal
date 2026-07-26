@@ -20,6 +20,7 @@ The service never issues a permit and never performs an effect.
 
 Usage:
   cyonic-service demo
+  cyonic-service trial    -report <trial-report.json> [-origin external]
   cyonic-service fixture  -dir <directory>
   cyonic-service evaluate -request <request.json> -trust-key <public.key> -issuer <issuer> [options]
 
@@ -192,6 +193,8 @@ func main() {
 	switch os.Args[1] {
 	case "demo":
 		code = runDemo()
+	case "trial":
+		code = runTrial(os.Args[2:])
 	case "fixture":
 		code = runFixture(os.Args[2:])
 	case "evaluate":

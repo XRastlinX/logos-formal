@@ -46,6 +46,29 @@ still reports:
 The demo is an internal interaction. It must not be counted as external
 adoption evidence.
 
+## First Contact trial
+
+An independent tester can run:
+
+```bash
+go run ./runtime/cyonic-service trial \
+  -origin external \
+  -report cyonic-first-contact-report-01.json
+```
+
+The command displays the boundary result and records the tester's own
+explanation, setup time, and friction. It never scores or promotes the report.
+
+Every report remains:
+
+```text
+externalityStatus: CLAIMED_EXTERNAL
+adjudicationStatus: PENDING_EXTERNAL_REVIEW
+authorityEffect: NONE
+```
+
+See [`docs/FIRST_CONTACT_TRIAL.md`](../../docs/FIRST_CONTACT_TRIAL.md).
+
 ## External CLI evaluation
 
 Create a short-lived fixture:

@@ -20,6 +20,7 @@
 | Interaction record | Every evaluation prints a receipt; optional JSONL append | Implemented |
 | Internal/external distinction | External is recorded only as `CLAIMED_EXTERNAL` pending separate adjudication | Implemented |
 | Friction classification | Rejections carry category, code, and message | Implemented |
+| First Contact capture | Interactive trial records setup time, articulation, friction, source ref, and pending adjudication | Implemented |
 | Fail-closed tests | Signature, issuer, expiry, scope, digest, malformed input, and effect-route tests | Implemented |
 
 ## Local verification
@@ -30,6 +31,7 @@ Observed on 2026-07-26:
 go test ./...: PASS
 go vet ./...: PASS
 PowerShell client example: PASS
+First Contact trial rehearsal: PASS (internal evidence only)
 clean-clone demo + full tests: PASS
 clean-clone elapsed time: 3.36 seconds
 valid permit receipt:

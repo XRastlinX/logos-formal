@@ -50,6 +50,17 @@ Or run the minimal client:
 .\runtime\cyonic-service\examples\client.ps1
 ```
 
+For an independent usability trial:
+
+```bash
+go run ./runtime/cyonic-service trial \
+  -origin external \
+  -report cyonic-first-contact-report-01.json
+```
+
+The trial records the participant's own explanation and friction without
+automatically accepting either as external evidence.
+
 ## Machine contract
 
 Input schema:
@@ -137,4 +148,3 @@ This service does not:
 - certify conformance.
 
 It is a reference implementation and discovery surface.
-
