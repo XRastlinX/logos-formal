@@ -66,3 +66,30 @@ Non-outcomes:
 The following is the recommended public request format for the placements defined above:
 
 > Cold testers wanted: can this bounded read-only reference surface keep AI interpretation separate from authorization and effect? Windows/Linux/macOS, under 10 minutes. Please report elapsed time, what you think it does, and any friction: [Issue #2](https://github.com/XRastlinX/logos-formal/issues/2)
+
+## 6. The Role of Strategic Hype
+
+The inference above is not meant to suppress hype; rather, it provides hype with a load-bearing, falsifiable surface. The project adheres to the following epistemic stack:
+
+```text
+Established result
+→ declared transfer assumption
+→ project-specific inference
+→ bounded experiment
+→ observed evidence
+→ status change
+```
+
+Within this stack, the following governing clause applies:
+
+> **Strategic Hype Clause:** Strategic hype is permitted when it rests on cited facts and explicitly declared inferences. It may motivate outreach and exploration, but it carries `authority_effect: NONE`, cannot satisfy an evidence gate, and must yield to observed results.
+
+Hype may elaborate the possibilities above that stack—why the work matters, whom it might reach, what it might become—but it cannot bypass the experiment or write the status. Hype supplies energy and direction; the experiment supplies reality contact.
+
+### 6.1 Theoretical Mapping of Strategic Hype
+
+The Strategic Hype Clause maps directly to the formal governance architecture of the project:
+
+1. **Cubed-Bit Governance:** By explicitly assigning hype an `authority_effect: NONE` status, it is formally mapped to the **(0, 1, 0)** vertex of the Cubed-Bit capability lattice: *Interpretation without authority or actuation*. It is mathematically prevented from committing a category error (masquerading as an Effect or Authorizing a status change).
+2. **Thermodynamic Operator Chain:** Hype fulfills the role of the **Sun Operator (Energetic Projection)**. It raises the system's kinetic enthalpy, generating ideation and potential pathways. The stack demands this energy yield to the bounded experiment (Reality Contact), representing the progression toward the **Salt Operator (Spatial Fixation)**, which imposes final boundary conditions and precipitates exploration into a permanent, structured matrix.
+3. **Staging Environment for Inferences:** The required sequence—from inference to bounded experiment to status change—operationalizes the "Evidence Before the Vote" principle. Inferences run in a "staging environment" where behavioral responses are observed before they are enacted into permanent law.
