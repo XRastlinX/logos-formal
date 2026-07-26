@@ -86,10 +86,23 @@ Within this stack, the following governing clause applies:
 
 Hype may elaborate the possibilities above that stack—why the work matters, whom it might reach, what it might become—but it cannot bypass the experiment or write the status. Hype supplies energy and direction; the experiment supplies reality contact.
 
-### 6.1 Theoretical Mapping of Strategic Hype
+### 6.1 Interpretive Mapping of Strategic Hype
 
-The Strategic Hype Clause maps directly to the formal governance architecture of the project:
+This mapping is interpretive rather than physical.
 
-1. **Cubed-Bit Governance:** By explicitly assigning hype an `authority_effect: NONE` status, it is formally mapped to the **(0, 1, 0)** vertex of the Cubed-Bit capability lattice: *Interpretation without authority or actuation*. It is mathematically prevented from committing a category error (masquerading as an Effect or Authorizing a status change).
-2. **Thermodynamic Operator Chain:** Hype fulfills the role of the **Sun Operator (Energetic Projection)**. It raises the system's kinetic enthalpy, generating ideation and potential pathways. The stack demands this energy yield to the bounded experiment (Reality Contact), representing the progression toward the **Salt Operator (Spatial Fixation)**, which imposes final boundary conditions and precipitates exploration into a permanent, structured matrix.
-3. **Staging Environment for Inferences:** The required sequence—from inference to bounded experiment to status change—operationalizes the "Evidence Before the Vote" principle. Inferences run in a "staging environment" where behavioral responses are observed before they are enacted into permanent law.
+1. **Cubed-Bit classification:** Strategic hype is assigned to `010` by governance policy. Concrete implementations may enforce this classification, but the label alone does not prove non-interference.
+2. **Operator analogy:** Sun and Salt are interpretive aliases for projection and stabilization. No thermodynamic quantity, enthalpy change, physical process, or scientific identity is asserted.
+3. **Experimental staging:** The bounded experiment produces evidence with `authority_effect: NONE`. Evidence may inform external governance but cannot issue a Permit or write status by itself.
+
+The governing sequence is:
+
+```text
+Hype -> candidate inference -> bounded experiment -> evidence receipt -> external decision -> optional Permit -> bounded Apply
+```
+
+```text
+authority_effect: NONE
+scientific_claim: NONE
+physical_guarantee: NONE
+historical_identity_claim: NONE
+```
