@@ -106,12 +106,20 @@ func ResolveBoundFile(repoRoot, candidate string) (string, error) {
 }
 
 func ensureWithin(root, candidate string) error {
-	relative, err := filepath.Rel(root, candidate)
+	canonicalRoot, err := filepath.EvalSymlinks(root)
+	if err != nil {
+		return fmt.Errorf("canonicalize repository boundary: %w", err)
+	}
+	canonicalCandidate, err := filepath.EvalSymlinks(candidate)
+	if err != nil {
+		return fmt.Errorf("canonicalize candidate path: %w", err)
+	}
+	relative, err := filepath.Rel(canonicalRoot, canonicalCandidate)
 	if err != nil {
 		return fmt.Errorf("compare repository and candidate paths: %w", err)
 	}
 	if relative == ".." || startsWithParent(relative) || filepath.IsAbs(relative) {
-		return fmt.Errorf("path %q escapes repository boundary %q", candidate, root)
+		return fmt.Errorf("path %q escapes repository boundary %q", canonicalCandidate, canonicalRoot)
 	}
 	return nil
 }
