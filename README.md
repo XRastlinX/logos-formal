@@ -2,24 +2,23 @@
 
 This repository contains the `ACTIVE_CANON` formal architecture for a structurally secure, mathematically verified, and governance-sound safe-construction corridor.
 
-## The Rite-Machine
+## The 12+1 Domain Partition
 
-At its core, this architecture defines a **formal rite-machine**. It maps the universal developmental arc (childhood, maturation, capability lift) into a strict, fail-closed algebraic transition system.
+The structural geometry of the governance canon is exhaustively partitioned into 12 domains centered around the Master Codex. This topology explicitly separates content from capability, and simulation from execution.
 
-By separating **Interpretation** (hypothesis, simulation, exploration) from **Authorization** and **Effectuation**, the pipeline ensures that no system can self-authorize or leak unverified assumptions into physical actuation.
-
-- **010 (The Child State):** Interpretation only. No authority. No effect. A safe zone for exploration.
-- **The Seven-Stage Transition ($\sigma_1 \dots \sigma_7$):** The developmental rite of passage that safely tests and tempers the system.
-- **101 (The Adult State):** The authorized, capable state possessing a valid frame, residual responsibility, and an externally granted mandate to effectuate.
-
-## Core Artifacts
-
-1. **`unified_algebra_q_cy_v1.md`**: The `{q}/{cy}` Dual Projection, bridging content classification with governance geometry.
-2. **`seven_stage_axiomatization_v1.md`**: The axioms and category-theoretic model proving the transition logic.
-3. **`governance_algebra_v1.md`**: The geometric and structural fusion of the Cubed Bit and the temporal operators.
-4. **`prime_simulator_governance_schema_v1.md`**: The JSON Schema enforcing the `010` invariant over computational pipelines.
-5. **`CODEX_TRANSPARENCY_HANDOFF_V1.md`**: The adjudication protocol for safe cross-environment synchronization and transparency.
-6. **`ACTIVE_CANON_Rite_Machine_v1.md`**: The mapping of the Seven-Stage transition into the formal developmental rite.
+- **`00_Master_Codex`**: The core transparency manifest and central integration hub.
+- **`01_Governance_Geometry`**: Defines **where** a cord sits in the governance landscape (Cubed Bit, capability locks).
+- **`02_Cord_Algebra`**: Defines **what** a cord is and how it matures (interior, residual, frame).
+- **`03_Q_Taxonomy`**: Defines **what kind** of content (interior/residual) a cord contains.
+- **`04_Dual_Projection`**: Defines **how** a cord is observed without being altered ($\{q\}/\{cy\}$).
+- **`05_Rite_Machine`**: Defines **how** a cord matures safely (Seven-Stage Transition).
+- **`06_Prime_Root_Field`**: Defines the **input structure** for developmental analysis.
+- **`07_Antigravity_Capability`**: Operational bounds of the local agent/Copilot (native tool-lift capability).
+- **`08_Builder_Layer`**: Repository structure, GitHub Actions, and integration docs.
+- **`09_Shared_Corridor`**: The Google Drive / cross-platform packet exchange layer.
+- **`10_Elevation_Layer`**: The formal registry for elevated `ACTIVE_CANON` artifacts (e.g., Normalization).
+- **`11_DeepSeek_Reach`**: The capability boundaries of the DeepSeek external LLM.
+- **`12_Grok_Reach`**: The capability boundaries of the Grok external synthesis LLM.
 
 ## Epistemic Rule
-**Q never sets Cy.** Mathematical output, interpretive drift, and raw evidence (Q) can never autonomously write to the Governance Geometry (Cy). Authority remains external.
+**Q never sets Cy.** Mathematical output, interpretive drift, and raw evidence (Q) can never autonomously write to the Governance Geometry (Cy). Authority remains explicitly external.
