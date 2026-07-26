@@ -5,8 +5,8 @@ Service Surface.
 
 Current package:
 
-- [`cyonic-node-setup-v0.1.1-portable-7e0f263.zip`](cyonic-node-setup-v0.1.1-portable-7e0f263.zip)
-- [`cyonic-node-setup-v0.1.1-portable-7e0f263.receipt.json`](cyonic-node-setup-v0.1.1-portable-7e0f263.receipt.json)
+- [`cyonic-node-setup-v0.1.2-portable-7e0f263.zip`](cyonic-node-setup-v0.1.2-portable-7e0f263.zip)
+- [`cyonic-node-setup-v0.1.2-portable-7e0f263.receipt.json`](cyonic-node-setup-v0.1.2-portable-7e0f263.receipt.json)
 
 The archive pins source commit:
 
@@ -17,13 +17,14 @@ The archive pins source commit:
 Its recorded SHA-256 is:
 
 ```text
-2b539eea8ee392bb5f1318b3661b1d04bc090bffb19e7482d9813453a9001c12
+8d1263b1dff0fcd84c42ac8911f132d270e8b172d50d06982d73d227499315a7
 ```
 
 Unpack it, then follow its `README.md`. On Windows:
 
 ```powershell
 .\setup.cmd friend-node-01 codex
+.\trial.cmd cyonic-first-contact-report-01.json
 ```
 
 On Linux or macOS:
@@ -31,10 +32,15 @@ On Linux or macOS:
 ```bash
 chmod +x scripts/*.sh
 ./scripts/setup.sh friend-node-01 codex
+./scripts/trial.sh cyonic-first-contact-report-01.json
 ```
 
-The archive and receipt have passed an internal Windows cold run. That run is
-implementation evidence only:
+The trial wrapper produces the participant report required by the First
+Contact evidence contract. It is interactive, create-only, and preserves
+`PENDING_EXTERNAL_REVIEW`.
+
+The archive and receipt have passed an internal Windows cold setup and trial.
+That run is implementation evidence only:
 
 ```text
 externalityStatus: NOT_ADJUDICATED

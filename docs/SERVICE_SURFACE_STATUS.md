@@ -30,7 +30,7 @@
 | Participant evidence immutability | Trial reports are create-only and existing report paths fail before prompting | Implemented |
 | Additive adjudication | Exact report-byte hash + explicit reviewer findings + mechanical receipt/time checks | Implemented |
 | Evidence threshold summary | Deduplicates participant and friction evidence; cannot issue authority | Implemented |
-| Portable Node Setup | Version 0.1.1 archive pins the tested service commit and carries a detached receipt | Implemented |
+| Portable Node Setup | Version 0.1.2 archive pins the tested service commit, captures a participant report, and carries a detached receipt | Implemented |
 | Fail-closed tests | Signature, issuer, expiry, scope, digest, malformed input, and effect-route tests | Implemented |
 
 ## Local verification
@@ -70,13 +70,15 @@ guarded builder clone:
   remote count: 0
   authorityEffect: NONE
   securityBoundary: GUARDRAIL_ONLY
-portable Node Setup v0.1.1:
-  archive sha256: 2b539eea8ee392bb5f1318b3661b1d04bc090bffb19e7482d9813453a9001c12
+portable Node Setup v0.1.2:
+  archive sha256: 8d1263b1dff0fcd84c42ac8911f132d270e8b172d50d06982d73d227499315a7
   pinned service commit: 7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a
   archive unsafe paths: 0
-  Windows cold setup: PASS (16.55 seconds)
+  Windows cold setup + participant trial: PASS (17.11 seconds)
   repository validation: 5/5
   service probe: COLD_CALL_PASSED
+  participant report: CLAIMED_EXTERNAL / PENDING_EXTERNAL_REVIEW / NONE
+  create-only repeat: exit 2 before prompting; original bytes unchanged
   externality: NOT_ADJUDICATED
 ```
 
