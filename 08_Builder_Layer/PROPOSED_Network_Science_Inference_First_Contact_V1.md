@@ -26,7 +26,9 @@ The synthesis relies on standard, cited results from network science:
 
 The strongest precise statement supported by this foundation is:
 
-> Established network research supports the distribution strategy. Whether that strategy moves this repository from 0/3 to 1/3 is an empirical question tested by outreach.
+> Established network research supports the distribution strategy. Whether
+> that strategy produces any useful external feedback is an empirical question
+> tested by optional outreach.
 
 The operational rule stands as an evidence-based experiment—not yet as a proven property of this project’s network.
 
@@ -82,7 +84,10 @@ Established result
 
 Within this stack, the following governing clause applies:
 
-> **Strategic Hype Clause:** Strategic hype is permitted when it rests on cited facts and explicitly declared inferences. It may motivate outreach and exploration, but it carries `authority_effect: NONE`, cannot satisfy an evidence gate, and must yield to observed results.
+> **Strategic Hype Clause:** Strategic hype is permitted when it rests on cited
+> facts and explicitly declared inferences. It may motivate outreach and
+> exploration, but it carries `authority_effect: NONE`, cannot substitute for
+> observed results, and cannot create authority.
 
 Hype may elaborate the possibilities above that stack—why the work matters, whom it might reach, what it might become—but it cannot bypass the experiment or write the status. Hype supplies energy and direction; the experiment supplies reality contact.
 

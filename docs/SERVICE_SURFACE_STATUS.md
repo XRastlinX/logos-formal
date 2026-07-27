@@ -29,7 +29,7 @@
 | First Contact capture | Interactive trial records setup time, articulation, friction, source ref, and pending adjudication | Implemented |
 | Participant evidence immutability | Trial reports are create-only and existing report paths fail before prompting | Implemented |
 | Additive adjudication | Exact report-byte hash + explicit reviewer findings + mechanical receipt/time checks | Implemented |
-| Evidence threshold summary | Deduplicates participant and friction evidence; cannot issue authority | Implemented |
+| Optional feedback summary | Deduplicates participant and friction records; has no completion or merge threshold | Implemented |
 | Portable Node Setup | Version 0.1.2 archive pins the tested service commit, captures a participant report, and carries a detached receipt | Implemented |
 | Fail-closed tests | Signature, issuer, expiry, scope, digest, malformed input, and effect-route tests | Implemented |
 
@@ -56,9 +56,9 @@ participant report create-only guard: PASS
   existing report bytes: unchanged
 adjudication + summary rehearsal: PASS
   qualification: NOT_QUALIFYING
-  qualifying external participants: 0/3
-  verified external friction events: 0/1
-  status: EVIDENCE_INCOMPLETE
+  qualifying external participants recorded: 0
+  verified external friction events recorded: 0
+  status: EXTERNAL_EVALUATION_NOT_ESTABLISHED
 clean-clone demo + full tests: PASS
 clean-clone elapsed time: 3.36 seconds
 valid permit receipt:
@@ -82,37 +82,37 @@ portable Node Setup v0.1.2:
   externality: NOT_ADJUDICATED
 ```
 
-These are internal verification events. They do not count as external First
-Contact or First Friction evidence.
+These internal verification events establish the behavior covered by the
+declared tests. They do not establish external usability, adoption, or
+certification, and no such claim is required for merge.
 
 The exact implementation is published on the public pull-request branch:
 
 ```text
 codex/cyonic-service-surface-v1
-87633c4f8757d1c03e328067343330e524b52f05
+https://github.com/XRastlinX/logos-formal/pull/1
 ```
 
-GitHub Actions run 32 (run ID `30216090500`) passed independent
-validator-conformance jobs on Windows and Ubuntu, followed by the public
-Windows and Unix validation scripts at that exact head. This is implementation
-evidence, not independent First Contact evidence.
+The protected merge path requires validator-conformance jobs on Windows and
+Ubuntu followed by the public Windows and Unix validation scripts. The PR head
+must satisfy those checks before merge. These checks are implementation
+evidence, not external usability or adoption evidence.
 
-## Adoption-arc audit
+## External-evaluation audit
 
-| Goal requirement | Status |
+| Question | Status |
 |---|---|
-| Outsider can call in under ten minutes | Standalone HTTP path and native probe pass internally; not externally verified |
-| Outsider can articulate the separation | No qualifying external evidence |
-| Three cold users complete First Contact | Not achieved |
-| At least one external friction event recorded | Not achieved |
+| Internal cold path completes | Verified by local and CI tests |
+| Outsider can call in under ten minutes | Not externally established |
+| Outsider can articulate the separation | Not externally established |
+| External feedback recorded | None |
 | Service is public primary discovery entry | Public PR candidate and Issue #2 trial entry; not merged into `main` |
 | Phase 3+ claims withheld | Satisfied |
 
-## Remaining gates
+## Remaining engineering gate
 
 1. Review and merge the candidate through the protected repository path.
-2. Run three cold external trials and record their elapsed time and
-   interpretation.
-3. Record the first independently verified external friction event.
 
-No internal run may be relabeled as external evidence.
+External feedback may be collected after publication. It is optional, has no
+required count, and does not govern engineering work or merge eligibility. No
+internal run may be relabeled as external evaluation.

@@ -456,9 +456,9 @@ func summarizeFirstContact(records []FirstContactAdjudication, dir string, now t
 	sort.Strings(qualifyingIDs)
 	sort.Strings(frictionIDs)
 
-	status := "EVIDENCE_INCOMPLETE"
-	if len(qualifyingParticipants) >= 3 && len(frictionReports) >= 1 {
-		status = "FIRST_CONTACT_VALIDATED"
+	status := "EXTERNAL_EVALUATION_NOT_ESTABLISHED"
+	if len(qualifyingParticipants) > 0 {
+		status = "EXTERNAL_FEEDBACK_RECORDED"
 	}
 	return FirstContactSummary{
 		Schema:                         firstContactSummarySchema,
@@ -477,7 +477,8 @@ func summarizeFirstContact(records []FirstContactAdjudication, dir string, now t
 			"Counts depend on reviewer attestations contained in additive adjudication records.",
 			"Distinct qualifying participants are deduplicated by participantRef; distinct friction events are deduplicated by reportDigest.",
 			"Qualification is recomputed from findings; conflicting identities for one reportDigest are excluded.",
-			"FIRST_CONTACT_VALIDATED is a Phase 1 evidence threshold, not adoption, certification, canon elevation, or authority.",
+			"External feedback is optional and is not a prerequisite for engineering work, merge, publication, or authority.",
+			"Recorded feedback does not establish adoption, certification, canon elevation, or semantic truth.",
 		},
 	}
 }
@@ -527,8 +528,8 @@ func runSummarizeTrials(args []string) int {
 	}
 
 	fmt.Printf("Wrote First Contact summary: %s\n", *outputPath)
-	fmt.Printf("Qualifying external participants: %d/3\n", summary.QualifyingExternalParticipants)
-	fmt.Printf("Verified external friction events: %d/1\n", summary.VerifiedExternalFrictionEvents)
+	fmt.Printf("Qualifying external participants recorded: %d\n", summary.QualifyingExternalParticipants)
+	fmt.Printf("Verified external friction events recorded: %d\n", summary.VerifiedExternalFrictionEvents)
 	fmt.Printf("Status: %s\n", summary.Status)
 	fmt.Println("Authority effect: NONE")
 	return 0

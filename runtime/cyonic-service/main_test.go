@@ -437,7 +437,7 @@ func TestAdjudicationCannotOverwriteSourceOrExistingEvidence(t *testing.T) {
 	}
 }
 
-func TestSummaryRequiresThreeDistinctParticipantsAndOneFriction(t *testing.T) {
+func TestSummaryRecordsDistinctParticipantsAndFrictionWithoutThreshold(t *testing.T) {
 	now := time.Date(2026, 7, 26, 14, 0, 0, 0, time.UTC)
 	var records []FirstContactAdjudication
 	for index, participant := range []string{"cold-user-01", "cold-user-02", "cold-user-03"} {
@@ -454,8 +454,8 @@ func TestSummaryRequiresThreeDistinctParticipantsAndOneFriction(t *testing.T) {
 	}
 
 	summary := summarizeFirstContact(records, "evidence", now)
-	if summary.Status != "FIRST_CONTACT_VALIDATED" {
-		t.Fatalf("expected validated First Contact threshold, got %+v", summary)
+	if summary.Status != "EXTERNAL_FEEDBACK_RECORDED" {
+		t.Fatalf("expected optional external feedback status, got %+v", summary)
 	}
 	if summary.QualifyingExternalParticipants != 3 ||
 		summary.VerifiedExternalFrictionEvents != 1 ||
@@ -481,5 +481,21 @@ func TestSummaryRequiresThreeDistinctParticipantsAndOneFriction(t *testing.T) {
 	)
 	if tamperedSummary.QualifyingExternalParticipants != 0 {
 		t.Fatalf("summary trusted mutable qualification string: %+v", tamperedSummary)
+	}
+	if tamperedSummary.Status != "EXTERNAL_EVALUATION_NOT_ESTABLISHED" {
+		t.Fatalf("unverified record created external feedback status: %+v", tamperedSummary)
+	}
+}
+
+func TestSummaryWithoutReportsDoesNotCreateExternalEvidence(t *testing.T) {
+	now := time.Date(2026, 7, 26, 14, 0, 0, 0, time.UTC)
+	summary := summarizeFirstContact(nil, "evidence", now)
+	if summary.Status != "EXTERNAL_EVALUATION_NOT_ESTABLISHED" {
+		t.Fatalf("unexpected empty summary status: %+v", summary)
+	}
+	if summary.QualifyingExternalParticipants != 0 ||
+		summary.VerifiedExternalFrictionEvents != 0 ||
+		summary.AuthorityEffect != "NONE" {
+		t.Fatalf("empty summary created evidence or authority: %+v", summary)
 	}
 }

@@ -57,9 +57,10 @@ the portable package SHA-256, qualification rules, and reporting instructions.
 - Not a claim of scientific proof, standards conformance, certification, or
   completed external adoption
 
-**Evidence status:** First Contact remains incomplete until qualifying
-independent runs are logged. Internal tests, CI, stars, and maintainer runs do
-not satisfy that evidence gate.
+**External evaluation status:** Not yet established. Independent reports are
+welcome but optional; they are not prerequisites for engineering work, merge,
+or publication. Internal verification establishes only the behavior covered by
+the declared tests.
 
 ## Status labels
 

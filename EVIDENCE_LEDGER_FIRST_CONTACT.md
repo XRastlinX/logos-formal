@@ -1,22 +1,31 @@
-# First Contact Evidence Ledger
+# First Contact Feedback Ledger
 
-**First Contact evidence**
-- Need **3** independent cold runs + **1** verified friction (or formal charter change).
-- Current: **0/3**, **0/1** → **EVIDENCE\_INCOMPLETE**.
+**Status:** `EXTERNAL_EVALUATION_NOT_ESTABLISHED`
 
-**Qualifying report:** independent actor · published hash · real run · elapsed time · one-line understanding · durable link.
+**Authority effect:** `NONE`
 
-**Friction:** reproducible blockage/confusion on the published cold path (docs/command/platform). Not taste, not philosophy, not after local edits.
+Independent cold-run reports are welcome but optional. They may provide
+usability evidence about the published path; they are not prerequisites for
+engineering work, merge, publication, or continued development.
+
+**Recordable report:** independent actor · published hash · real run · elapsed
+time · one-line understanding · friction or `none` · durable link.
+
+**Friction:** a reproducible blockage or confusion on the published cold path
+(documentation, command, or platform). Friction is recorded when observed; it
+is never required.
 
 **Log line:**
 
 `date | actor | hash | elapsed | understanding | friction? | link`
 
-**Excluded:** maintainer runs, CI, stars, simulated agent “testers.”
+**Excluded from external-evaluation claims:** maintainer runs, CI, stars, and
+simulated agent testers. These remain valid internal engineering evidence when
+accurately labeled.
 
-No automated log parsing until real rows exist. Distribution → independent reports is the only way this gate moves.
+No report count changes authority, canon status, or merge eligibility.
 
-## Log Ledger
+## Feedback Log
 
 | date | actor | hash | elapsed | understanding | friction? | link |
 | :--- | :--- | :--- | :--- | :--- | :--- | :--- |

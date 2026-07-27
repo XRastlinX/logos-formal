@@ -20,29 +20,32 @@ effect
 
 It is not presently established as a framework, standard, certification scheme, adopted dependency, or commercial product.
 
-The phases below are evidence gates. They are not a guaranteed timeline, an inevitable growth sequence, or a basis for projecting revenue.
+The phases below define evidence required only for optional external-use or
+adoption claims. They do not gate engineering work, merge, publication, or
+continued development. They are not a guaranteed timeline, an inevitable
+growth sequence, or a basis for projecting revenue.
 
 ## 2. Phase Gates
 
-### Phase 1 — First Contact
+### Phase 1 — Optional First Contact Evaluation
 
 **Objective:** Make the public surface legible and runnable without prior project context.
 
-**Required evidence:**
+**Evidence required only to claim `FIRST_CONTACT_VALIDATED`:**
 
 - three cold users independently locate the primary claim;
 - median time from clone to passing demonstration is at most ten minutes;
 - each user can accurately distinguish proposal, validation, authorization, and effect;
-- at least one independently reported, reproducible cold-run limitation or
-  confusion is recorded as verified friction;
 - public claims match the demonstrators' actual test boundaries.
 
-**Exit event:** `FIRST_CONTACT_VALIDATED`
+Friction is recorded when observed. A successful run with no friction is valid
+feedback and does not create a missing requirement.
 
-Repository visits, stars, model praise, or internal walkthroughs do not satisfy
-this gate. If the first three qualifying participants report no friction, the
-cohort expands until one qualifying friction event is recorded or this
-requirement is formally revised.
+**Optional evidence event:** `FIRST_CONTACT_VALIDATED`
+
+Repository visits, stars, model praise, or internal walkthroughs do not support
+that external-evaluation claim. Absence of the claim does not block merge or
+reduce the validity of accurately scoped internal verification.
 
 ### Phase 2 — First Applied Friction
 
@@ -147,7 +150,8 @@ The event records declared evidence. It does not prove honest intent, complete d
 
 ## 4. Non-Inflation Rules
 
-1. A later phase may not be claimed while an earlier phase lacks its required evidence.
+1. A named external-use or adoption phase may be claimed only when its own
+   declared evidence exists.
 2. Evidence from the project team is not counted as independent external evidence.
 3. Multiple derivatives of one interaction count as one evidence family.
 4. Attention is not adoption.
@@ -190,7 +194,9 @@ Across all phases, maintainers must:
 
 ## 7. Current Adjudication
 
-The public repository establishes addressability and contains runnable reference material. That places the project inside Phase 1.
+The public repository establishes addressability and contains runnable
+reference material. External First Contact evaluation is optional and has not
+yet been established.
 
 The following have not yet been demonstrated by the evidence presently bound to this strategy:
 
@@ -202,12 +208,9 @@ TOOLING_CANDIDATE_VALIDATED
 INSTITUTIONAL_TOUCH
 ```
 
-The immediate work remains:
-
-1. reconcile public claims with the actual demonstrator behavior;
-2. complete three cold-clone tests;
-3. record the first external reactions without inflating them;
-4. treat the first reproducible external friction as the next design input.
+No external report is required for engineering work, merge, publication, or
+continued development. If reports arrive, record them without inflating them
+into adoption, certification, or authority.
 
 ## 8. Status
 

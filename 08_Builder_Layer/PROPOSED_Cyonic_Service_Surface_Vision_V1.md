@@ -95,7 +95,10 @@ This document describes five architectural pillars for a long-term vision. The l
 | Dual licensing / enterprise SLAs | **PROPOSED** strategy — no commercial activity |
 | Institutional standards engagement | **Phase 5** — no external institution has engaged |
 
-No aspirational element may be described as demonstrated, proven, or established until it passes the evidence gates defined in the Cy-Egology Adoption Arc V1.
+No aspirational element may be described as demonstrated, proven, or
+established without evidence appropriate to that claim. External-use evidence
+is not a prerequisite for internally verified engineering work, merge, or
+publication.
 
 ---
 
