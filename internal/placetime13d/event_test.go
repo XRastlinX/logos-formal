@@ -2,6 +2,8 @@ package placetime13d
 
 import (
 	"encoding/json"
+	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 )
@@ -17,6 +19,26 @@ func TestMissingDimensionIsRejected(t *testing.T) {
 	event := validProposalEvent(t)
 	delete(event.Coordinates, "d13")
 	assertRejectedWith(t, event, "coordinates contains 12 entries", "coordinates is missing d13")
+}
+
+func TestGeneratedSchemaRejectsOutOfRangeCoordinate(t *testing.T) {
+	event := validProposalEvent(t)
+	event.Coordinates["d02"] = raw(t, map[string]any{
+		"degrees":         100,
+		"referenceSystem": "EPSG:4326",
+	})
+	data, err := json.Marshal(event)
+	if err != nil {
+		t.Fatal(err)
+	}
+	instancePath := filepath.Join(t.TempDir(), "invalid-event.json")
+	if err := os.WriteFile(instancePath, data, 0o644); err != nil {
+		t.Fatal(err)
+	}
+	schemaPath := filepath.Join("..", "..", "registry", "event_envelope.schema.json")
+	if err := ValidateJSONFile(schemaPath, instancePath); err == nil {
+		t.Fatal("expected out-of-range latitude to violate generated JSON Schema")
+	}
 }
 
 func TestCertifierReferenceDoesNotBecomePermit(t *testing.T) {

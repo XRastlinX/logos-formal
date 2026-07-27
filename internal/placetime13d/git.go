@@ -7,6 +7,8 @@ import (
 	"crypto/sha256"
 	"encoding/binary"
 	"encoding/hex"
+	"encoding/json"
+	"errors"
 	"fmt"
 	"os/exec"
 	"path"
@@ -14,6 +16,56 @@ import (
 )
 
 type GitObserver struct{}
+
+func VerifyParentEvents(ctx context.Context, repoRoot string, event EventEnvelope) error {
+	if len(event.ParentEvents) != len(event.GitBinding.ParentOIDs) {
+		return fmt.Errorf(
+			"parentEvents contains %d entries, want %d for the Git parents",
+			len(event.ParentEvents),
+			len(event.GitBinding.ParentOIDs),
+		)
+	}
+	for index, parentOID := range event.GitBinding.ParentOIDs {
+		parentID, err := eventIDAtCommit(ctx, repoRoot, parentOID)
+		if err != nil {
+			return fmt.Errorf("resolve parent event for %s: %w", parentOID, err)
+		}
+		if event.ParentEvents[index] != parentID {
+			return fmt.Errorf(
+				"parentEvents[%d] is %q, want %q from Git parent %s",
+				index,
+				event.ParentEvents[index],
+				parentID,
+				parentOID,
+			)
+		}
+	}
+	return nil
+}
+
+func eventIDAtCommit(ctx context.Context, repoRoot, commitOID string) (string, error) {
+	var data []byte
+	var err error
+	for _, eventPath := range []string{".meta/event.yaml", "meta/event.yaml"} {
+		data, err = gitBytes(ctx, repoRoot, "show", commitOID+":"+eventPath)
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		return "", errors.New("parent commit has no tracked 13D event envelope")
+	}
+	var header struct {
+		EventID string `json:"eventId"`
+	}
+	if err := json.Unmarshal(data, &header); err != nil {
+		return "", fmt.Errorf("parse parent event: %w", err)
+	}
+	if header.EventID == "" {
+		return "", errors.New("parent event has no eventId")
+	}
+	return header.EventID, nil
+}
 
 func (GitObserver) ObserveIndex(ctx context.Context, repoRoot string, excludes []string) (GitBinding, error) {
 	objectFormat, err := gitText(ctx, repoRoot, "rev-parse", "--show-object-format")

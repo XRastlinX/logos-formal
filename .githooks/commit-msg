@@ -1,4 +1,4 @@
 #!/bin/sh
 set -eu
 
-go run ./cmd/placetime-13d verify-message meta/event.yaml "$1"
+go run ./cmd/placetime-13d verify-message .meta/event.yaml "$1"

@@ -8,6 +8,8 @@
   "registryPath": "registry/13D_coordinates.yaml",
   "eventSchemaPath": "registry/event_envelope.schema.json",
   "moduleContextPath": "registry/module_contexts.json",
+  "metricsProfilePath": "registry/metrics_profile.yaml",
+  "sourceLineagePath": "registry/source_lineage.json",
   "generatedGoPath": "internal/placetime13d/registry_generated.go",
   "gitBinding": {
     "allowedObjectFormats": [
@@ -20,7 +22,7 @@
     "requireExternalArtifactRoot": true,
     "artifactRootAlgorithm": "sha256",
     "artifactExcludes": [
-      "meta/"
+      ".meta/"
     ]
   },
   "governanceFence": {

@@ -14,6 +14,13 @@ func LoadEvent(path string) (EventEnvelope, error) {
 	if err != nil {
 		return EventEnvelope{}, err
 	}
+	schemaPath, err := findEventSchema(path)
+	if err != nil {
+		return EventEnvelope{}, err
+	}
+	if err := ValidateJSONFile(schemaPath, path); err != nil {
+		return EventEnvelope{}, err
+	}
 	var event EventEnvelope
 	if err := json.Unmarshal(data, &event); err != nil {
 		return EventEnvelope{}, fmt.Errorf("parse event envelope: %w", err)

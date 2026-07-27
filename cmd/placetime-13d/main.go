@@ -158,12 +158,12 @@ func verifyIndex(ctx context.Context, repo, eventPath string) error {
 	}
 	if event.ArtifactRoot != bound.ArtifactRoot ||
 		event.GitBinding.ArtifactRoot != bound.GitBinding.ArtifactRoot {
-		return fmt.Errorf("tracked proposal artifact root is stale; run placetime-13d bind-index and update meta/event.yaml")
+		return fmt.Errorf("tracked proposal artifact root is stale; run placetime-13d bind-index and update .meta/event.yaml")
 	}
 	if !equalStrings(event.GitBinding.ParentOIDs, bound.GitBinding.ParentOIDs) {
 		return fmt.Errorf("tracked proposal parent OIDs are stale")
 	}
-	return nil
+	return placetime13d.VerifyParentEvents(ctx, repo, event)
 }
 
 func verifyMessage(eventPath, messagePath string) error {
@@ -190,7 +190,7 @@ func verifyRepository(ctx context.Context, repo string) error {
 	if err := placetime13d.VerifyRepositorySources(repo); err != nil {
 		return err
 	}
-	eventPath := filepath.Join(repo, "meta", "event.yaml")
+	eventPath := filepath.Join(repo, ".meta", "event.yaml")
 	event, err := placetime13d.LoadEvent(eventPath)
 	if err != nil {
 		return fmt.Errorf("load tracked event envelope: %w", err)
@@ -214,6 +214,9 @@ func verifyRepository(ctx context.Context, repo string) error {
 	}
 	if !equalStrings(event.GitBinding.ParentOIDs, actual.ParentOIDs) {
 		return fmt.Errorf("event parent OIDs do not match HEAD parents")
+	}
+	if err := placetime13d.VerifyParentEvents(ctx, repo, event); err != nil {
+		return err
 	}
 	message, err := gitCommitMessage(ctx, repo)
 	if err != nil {

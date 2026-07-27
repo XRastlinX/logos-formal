@@ -13,6 +13,8 @@
     "registryPath",
     "eventSchemaPath",
     "moduleContextPath",
+    "metricsProfilePath",
+    "sourceLineagePath",
     "generatedGoPath",
     "gitBinding",
     "governanceFence"
@@ -45,6 +47,12 @@
     },
     "moduleContextPath": {
       "const": "registry/module_contexts.json"
+    },
+    "metricsProfilePath": {
+      "const": "registry/metrics_profile.yaml"
+    },
+    "sourceLineagePath": {
+      "const": "registry/source_lineage.json"
     },
     "generatedGoPath": {
       "const": "internal/placetime13d/registry_generated.go"
@@ -97,7 +105,7 @@
             "minLength": 1
           },
           "contains": {
-            "const": "meta/"
+            "const": ".meta/"
           }
         }
       }

@@ -1,9 +1,70 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/XRastlinX/logos-formal/registry/git_binding.schema.json",
-  "title": "Placetime 13D Git Binding",
-  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
+  "properties": {
+    "artifactRoot": {
+      "additionalProperties": false,
+      "properties": {
+        "alg": {
+          "const": "sha256"
+        },
+        "value": {
+          "pattern": "^[0-9a-f]{64}$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alg",
+        "value"
+      ],
+      "type": "object"
+    },
+    "commitOid": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "pattern": "^[0-9a-f]+$",
+          "type": "string"
+        }
+      ]
+    },
+    "objectFormat": {
+      "enum": [
+        "sha1",
+        "sha256"
+      ]
+    },
+    "parentOids": {
+      "items": {
+        "pattern": "^[0-9a-f]+$",
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "refAtObservation": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "repository": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "treeOid": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "pattern": "^[0-9a-f]+$",
+          "type": "string"
+        }
+      ]
+    }
+  },
   "required": [
     "repository",
     "objectFormat",
@@ -13,67 +74,6 @@
     "refAtObservation",
     "artifactRoot"
   ],
-  "properties": {
-    "repository": {
-      "type": "string",
-      "minLength": 1
-    },
-    "objectFormat": {
-      "enum": [
-        "sha1",
-        "sha256"
-      ]
-    },
-    "commitOid": {
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "string",
-          "pattern": "^[0-9a-f]+$"
-        }
-      ]
-    },
-    "treeOid": {
-      "oneOf": [
-        {
-          "type": "null"
-        },
-        {
-          "type": "string",
-          "pattern": "^[0-9a-f]+$"
-        }
-      ]
-    },
-    "parentOids": {
-      "type": "array",
-      "uniqueItems": true,
-      "items": {
-        "type": "string",
-        "pattern": "^[0-9a-f]+$"
-      }
-    },
-    "refAtObservation": {
-      "type": "string",
-      "minLength": 1
-    },
-    "artifactRoot": {
-      "type": "object",
-      "additionalProperties": false,
-      "required": [
-        "alg",
-        "value"
-      ],
-      "properties": {
-        "alg": {
-          "const": "sha256"
-        },
-        "value": {
-          "type": "string",
-          "pattern": "^[0-9a-f]{64}$"
-        }
-      }
-    }
-  }
+  "title": "Placetime 13D Git Binding",
+  "type": "object"
 }

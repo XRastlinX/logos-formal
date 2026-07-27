@@ -32,6 +32,12 @@ jobs:
         with:
           go-version-file: go.mod
           cache: false
+      - name: Capture checked-out commit
+        id: matrix-checkout
+        shell: pwsh
+        run: |
+          $sha = (git rev-parse HEAD).Trim()
+          "sha=$sha" >> $env:GITHUB_OUTPUT
       - name: Test validator independently
         run: go test -count=1 ./cmd/cyonic-validate ./internal/cyonicvalidate
       - name: Verify generated 13D contracts
@@ -40,6 +46,20 @@ jobs:
         run: go test -count=1 ./cmd/placetime-13d ./internal/placetime13d ./tools/placetime13d-generate
       - name: Verify checked-out 13D Git event
         run: go run ./cmd/placetime-13d verify-repository --repo .
+      - name: Emit post-commit 13D witness receipt
+        shell: pwsh
+        run: |
+          $receipt = Join-Path $env:RUNNER_TEMP "placetime-13d-witness.json"
+          go run ./cmd/placetime-13d witness-git . .meta/event.yaml |
+            Set-Content -LiteralPath $receipt -Encoding utf8
+      - name: Upload 13D witness receipt
+        uses: actions/upload-artifact@v7
+        with:
+          name: placetime-13d-witness-${{ matrix.os }}-${{ steps.matrix-checkout.outputs.sha }}
+          path: ${{ runner.temp }}/placetime-13d-witness.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
 
   validate-unix:
     needs: validator-conformance

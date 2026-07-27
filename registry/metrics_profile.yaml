@@ -1,5 +1,5 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$schema": "metrics_profile.schema.json",
   "schema": "urn:logos-formal:placetime-13d-metrics-profile:v0.1",
   "version": "0.1.0",
   "status": "PROPOSED",

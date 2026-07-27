@@ -1,4 +1,5 @@
 {
+  "$schema": "source_lineage.schema.json",
   "schema": "urn:logos-formal:placetime-13d-source-lineage:v0.1",
   "version": "0.1.0",
   "status": "PROPOSED",

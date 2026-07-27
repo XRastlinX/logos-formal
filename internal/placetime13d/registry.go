@@ -29,16 +29,18 @@ type RegistryDimension struct {
 }
 
 type RepositoryProfile struct {
-	Schema            string `json:"schema"`
-	Version           string `json:"version"`
-	Profile           string `json:"profile"`
-	Status            string `json:"status"`
-	AuthorityEffect   string `json:"authorityEffect"`
-	RegistryPath      string `json:"registryPath"`
-	EventSchemaPath   string `json:"eventSchemaPath"`
-	ModuleContextPath string `json:"moduleContextPath"`
-	GeneratedGoPath   string `json:"generatedGoPath"`
-	GitBinding        struct {
+	Schema             string `json:"schema"`
+	Version            string `json:"version"`
+	Profile            string `json:"profile"`
+	Status             string `json:"status"`
+	AuthorityEffect    string `json:"authorityEffect"`
+	RegistryPath       string `json:"registryPath"`
+	EventSchemaPath    string `json:"eventSchemaPath"`
+	ModuleContextPath  string `json:"moduleContextPath"`
+	MetricsProfilePath string `json:"metricsProfilePath"`
+	SourceLineagePath  string `json:"sourceLineagePath"`
+	GeneratedGoPath    string `json:"generatedGoPath"`
+	GitBinding         struct {
 		AllowedObjectFormats        []string `json:"allowedObjectFormats"`
 		RequireCommitOID            bool     `json:"requireCommitOid"`
 		RequireTreeOID              bool     `json:"requireTreeOid"`
@@ -124,9 +126,57 @@ func LoadRepositoryProfile(path string) (RepositoryProfile, error) {
 }
 
 func VerifyRepositorySources(repoRoot string) error {
+	absoluteRoot, err := filepath.Abs(repoRoot)
+	if err != nil {
+		return err
+	}
+	repoRoot = absoluteRoot
+	if err := ValidateJSONFile(
+		filepath.Join(repoRoot, "registry", "repository_profile.schema.json"),
+		filepath.Join(repoRoot, "registry", "repository_profile.json"),
+	); err != nil {
+		return err
+	}
 	profile, err := LoadRepositoryProfile(filepath.Join(repoRoot, "registry", "repository_profile.json"))
 	if err != nil {
 		return err
+	}
+	if err := ValidateJSONFile(
+		filepath.Join(repoRoot, "registry", "13D_coordinates.schema.json"),
+		filepath.Join(repoRoot, filepath.FromSlash(profile.RegistryPath)),
+	); err != nil {
+		return err
+	}
+	if err := ValidateJSONFile(
+		filepath.Join(repoRoot, "registry", "module_contexts.schema.json"),
+		filepath.Join(repoRoot, filepath.FromSlash(profile.ModuleContextPath)),
+	); err != nil {
+		return err
+	}
+	if err := ValidateJSONFile(
+		filepath.Join(repoRoot, "registry", "metrics_profile.schema.json"),
+		filepath.Join(repoRoot, filepath.FromSlash(profile.MetricsProfilePath)),
+	); err != nil {
+		return err
+	}
+	if err := ValidateJSONFile(
+		filepath.Join(repoRoot, "registry", "source_lineage.schema.json"),
+		filepath.Join(repoRoot, filepath.FromSlash(profile.SourceLineagePath)),
+	); err != nil {
+		return err
+	}
+	for _, schemaName := range []string{
+		"13D_coordinates.schema.json",
+		"event_envelope.schema.json",
+		"git_binding.schema.json",
+		"metrics_profile.schema.json",
+		"module_contexts.schema.json",
+		"repository_profile.schema.json",
+		"source_lineage.schema.json",
+	} {
+		if err := ValidateSchemaFile(filepath.Join(repoRoot, "registry", schemaName)); err != nil {
+			return err
+		}
 	}
 	_, root, err := LoadRegistry(filepath.Join(repoRoot, filepath.FromSlash(profile.RegistryPath)))
 	if err != nil {

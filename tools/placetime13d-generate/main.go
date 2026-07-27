@@ -37,6 +37,7 @@ func main() {
 	registryPath := flag.String("registry", "registry/13D_coordinates.yaml", "source registry")
 	goOutput := flag.String("go-output", "internal/placetime13d/registry_generated.go", "generated Go registry")
 	schemaOutput := flag.String("schema-output", "registry/event_envelope.schema.json", "generated event schema")
+	gitSchemaOutput := flag.String("git-schema-output", "registry/git_binding.schema.json", "generated Git binding schema")
 	check := flag.Bool("check", false, "fail if generated outputs are stale")
 	flag.Parse()
 
@@ -52,14 +53,40 @@ func main() {
 	fatalIf(err)
 	schemaBytes, err := generateSchema(parsed, registryRoot)
 	fatalIf(err)
+	gitSchemaBytes, err := generateGitBindingSchema()
+	fatalIf(err)
 
 	if *check {
 		fatalIf(compareFile(*goOutput, goBytes))
 		fatalIf(compareFile(*schemaOutput, schemaBytes))
+		fatalIf(compareFile(*gitSchemaOutput, gitSchemaBytes))
 		return
 	}
 	fatalIf(writeFile(*goOutput, goBytes))
 	fatalIf(writeFile(*schemaOutput, schemaBytes))
+	fatalIf(writeFile(*gitSchemaOutput, gitSchemaBytes))
+}
+
+func generateGitBindingSchema() ([]byte, error) {
+	schema := gitBindingSchema()
+	schema["$schema"] = "https://json-schema.org/draft/2020-12/schema"
+	schema["$id"] = "https://github.com/XRastlinX/logos-formal/registry/git_binding.schema.json"
+	schema["title"] = "Placetime 13D Git Binding"
+	properties := schema["properties"].(map[string]any)
+	properties["artifactRoot"] = map[string]any{
+		"type":                 "object",
+		"additionalProperties": false,
+		"required":             []string{"alg", "value"},
+		"properties": map[string]any{
+			"alg":   map[string]any{"const": "sha256"},
+			"value": map[string]any{"type": "string", "pattern": "^[0-9a-f]{64}$"},
+		},
+	}
+	encoded, err := json.MarshalIndent(schema, "", "  ")
+	if err != nil {
+		return nil, err
+	}
+	return append(encoded, '\n'), nil
 }
 
 func validateRegistry(value registry) error {

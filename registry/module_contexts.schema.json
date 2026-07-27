@@ -6,6 +6,7 @@
   "additionalProperties": false,
   "required": ["schema", "version", "status", "authorityEffect", "modules"],
   "properties": {
+    "$schema": {"type": "string"},
     "schema": {"const": "urn:logos-formal:placetime-13d-module-contexts:v0.1"},
     "version": {"const": "0.1.0"},
     "status": {"const": "PROPOSED"},

@@ -18,10 +18,10 @@ Neither phase authorizes the requested effect.
 Before committing a new tree:
 
 ```text
-placetime-13d bind-index . meta/event.yaml
+placetime-13d bind-index . .meta/event.yaml
 ```
 
-Replace `meta/event.yaml` with the emitted proposal envelope, set a new
+Replace `.meta/event.yaml` with the emitted proposal envelope, set a new
 `eventId`, and include the matching commit trailer:
 
 ```text
@@ -30,4 +30,6 @@ Placetime-Event-ID: <eventId>
 
 The opt-in repository hooks are installed with
 `scripts/install-13d-hooks.ps1` or `scripts/install-13d-hooks.sh`. CI enforces
-the same generated-contract and checked-out-event checks independently.
+the same generated-contract and checked-out-event checks independently, then
+uploads a post-commit witness envelope containing the actual commit OID, tree
+OID, Git parent OIDs, and external SHA-256 artifact root.

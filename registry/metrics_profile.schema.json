@@ -1,0 +1,68 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/XRastlinX/logos-formal/registry/metrics_profile.schema.json",
+  "title": "Placetime 13D Metric Definition Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "status", "authorityEffect", "metrics", "admissionRule"],
+  "properties": {
+    "$schema": {"type": "string"},
+    "schema": {"const": "urn:logos-formal:placetime-13d-metrics-profile:v0.1"},
+    "version": {"const": "0.1.0"},
+    "status": {"const": "PROPOSED"},
+    "authorityEffect": {"const": "NONE"},
+    "metrics": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "numerator",
+          "denominator",
+          "unit",
+          "scope",
+          "observationWindow",
+          "uncertainty",
+          "source"
+        ],
+        "properties": {
+          "id": {"type": "string", "minLength": 1},
+          "numerator": {"type": "string", "minLength": 1},
+          "denominator": {"type": "string", "minLength": 1},
+          "unit": {"type": "string", "minLength": 1},
+          "scope": {"type": "string", "minLength": 1},
+          "observationWindow": {"type": "string", "minLength": 1},
+          "uncertainty": {"type": "string", "minLength": 1},
+          "source": {"type": "string", "minLength": 1}
+        }
+      }
+    },
+    "admissionRule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["requiredFields", "note"],
+      "properties": {
+        "requiredFields": {
+          "type": "array",
+          "minItems": 8,
+          "maxItems": 8,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "id",
+              "numerator",
+              "denominator",
+              "unit",
+              "scope",
+              "observationWindow",
+              "uncertainty",
+              "source"
+            ]
+          }
+        },
+        "note": {"type": "string", "minLength": 1}
+      }
+    }
+  }
+}
