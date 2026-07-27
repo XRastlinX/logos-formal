@@ -1,0 +1,115 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/XRastlinX/logos-formal/registry/13D_coordinates.schema.json",
+  "title": "Placetime 13D Source Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "status",
+    "authorityEffect",
+    "sourceLineagePath",
+    "claimBoundary",
+    "dimensions",
+    "$defs"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "urn:logos-formal:placetime-13d-registry:v0.1"
+    },
+    "version": {
+      "const": "0.1.0"
+    },
+    "status": {
+      "const": "PROPOSED"
+    },
+    "authorityEffect": {
+      "const": "NONE"
+    },
+    "sourceLineagePath": {
+      "const": "registry/source_lineage.json"
+    },
+    "claimBoundary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "artifactType",
+        "physicalDimensionClaim",
+        "spacetimeReplacementClaim",
+        "legalAuthorityCreation"
+      ],
+      "properties": {
+        "artifactType": {
+          "const": "typed-governance-coordinate-registry"
+        },
+        "physicalDimensionClaim": {
+          "const": "NONE"
+        },
+        "spacetimeReplacementClaim": {
+          "const": "NONE"
+        },
+        "legalAuthorityCreation": {
+          "const": "NONE"
+        }
+      }
+    },
+    "dimensions": {
+      "type": "array",
+      "minItems": 13,
+      "maxItems": 13,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "coordinateClass",
+          "definition",
+          "nullMeaning",
+          "valueSchema",
+          "derivedMetrics"
+        ],
+        "properties": {
+          "id": {
+            "pattern": "^d(0[1-9]|1[0-3])$"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1
+          },
+          "coordinateClass": {
+            "type": "string",
+            "minLength": 1
+          },
+          "definition": {
+            "type": "string",
+            "minLength": 1
+          },
+          "nullMeaning": {
+            "type": "string",
+            "minLength": 1
+          },
+          "valueSchema": {
+            "type": "object"
+          },
+          "derivedMetrics": {
+            "type": "array",
+            "uniqueItems": true,
+            "items": {
+              "type": "string",
+              "minLength": 1
+            }
+          }
+        }
+      }
+    },
+    "$defs": {
+      "type": "object",
+      "minProperties": 1
+    }
+  }
+}

@@ -1,0 +1,143 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/XRastlinX/logos-formal/registry/repository_profile.schema.json",
+  "title": "Placetime 13D Repository Profile",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "profile",
+    "status",
+    "authorityEffect",
+    "registryPath",
+    "eventSchemaPath",
+    "generatedGoPath",
+    "gitBinding",
+    "governanceFence"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "urn:logos-formal:placetime-13d-repository-profile:v0.1"
+    },
+    "version": {
+      "const": "0.1.0"
+    },
+    "profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "status": {
+      "const": "PROPOSED"
+    },
+    "authorityEffect": {
+      "const": "NONE"
+    },
+    "registryPath": {
+      "const": "registry/13D_coordinates.yaml"
+    },
+    "eventSchemaPath": {
+      "const": "registry/event_envelope.schema.json"
+    },
+    "generatedGoPath": {
+      "const": "internal/placetime13d/registry_generated.go"
+    },
+    "gitBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "allowedObjectFormats",
+        "requireCommitOid",
+        "requireTreeOid",
+        "requireParentOids",
+        "requireExternalArtifactRoot",
+        "artifactRootAlgorithm",
+        "artifactExcludes"
+      ],
+      "properties": {
+        "allowedObjectFormats": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "sha1",
+              "sha256"
+            ]
+          }
+        },
+        "requireCommitOid": {
+          "const": true
+        },
+        "requireTreeOid": {
+          "const": true
+        },
+        "requireParentOids": {
+          "const": true
+        },
+        "requireExternalArtifactRoot": {
+          "const": true
+        },
+        "artifactRootAlgorithm": {
+          "const": "sha256"
+        },
+        "artifactExcludes": {
+          "type": "array",
+          "minItems": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string",
+            "minLength": 1
+          },
+          "contains": {
+            "const": "meta/"
+          }
+        }
+      }
+    },
+    "governanceFence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "coordinatesAuthorize",
+        "certifierReferenceIsPermit",
+        "lineageCommitmentIsPermit",
+        "entityBindingIsPermit",
+        "requiredEnvelopeFields"
+      ],
+      "properties": {
+        "coordinatesAuthorize": {
+          "const": false
+        },
+        "certifierReferenceIsPermit": {
+          "const": false
+        },
+        "lineageCommitmentIsPermit": {
+          "const": false
+        },
+        "entityBindingIsPermit": {
+          "const": false
+        },
+        "requiredEnvelopeFields": {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "uniqueItems": true,
+          "items": {
+            "enum": [
+              "requestedEffect",
+              "permitRef",
+              "policyRoot",
+              "decision",
+              "authorityEffect",
+              "validationReceipts"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

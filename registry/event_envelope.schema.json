@@ -1,0 +1,672 @@
+{
+  "$defs": {
+    "authorityProof": {
+      "additionalProperties": false,
+      "properties": {
+        "presence": {
+          "enum": [
+            "ABSENT",
+            "PRESENT",
+            "INVALID",
+            "REVOKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "root": {
+          "$ref": "#/$defs/hashRef"
+        },
+        "subject": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "presence"
+      ],
+      "type": "object"
+    },
+    "boundedAssessment": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "method": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "methodRoot": {
+              "$ref": "#/$defs/hashRef"
+            },
+            "uncertainty": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            },
+            "value": {
+              "maximum": 1,
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "value",
+            "method"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "certifierReference": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "keyRoot": {
+          "$ref": "#/$defs/hashRef"
+        },
+        "observedAt": {
+          "format": "date-time",
+          "type": "string"
+        },
+        "presence": {
+          "enum": [
+            "ABSENT",
+            "PRESENT",
+            "UNRESOLVED",
+            "REVOKED",
+            "NOT_APPLICABLE"
+          ]
+        }
+      },
+      "required": [
+        "presence"
+      ],
+      "type": "object"
+    },
+    "claimRadius": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "metric": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "scope": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "unit": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "value",
+            "unit",
+            "metric",
+            "scope"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "classification": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "registryRoot": {
+              "$ref": "#/$defs/hashRef"
+            },
+            "registryVersion": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "term": {
+              "minLength": 1,
+              "type": "string"
+            }
+          },
+          "required": [
+            "term",
+            "registryVersion",
+            "registryRoot"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "commitment": {
+      "additionalProperties": false,
+      "properties": {
+        "presence": {
+          "enum": [
+            "ABSENT",
+            "PRESENT",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "profile": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "root": {
+          "$ref": "#/$defs/hashRef"
+        },
+        "verificationRule": {
+          "minLength": 1,
+          "type": "string"
+        }
+      },
+      "required": [
+        "presence"
+      ],
+      "type": "object"
+    },
+    "entityBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "identifier": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "namespace": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "presence": {
+          "enum": [
+            "ABSENT",
+            "PRESENT",
+            "UNRESOLVED",
+            "REVOKED",
+            "NOT_APPLICABLE"
+          ]
+        },
+        "registryRoot": {
+          "$ref": "#/$defs/hashRef"
+        }
+      },
+      "required": [
+        "presence"
+      ],
+      "type": "object"
+    },
+    "gitBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactRoot": {
+          "$ref": "#/$defs/hashRef"
+        },
+        "commitOid": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "pattern": "^[0-9a-f]+$",
+              "type": "string"
+            }
+          ]
+        },
+        "objectFormat": {
+          "enum": [
+            "sha1",
+            "sha256"
+          ]
+        },
+        "parentOids": {
+          "items": {
+            "pattern": "^[0-9a-f]+$",
+            "type": "string"
+          },
+          "type": "array",
+          "uniqueItems": true
+        },
+        "refAtObservation": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "repository": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "treeOid": {
+          "oneOf": [
+            {
+              "type": "null"
+            },
+            {
+              "pattern": "^[0-9a-f]+$",
+              "type": "string"
+            }
+          ]
+        }
+      },
+      "required": [
+        "repository",
+        "objectFormat",
+        "commitOid",
+        "treeOid",
+        "parentOids",
+        "refAtObservation",
+        "artifactRoot"
+      ],
+      "type": "object"
+    },
+    "hashRef": {
+      "additionalProperties": false,
+      "properties": {
+        "alg": {
+          "enum": [
+            "sha256",
+            "sha3-256",
+            "sha3-512"
+          ]
+        },
+        "value": {
+          "pattern": "^[0-9a-f]+$",
+          "type": "string"
+        }
+      },
+      "required": [
+        "alg",
+        "value"
+      ],
+      "type": "object"
+    },
+    "latitude": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "degrees": {
+              "maximum": 90,
+              "minimum": -90,
+              "type": "number"
+            },
+            "referenceSystem": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "uncertaintyMeters": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "degrees",
+            "referenceSystem"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "longitude": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "degrees": {
+              "maximum": 180,
+              "minimum": -180,
+              "type": "number"
+            },
+            "referenceSystem": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "uncertaintyMeters": {
+              "minimum": 0,
+              "type": "number"
+            }
+          },
+          "required": [
+            "degrees",
+            "referenceSystem"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "observedTime": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "clockSource": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "instant": {
+              "format": "date-time",
+              "type": "string"
+            },
+            "precisionNs": {
+              "minimum": 0,
+              "type": "integer"
+            },
+            "uncertaintyNs": {
+              "minimum": 0,
+              "type": "integer"
+            }
+          },
+          "required": [
+            "instant",
+            "clockSource",
+            "precisionNs",
+            "uncertaintyNs"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "permitReference": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "type": "string"
+        },
+        "presence": {
+          "enum": [
+            "ABSENT",
+            "PRESENT",
+            "INVALID",
+            "REVOKED"
+          ]
+        },
+        "root": {
+          "$ref": "#/$defs/hashRef"
+        }
+      },
+      "required": [
+        "presence"
+      ],
+      "type": "object"
+    },
+    "semanticCoordinate": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "profile": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "profileRoot": {
+              "$ref": "#/$defs/hashRef"
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "value",
+            "profile",
+            "profileRoot"
+          ],
+          "type": "object"
+        }
+      ]
+    },
+    "verticalCoordinate": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "additionalProperties": false,
+          "properties": {
+            "datum": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "direction": {
+              "enum": [
+                "ALTITUDE",
+                "DEPTH"
+              ]
+            },
+            "uncertainty": {
+              "minimum": 0,
+              "type": "number"
+            },
+            "unit": {
+              "minLength": 1,
+              "type": "string"
+            },
+            "value": {
+              "type": "number"
+            }
+          },
+          "required": [
+            "value",
+            "unit",
+            "datum",
+            "direction"
+          ],
+          "type": "object"
+        }
+      ]
+    }
+  },
+  "$id": "https://github.com/XRastlinX/logos-formal/registry/event_envelope.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "bindingPhase": {
+            "const": "WITNESS"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "gitBinding": {
+            "properties": {
+              "commitOid": {
+                "minLength": 1,
+                "type": "string"
+              },
+              "treeOid": {
+                "minLength": 1,
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    }
+  ],
+  "properties": {
+    "artifactRoot": {
+      "$ref": "#/$defs/hashRef"
+    },
+    "authorityEffect": {
+      "enum": [
+        "NONE",
+        "PERMITTED"
+      ]
+    },
+    "authorityProof": {
+      "$ref": "#/$defs/authorityProof"
+    },
+    "bindingPhase": {
+      "enum": [
+        "PROPOSAL",
+        "WITNESS"
+      ]
+    },
+    "coordinates": {
+      "additionalProperties": false,
+      "properties": {
+        "d01": {
+          "$ref": "#/$defs/observedTime"
+        },
+        "d02": {
+          "$ref": "#/$defs/latitude"
+        },
+        "d03": {
+          "$ref": "#/$defs/longitude"
+        },
+        "d04": {
+          "$ref": "#/$defs/verticalCoordinate"
+        },
+        "d05": {
+          "$ref": "#/$defs/semanticCoordinate"
+        },
+        "d06": {
+          "$ref": "#/$defs/semanticCoordinate"
+        },
+        "d07": {
+          "$ref": "#/$defs/boundedAssessment"
+        },
+        "d08": {
+          "$ref": "#/$defs/commitment"
+        },
+        "d09": {
+          "$ref": "#/$defs/boundedAssessment"
+        },
+        "d10": {
+          "$ref": "#/$defs/classification"
+        },
+        "d11": {
+          "$ref": "#/$defs/certifierReference"
+        },
+        "d12": {
+          "$ref": "#/$defs/claimRadius"
+        },
+        "d13": {
+          "$ref": "#/$defs/entityBinding"
+        }
+      },
+      "required": [
+        "d01",
+        "d02",
+        "d03",
+        "d04",
+        "d05",
+        "d06",
+        "d07",
+        "d08",
+        "d09",
+        "d10",
+        "d11",
+        "d12",
+        "d13"
+      ],
+      "type": "object"
+    },
+    "decision": {
+      "enum": [
+        "NONE",
+        "OBSERVE_ONLY",
+        "REJECT",
+        "PERMIT_REQUIRED",
+        "PERMITTED"
+      ]
+    },
+    "eventId": {
+      "minLength": 1,
+      "type": "string"
+    },
+    "gitBinding": {
+      "$ref": "#/$defs/gitBinding"
+    },
+    "parentEvents": {
+      "items": {
+        "minLength": 1,
+        "type": "string"
+      },
+      "type": "array",
+      "uniqueItems": true
+    },
+    "permitRef": {
+      "$ref": "#/$defs/permitReference"
+    },
+    "policyRoot": {
+      "oneOf": [
+        {
+          "type": "null"
+        },
+        {
+          "$ref": "#/$defs/hashRef"
+        }
+      ]
+    },
+    "registryRoot": {
+      "const": "sha256:b63e16c073c0c3b58f277787b033fa25132b1e21be59a371312962f68953c913"
+    },
+    "requestedEffect": {
+      "enum": [
+        "NONE",
+        "READ",
+        "STAGE",
+        "APPLY"
+      ]
+    },
+    "schema": {
+      "const": "urn:logos-formal:placetime-13d-event:v0.1"
+    },
+    "validationReceipts": {
+      "items": {
+        "$ref": "#/$defs/hashRef"
+      },
+      "type": "array"
+    },
+    "version": {
+      "const": "0.1.0"
+    }
+  },
+  "required": [
+    "schema",
+    "version",
+    "eventId",
+    "registryRoot",
+    "bindingPhase",
+    "artifactRoot",
+    "parentEvents",
+    "gitBinding",
+    "coordinates",
+    "requestedEffect",
+    "authorityProof",
+    "permitRef",
+    "policyRoot",
+    "decision",
+    "authorityEffect",
+    "validationReceipts"
+  ],
+  "title": "Placetime 13D Governed Git Event",
+  "type": "object"
+}

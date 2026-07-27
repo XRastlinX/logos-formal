@@ -1,0 +1,21 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "schema": "urn:logos-formal:placetime-13d-metrics-profile:v0.1",
+  "version": "0.1.0",
+  "status": "PROPOSED",
+  "authorityEffect": "NONE",
+  "metrics": [],
+  "admissionRule": {
+    "requiredFields": [
+      "id",
+      "numerator",
+      "denominator",
+      "unit",
+      "scope",
+      "observationWindow",
+      "uncertainty",
+      "source"
+    ],
+    "note": "No coordinate is a ratio by name alone. Metrics are admitted only after all required fields are defined and validated."
+  }
+}

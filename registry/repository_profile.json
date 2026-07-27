@@ -1,0 +1,39 @@
+{
+  "$schema": "repository_profile.schema.json",
+  "schema": "urn:logos-formal:placetime-13d-repository-profile:v0.1",
+  "version": "0.1.0",
+  "profile": "logos-formal-git-matrix-v0.1",
+  "status": "PROPOSED",
+  "authorityEffect": "NONE",
+  "registryPath": "registry/13D_coordinates.yaml",
+  "eventSchemaPath": "registry/event_envelope.schema.json",
+  "generatedGoPath": "internal/placetime13d/registry_generated.go",
+  "gitBinding": {
+    "allowedObjectFormats": [
+      "sha1",
+      "sha256"
+    ],
+    "requireCommitOid": true,
+    "requireTreeOid": true,
+    "requireParentOids": true,
+    "requireExternalArtifactRoot": true,
+    "artifactRootAlgorithm": "sha256",
+    "artifactExcludes": [
+      "meta/"
+    ]
+  },
+  "governanceFence": {
+    "coordinatesAuthorize": false,
+    "certifierReferenceIsPermit": false,
+    "lineageCommitmentIsPermit": false,
+    "entityBindingIsPermit": false,
+    "requiredEnvelopeFields": [
+      "requestedEffect",
+      "permitRef",
+      "policyRoot",
+      "decision",
+      "authorityEffect",
+      "validationReceipts"
+    ]
+  }
+}

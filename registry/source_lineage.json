@@ -1,0 +1,46 @@
+{
+  "schema": "urn:logos-formal:placetime-13d-source-lineage:v0.1",
+  "version": "0.1.0",
+  "status": "PROPOSED",
+  "authorityEffect": "NONE",
+  "sources": [
+    {
+      "role": "source-archive",
+      "name": "13d-placetime-&-epistemic-governance-studio.zip",
+      "sha256": "763c047b47ef45712e0bf073dcf20e0a2972e9346c4f4a63ff6284b26d22fa9f"
+    },
+    {
+      "role": "archived-coordinate-type-definition",
+      "archivePath": "src/types/placetime.ts",
+      "sha256": "ab99aeaf69067b80046f51d5d7eda988195257e23e85747520db5d4d5a7c1757"
+    },
+    {
+      "role": "archived-coordinate-label-and-grouping-witness",
+      "archivePath": "src/components/DimensionInspector.tsx",
+      "sha256": "203269dee9ad12bb940ca5f6eda83cf2349b888f2540e5812381534069a8a92a"
+    },
+    {
+      "role": "later-local-coordinate-type-derivative",
+      "sourceName": "13d_studio_extracted/src/types/placetime.ts",
+      "sha256": "4387539cf6db2913a2bfd105757cfd336e0a9f26e1f245209874749ed9d24f5c"
+    },
+    {
+      "role": "later-local-label-and-grouping-derivative",
+      "sourceName": "13d_studio_extracted/src/components/DimensionInspector.tsx",
+      "sha256": "cadbfc2dec2554d774a4027df3ed799858c171c8fece0f550f3b1fad116c69f4"
+    }
+  ],
+  "adjudication": {
+    "coordinatePartition": "D1-D4 spacetime observation; D5-D8 semantic provenance; D9-D11 observation context; D12-D13 governance boundary",
+    "hardeningRule": "The registry preserves the authored four-vector partition while replacing ambiguous primitive fields with typed, bounded records. D13 generalizes the archive's VIN subtype to the later derivative's entity binding.",
+    "excludedFromCoordinates": [
+      "Git DAG order",
+      "policy epoch",
+      "requested effect",
+      "Permit reference",
+      "decision",
+      "authority effect",
+      "validation receipts"
+    ]
+  }
+}

@@ -1,0 +1,302 @@
+{
+  "$schema": "13D_coordinates.schema.json",
+  "schema": "urn:logos-formal:placetime-13d-registry:v0.1",
+  "version": "0.1.0",
+  "status": "PROPOSED",
+  "authorityEffect": "NONE",
+  "sourceLineagePath": "registry/source_lineage.json",
+  "claimBoundary": {
+    "artifactType": "typed-governance-coordinate-registry",
+    "physicalDimensionClaim": "NONE",
+    "spacetimeReplacementClaim": "NONE",
+    "legalAuthorityCreation": "NONE"
+  },
+  "dimensions": [
+    {
+      "id": "d01",
+      "name": "observed_time",
+      "coordinateClass": "spacetime-observation",
+      "definition": "Observed instant in the spacetime sub-vector ell, with an identified clock, precision, and uncertainty.",
+      "nullMeaning": "No clock observation is available.",
+      "valueSchema": {"$ref": "#/$defs/observedTime"},
+      "derivedMetrics": ["duration_with_common_clock_basis"]
+    },
+    {
+      "id": "d02",
+      "name": "latitude",
+      "coordinateClass": "spacetime-observation",
+      "definition": "Latitude in the spacetime sub-vector ell, bound to a declared geodetic reference system.",
+      "nullMeaning": "Latitude is not observed or is not applicable.",
+      "valueSchema": {"$ref": "#/$defs/latitude"},
+      "derivedMetrics": ["geodesic_distance_with_common_reference"]
+    },
+    {
+      "id": "d03",
+      "name": "longitude",
+      "coordinateClass": "spacetime-observation",
+      "definition": "Longitude in the spacetime sub-vector ell, bound to the same geodetic reference system as d02.",
+      "nullMeaning": "Longitude is not observed or is not applicable.",
+      "valueSchema": {"$ref": "#/$defs/longitude"},
+      "derivedMetrics": ["geodesic_distance_with_common_reference"]
+    },
+    {
+      "id": "d04",
+      "name": "vertical_coordinate",
+      "coordinateClass": "spacetime-observation",
+      "definition": "Altitude or depth in the spacetime sub-vector ell, with declared unit, datum, and direction.",
+      "nullMeaning": "No vertical coordinate is observed.",
+      "valueSchema": {"$ref": "#/$defs/verticalCoordinate"},
+      "derivedMetrics": ["vertical_separation_with_common_datum"]
+    },
+    {
+      "id": "d05",
+      "name": "semantic_axis_1",
+      "coordinateClass": "semantic-provenance",
+      "definition": "First profile-defined semantic coordinate in sub-vector u; it has no universal meaning without its pinned profile.",
+      "nullMeaning": "The source has no semantic embedding under the declared profile.",
+      "valueSchema": {"$ref": "#/$defs/semanticCoordinate"},
+      "derivedMetrics": ["semantic_distance_under_common_profile"]
+    },
+    {
+      "id": "d06",
+      "name": "semantic_axis_2",
+      "coordinateClass": "semantic-provenance",
+      "definition": "Second profile-defined semantic coordinate in sub-vector u; it has no universal meaning without its pinned profile.",
+      "nullMeaning": "The source has no semantic embedding under the declared profile.",
+      "valueSchema": {"$ref": "#/$defs/semanticCoordinate"},
+      "derivedMetrics": ["semantic_distance_under_common_profile"]
+    },
+    {
+      "id": "d07",
+      "name": "provenance_integrity_index",
+      "coordinateClass": "semantic-provenance",
+      "definition": "A bounded assessment of provenance integrity under a named method and source commitment; the score is not truth.",
+      "nullMeaning": "Provenance integrity has not been assessed.",
+      "valueSchema": {"$ref": "#/$defs/boundedAssessment"},
+      "derivedMetrics": ["provenance_integrity_under_common_method"]
+    },
+    {
+      "id": "d08",
+      "name": "lineage_commitment",
+      "coordinateClass": "semantic-provenance",
+      "definition": "Algorithm-tagged commitment to source lineage in sub-vector u; it is neither a Permit nor proof of evidential sufficiency.",
+      "nullMeaning": "Lineage commitment is explicitly absent or not applicable as declared by presence.",
+      "valueSchema": {"$ref": "#/$defs/commitment"},
+      "derivedMetrics": ["lineage_commitment_verifiability"]
+    },
+    {
+      "id": "d09",
+      "name": "observer_confidence",
+      "coordinateClass": "observation-context",
+      "definition": "Observer confidence or precision assessment in sub-vector v, bound to a method and optional calibration commitment; it is not truth probability by default.",
+      "nullMeaning": "Observer confidence has not been assessed.",
+      "valueSchema": {"$ref": "#/$defs/boundedAssessment"},
+      "derivedMetrics": ["calibrated_confidence_under_common_method"]
+    },
+    {
+      "id": "d10",
+      "name": "instrumentation_class",
+      "coordinateClass": "observation-context",
+      "definition": "Sensor or agency classification in sub-vector v, bound to a versioned classification registry.",
+      "nullMeaning": "Instrumentation class is unknown or not applicable.",
+      "valueSchema": {"$ref": "#/$defs/classification"},
+      "derivedMetrics": ["instrumentation_distribution"]
+    },
+    {
+      "id": "d11",
+      "name": "certifier_reference",
+      "coordinateClass": "observation-context",
+      "definition": "Reference to an observed certifier identity or public key in sub-vector v; identity is not a Permit and does not authorize.",
+      "nullMeaning": "A certifier is explicitly absent, unresolved, revoked, or not applicable as declared by presence.",
+      "valueSchema": {"$ref": "#/$defs/certifierReference"},
+      "derivedMetrics": ["certification_path_length_when_verified"]
+    },
+    {
+      "id": "d12",
+      "name": "claim_radius",
+      "coordinateClass": "governance-boundary",
+      "definition": "Declared reach of a claim in sub-vector m under an identified metric, unit, and scope; it bounds description and grants no authority.",
+      "nullMeaning": "No claim-radius metric applies.",
+      "valueSchema": {"$ref": "#/$defs/claimRadius"},
+      "derivedMetrics": ["claim_coverage_under_common_metric"]
+    },
+    {
+      "id": "d13",
+      "name": "entity_binding",
+      "coordinateClass": "governance-boundary",
+      "definition": "Identifier constraint binding the event to an entity namespace and registry in sub-vector m; it is not identity proof or authority.",
+      "nullMeaning": "Entity binding is explicitly absent, unresolved, revoked, or not applicable as declared by presence.",
+      "valueSchema": {"$ref": "#/$defs/entityBinding"},
+      "derivedMetrics": ["entity_binding_verifiability"]
+    }
+  ],
+  "$defs": {
+    "hashRef": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["alg", "value"],
+      "properties": {
+        "alg": {"enum": ["sha256", "sha3-256", "sha3-512"]},
+        "value": {"type": "string", "pattern": "^[0-9a-f]+$"}
+      }
+    },
+    "observedTime": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["instant", "clockSource", "precisionNs", "uncertaintyNs"],
+          "properties": {
+            "instant": {"type": "string", "format": "date-time"},
+            "clockSource": {"type": "string", "minLength": 1},
+            "precisionNs": {"type": "integer", "minimum": 0},
+            "uncertaintyNs": {"type": "integer", "minimum": 0}
+          }
+        }
+      ]
+    },
+    "latitude": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["degrees", "referenceSystem"],
+          "properties": {
+            "degrees": {"type": "number", "minimum": -90, "maximum": 90},
+            "referenceSystem": {"type": "string", "minLength": 1},
+            "uncertaintyMeters": {"type": "number", "minimum": 0}
+          }
+        }
+      ]
+    },
+    "longitude": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["degrees", "referenceSystem"],
+          "properties": {
+            "degrees": {"type": "number", "minimum": -180, "maximum": 180},
+            "referenceSystem": {"type": "string", "minLength": 1},
+            "uncertaintyMeters": {"type": "number", "minimum": 0}
+          }
+        }
+      ]
+    },
+    "verticalCoordinate": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "unit", "datum", "direction"],
+          "properties": {
+            "value": {"type": "number"},
+            "unit": {"type": "string", "minLength": 1},
+            "datum": {"type": "string", "minLength": 1},
+            "direction": {"enum": ["ALTITUDE", "DEPTH"]},
+            "uncertainty": {"type": "number", "minimum": 0}
+          }
+        }
+      ]
+    },
+    "semanticCoordinate": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "profile", "profileRoot"],
+          "properties": {
+            "value": {"type": "number"},
+            "profile": {"type": "string", "minLength": 1},
+            "profileRoot": {"$ref": "#/$defs/hashRef"}
+          }
+        }
+      ]
+    },
+    "boundedAssessment": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "method"],
+          "properties": {
+            "value": {"type": "number", "minimum": 0, "maximum": 1},
+            "method": {"type": "string", "minLength": 1},
+            "methodRoot": {"$ref": "#/$defs/hashRef"},
+            "uncertainty": {"type": "number", "minimum": 0, "maximum": 1}
+          }
+        }
+      ]
+    },
+    "commitment": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presence"],
+      "properties": {
+        "presence": {"enum": ["ABSENT", "PRESENT", "NOT_APPLICABLE"]},
+        "root": {"$ref": "#/$defs/hashRef"},
+        "profile": {"type": "string", "minLength": 1},
+        "verificationRule": {"type": "string", "minLength": 1}
+      }
+    },
+    "classification": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["term", "registryVersion", "registryRoot"],
+          "properties": {
+            "term": {"type": "string", "minLength": 1},
+            "registryVersion": {"type": "string", "minLength": 1},
+            "registryRoot": {"$ref": "#/$defs/hashRef"}
+          }
+        }
+      ]
+    },
+    "certifierReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presence"],
+      "properties": {
+        "presence": {"enum": ["ABSENT", "PRESENT", "UNRESOLVED", "REVOKED", "NOT_APPLICABLE"]},
+        "identifier": {"type": "string", "minLength": 1},
+        "keyRoot": {"$ref": "#/$defs/hashRef"},
+        "observedAt": {"type": "string", "format": "date-time"}
+      }
+    },
+    "claimRadius": {
+      "oneOf": [
+        {"type": "null"},
+        {
+          "type": "object",
+          "additionalProperties": false,
+          "required": ["value", "unit", "metric", "scope"],
+          "properties": {
+            "value": {"type": "number", "minimum": 0},
+            "unit": {"type": "string", "minLength": 1},
+            "metric": {"type": "string", "minLength": 1},
+            "scope": {"type": "string", "minLength": 1}
+          }
+        }
+      ]
+    },
+    "entityBinding": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["presence"],
+      "properties": {
+        "presence": {"enum": ["ABSENT", "PRESENT", "UNRESOLVED", "REVOKED", "NOT_APPLICABLE"]},
+        "identifier": {"type": "string", "minLength": 1},
+        "namespace": {"type": "string", "minLength": 1},
+        "registryRoot": {"$ref": "#/$defs/hashRef"}
+      }
+    }
+  }
+}

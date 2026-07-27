@@ -34,6 +34,10 @@ jobs:
           cache: false
       - name: Test validator independently
         run: go test -count=1 ./cmd/cyonic-validate ./internal/cyonicvalidate
+      - name: Verify generated 13D contracts
+        run: go run ./tools/placetime13d-generate -check
+      - name: Test 13D Git matrix
+        run: go test -count=1 ./cmd/placetime-13d ./internal/placetime13d ./tools/placetime13d-generate
 
   validate-unix:
     needs: validator-conformance
