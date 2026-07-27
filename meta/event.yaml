@@ -1,12 +1,12 @@
 {
   "schema": "urn:logos-formal:placetime-13d-event:v0.1",
   "version": "0.1.0",
-  "eventId": "evt-13d-git-matrix-v0.1-proposal",
+  "eventId": "evt-13d-git-matrix-v0.1-hooks",
   "registryRoot": "sha256:b63e16c073c0c3b58f277787b033fa25132b1e21be59a371312962f68953c913",
   "bindingPhase": "PROPOSAL",
   "artifactRoot": {
     "alg": "sha256",
-    "value": "0d8277f8fe74c8132d375f4fed1ea1366a582b42169e5e6db2f26838ae86a179"
+    "value": "8fc8dd3c03b508d2d40e5c11eef79d7d5b9bbed2ebab85452fba5c9a846b1d4e"
   },
   "parentEvents": [],
   "gitBinding": {
@@ -15,17 +15,17 @@
     "commitOid": null,
     "treeOid": null,
     "parentOids": [
-      "3157610958435d47558740013f6e3953ca5db921"
+      "2d96d4c77dabff533f0dce55c974c891a362b59f"
     ],
     "refAtObservation": "codex/13d-git-matrix-v0.1",
     "artifactRoot": {
       "alg": "sha256",
-      "value": "0d8277f8fe74c8132d375f4fed1ea1366a582b42169e5e6db2f26838ae86a179"
+      "value": "8fc8dd3c03b508d2d40e5c11eef79d7d5b9bbed2ebab85452fba5c9a846b1d4e"
     }
   },
   "coordinates": {
     "d01": {
-      "instant": "2026-07-27T09:44:57Z",
+      "instant": "2026-07-27T09:51:00Z",
       "clockSource": "system-utc",
       "precisionNs": 1000000000,
       "uncertaintyNs": 1000000000
@@ -40,7 +40,7 @@
       "presence": "PRESENT",
       "root": {
         "alg": "sha256",
-        "value": "0d8277f8fe74c8132d375f4fed1ea1366a582b42169e5e6db2f26838ae86a179"
+        "value": "8fc8dd3c03b508d2d40e5c11eef79d7d5b9bbed2ebab85452fba5c9a846b1d4e"
       },
       "profile": "logos-formal.placetime13d.artifact-tree.v1",
       "verificationRule": "Recompute the external artifact root over the Git tree while excluding meta/."

@@ -38,6 +38,8 @@ jobs:
         run: go run ./tools/placetime13d-generate -check
       - name: Test 13D Git matrix
         run: go test -count=1 ./cmd/placetime-13d ./internal/placetime13d ./tools/placetime13d-generate
+      - name: Verify checked-out 13D Git event
+        run: go run ./cmd/placetime-13d verify-repository --repo .
 
   validate-unix:
     needs: validator-conformance

@@ -1,0 +1,7 @@
+#!/bin/sh
+set -eu
+
+go run ./tools/placetime13d-generate -check
+go test ./internal/placetime13d ./cmd/placetime-13d ./tools/placetime13d-generate
+go run ./cmd/placetime-13d validate-event meta/event.yaml
+go run ./cmd/placetime-13d verify-index . meta/event.yaml

@@ -15,3 +15,19 @@ dependency. The binding therefore has two phases:
 
 Neither phase authorizes the requested effect.
 
+Before committing a new tree:
+
+```text
+placetime-13d bind-index . meta/event.yaml
+```
+
+Replace `meta/event.yaml` with the emitted proposal envelope, set a new
+`eventId`, and include the matching commit trailer:
+
+```text
+Placetime-Event-ID: <eventId>
+```
+
+The opt-in repository hooks are installed with
+`scripts/install-13d-hooks.ps1` or `scripts/install-13d-hooks.sh`. CI enforces
+the same generated-contract and checked-out-event checks independently.

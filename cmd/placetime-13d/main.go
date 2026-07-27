@@ -77,6 +77,37 @@ func run(arguments []string) int {
 			return exitRejected
 		}
 		return writeJSON(binding)
+	case "bind-index":
+		if len(arguments) != 3 {
+			return usageError(errors.New("bind-index requires REPOSITORY EVENT_FILE"))
+		}
+		event, err := bindIndex(ctx, arguments[1], arguments[2])
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return exitRejected
+		}
+		return writeJSON(event)
+	case "verify-index":
+		if len(arguments) != 3 {
+			return usageError(errors.New("verify-index requires REPOSITORY EVENT_FILE"))
+		}
+		if err := verifyIndex(ctx, arguments[1], arguments[2]); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return exitRejected
+		}
+		fmt.Println("PLACETIME_13D_INDEX_VALID")
+		fmt.Println("authorityEffect: NONE")
+		return exitOK
+	case "verify-message":
+		if len(arguments) != 3 {
+			return usageError(errors.New("verify-message requires EVENT_FILE COMMIT_MESSAGE_FILE"))
+		}
+		if err := verifyMessage(arguments[1], arguments[2]); err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return exitRejected
+		}
+		fmt.Println("PLACETIME_13D_MESSAGE_VALID")
+		return exitOK
 	case "witness-git":
 		if len(arguments) != 3 {
 			return usageError(errors.New("witness-git requires REPOSITORY EVENT_FILE"))
@@ -89,6 +120,66 @@ func run(arguments []string) int {
 	default:
 		return usageError(fmt.Errorf("unknown command %q", arguments[0]))
 	}
+}
+
+func bindIndex(ctx context.Context, repo, eventPath string) (placetime13d.EventEnvelope, error) {
+	event, err := placetime13d.LoadEvent(eventPath)
+	if err != nil {
+		return placetime13d.EventEnvelope{}, err
+	}
+	profile, err := loadProfile(repo)
+	if err != nil {
+		return placetime13d.EventEnvelope{}, err
+	}
+	binding, err := (placetime13d.GitObserver{}).ObserveIndex(ctx, repo, profile.GitBinding.ArtifactExcludes)
+	if err != nil {
+		return placetime13d.EventEnvelope{}, err
+	}
+	event.BindingPhase = "PROPOSAL"
+	event.ArtifactRoot = binding.ArtifactRoot
+	event.GitBinding = binding
+	if err := placetime13d.ValidateEvent(event); err != nil {
+		return placetime13d.EventEnvelope{}, err
+	}
+	return event, nil
+}
+
+func verifyIndex(ctx context.Context, repo, eventPath string) error {
+	event, err := placetime13d.LoadEvent(eventPath)
+	if err != nil {
+		return err
+	}
+	if err := placetime13d.ValidateEvent(event); err != nil {
+		return err
+	}
+	bound, err := bindIndex(ctx, repo, eventPath)
+	if err != nil {
+		return err
+	}
+	if event.ArtifactRoot != bound.ArtifactRoot ||
+		event.GitBinding.ArtifactRoot != bound.GitBinding.ArtifactRoot {
+		return fmt.Errorf("tracked proposal artifact root is stale; run placetime-13d bind-index and update meta/event.yaml")
+	}
+	if !equalStrings(event.GitBinding.ParentOIDs, bound.GitBinding.ParentOIDs) {
+		return fmt.Errorf("tracked proposal parent OIDs are stale")
+	}
+	return nil
+}
+
+func verifyMessage(eventPath, messagePath string) error {
+	event, err := placetime13d.LoadEvent(eventPath)
+	if err != nil {
+		return err
+	}
+	message, err := os.ReadFile(messagePath)
+	if err != nil {
+		return err
+	}
+	trailer := "Placetime-Event-ID: " + event.EventID
+	if !strings.Contains(string(message), trailer) {
+		return fmt.Errorf("commit message must contain trailer %q", trailer)
+	}
+	return nil
 }
 
 func verifyRepository(ctx context.Context, repo string) error {
@@ -206,6 +297,9 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "  placetime-13d verify-repository [--repo PATH]")
 	fmt.Fprintln(os.Stderr, "  placetime-13d validate-event EVENT_FILE")
 	fmt.Fprintln(os.Stderr, "  placetime-13d observe-index [--repo PATH]")
+	fmt.Fprintln(os.Stderr, "  placetime-13d bind-index REPOSITORY EVENT_FILE")
+	fmt.Fprintln(os.Stderr, "  placetime-13d verify-index REPOSITORY EVENT_FILE")
+	fmt.Fprintln(os.Stderr, "  placetime-13d verify-message EVENT_FILE COMMIT_MESSAGE_FILE")
 	fmt.Fprintln(os.Stderr, "  placetime-13d witness-git REPOSITORY EVENT_FILE")
 }
 
