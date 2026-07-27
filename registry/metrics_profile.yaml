@@ -4,7 +4,68 @@
   "version": "0.1.0",
   "status": "PROPOSED",
   "authorityEffect": "NONE",
-  "metrics": [],
+  "metrics": [
+    {
+      "id": "coordinate_completeness",
+      "numerator": "number of non-null coordinate values among d01 through d13",
+      "denominator": "13 declared coordinate positions",
+      "unit": "proportion",
+      "scope": "one event envelope",
+      "observationWindow": "the exact event envelope supplied to the evaluator",
+      "uncertainty": "exact structural count; no claim-quality uncertainty is represented",
+      "source": "event.coordinates",
+      "coordinateIds": ["d01", "d02", "d03", "d04", "d05", "d06", "d07", "d08", "d09", "d10", "d11", "d12", "d13"],
+      "calculation": "NON_NULL_COUNT_OVER_DECLARED_COUNT"
+    },
+    {
+      "id": "spatiotemporal_observation_completeness",
+      "numerator": "number of non-null coordinate values among d01 through d04",
+      "denominator": "4 declared spacetime-observation positions",
+      "unit": "proportion",
+      "scope": "one event envelope",
+      "observationWindow": "the exact event envelope supplied to the evaluator",
+      "uncertainty": "exact structural count; measurement uncertainty remains inside coordinate values",
+      "source": "event.coordinates[d01:d04]",
+      "coordinateIds": ["d01", "d02", "d03", "d04"],
+      "calculation": "NON_NULL_COUNT_OVER_DECLARED_COUNT"
+    },
+    {
+      "id": "semantic_provenance_completeness",
+      "numerator": "number of non-null coordinate values among d05 through d08",
+      "denominator": "4 declared semantic-provenance positions",
+      "unit": "proportion",
+      "scope": "one event envelope",
+      "observationWindow": "the exact event envelope supplied to the evaluator",
+      "uncertainty": "exact structural count; completeness is not provenance validity",
+      "source": "event.coordinates[d05:d08]",
+      "coordinateIds": ["d05", "d06", "d07", "d08"],
+      "calculation": "NON_NULL_COUNT_OVER_DECLARED_COUNT"
+    },
+    {
+      "id": "observation_context_completeness",
+      "numerator": "number of non-null coordinate values among d09 through d11",
+      "denominator": "3 declared observation-context positions",
+      "unit": "proportion",
+      "scope": "one event envelope",
+      "observationWindow": "the exact event envelope supplied to the evaluator",
+      "uncertainty": "exact structural count; completeness is not observer reliability",
+      "source": "event.coordinates[d09:d11]",
+      "coordinateIds": ["d09", "d10", "d11"],
+      "calculation": "NON_NULL_COUNT_OVER_DECLARED_COUNT"
+    },
+    {
+      "id": "governance_boundary_completeness",
+      "numerator": "number of non-null coordinate values among d12 and d13",
+      "denominator": "2 declared governance-boundary positions",
+      "unit": "proportion",
+      "scope": "one event envelope",
+      "observationWindow": "the exact event envelope supplied to the evaluator",
+      "uncertainty": "exact structural count; completeness grants no authority",
+      "source": "event.coordinates[d12:d13]",
+      "coordinateIds": ["d12", "d13"],
+      "calculation": "NON_NULL_COUNT_OVER_DECLARED_COUNT"
+    }
+  ],
   "admissionRule": {
     "requiredFields": [
       "id",
@@ -14,7 +75,9 @@
       "scope",
       "observationWindow",
       "uncertainty",
-      "source"
+      "source",
+      "coordinateIds",
+      "calculation"
     ],
     "note": "No coordinate is a ratio by name alone. Metrics are admitted only after all required fields are defined and validated."
   }

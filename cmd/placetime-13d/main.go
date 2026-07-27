@@ -117,6 +117,27 @@ func run(arguments []string) int {
 			return exitRejected
 		}
 		return exitOK
+	case "metrics":
+		if len(arguments) != 3 {
+			return usageError(errors.New("metrics requires EVENT_FILE METRICS_PROFILE"))
+		}
+		event, err := placetime13d.LoadEvent(arguments[1])
+		if err == nil {
+			err = placetime13d.ValidateEvent(event)
+		}
+		var profile placetime13d.MetricsProfile
+		if err == nil {
+			profile, err = placetime13d.LoadMetricsProfile(arguments[2])
+		}
+		var receipt placetime13d.MetricReceipt
+		if err == nil {
+			receipt, err = placetime13d.ComputeMetrics(event, profile)
+		}
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err)
+			return exitRejected
+		}
+		return writeJSON(receipt)
 	default:
 		return usageError(fmt.Errorf("unknown command %q", arguments[0]))
 	}
@@ -304,6 +325,7 @@ func printUsage() {
 	fmt.Fprintln(os.Stderr, "  placetime-13d verify-index REPOSITORY EVENT_FILE")
 	fmt.Fprintln(os.Stderr, "  placetime-13d verify-message EVENT_FILE COMMIT_MESSAGE_FILE")
 	fmt.Fprintln(os.Stderr, "  placetime-13d witness-git REPOSITORY EVENT_FILE")
+	fmt.Fprintln(os.Stderr, "  placetime-13d metrics EVENT_FILE METRICS_PROFILE")
 }
 
 func equalStrings(left, right []string) bool {

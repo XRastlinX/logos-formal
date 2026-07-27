@@ -1,15 +1,15 @@
 {
   "schema": "urn:logos-formal:placetime-13d-event:v0.1",
   "version": "0.1.0",
-  "eventId": "evt-13d-git-matrix-v0.1-schema-ancestry",
+  "eventId": "evt-13d-git-matrix-v0.1-metric-matrix",
   "registryRoot": "sha256:b63e16c073c0c3b58f277787b033fa25132b1e21be59a371312962f68953c913",
   "bindingPhase": "PROPOSAL",
   "artifactRoot": {
     "alg": "sha256",
-    "value": "8795ab4588ebb060558fe0dc0c038d5021daacd8a56793b391153e59a3e47c23"
+    "value": "ef2a0c730c8d464298e27344684847cce70ebaad5238dfbf9b075f4f5c51f63f"
   },
   "parentEvents": [
-    "evt-13d-git-matrix-v0.1-modules"
+    "evt-13d-git-matrix-v0.1-schema-ancestry"
   ],
   "gitBinding": {
     "repository": "https://github.com/XRastlinX/logos-formal.git",
@@ -17,17 +17,17 @@
     "commitOid": null,
     "treeOid": null,
     "parentOids": [
-      "7cb9a9413c48b750f1abc35e877eb96b1a0b6ff6"
+      "7f5f3c2ada0ea0ebb670b58250a3f5a66407df6f"
     ],
     "refAtObservation": "codex/13d-git-matrix-v0.1",
     "artifactRoot": {
       "alg": "sha256",
-      "value": "8795ab4588ebb060558fe0dc0c038d5021daacd8a56793b391153e59a3e47c23"
+      "value": "ef2a0c730c8d464298e27344684847cce70ebaad5238dfbf9b075f4f5c51f63f"
     }
   },
   "coordinates": {
     "d01": {
-      "instant": "2026-07-27T10:18:00Z",
+      "instant": "2026-07-27T11:00:00Z",
       "clockSource": "system-utc",
       "precisionNs": 1000000000,
       "uncertaintyNs": 1000000000
@@ -42,7 +42,7 @@
       "presence": "PRESENT",
       "root": {
         "alg": "sha256",
-        "value": "8795ab4588ebb060558fe0dc0c038d5021daacd8a56793b391153e59a3e47c23"
+        "value": "ef2a0c730c8d464298e27344684847cce70ebaad5238dfbf9b075f4f5c51f63f"
       },
       "profile": "logos-formal.placetime13d.artifact-tree.v1",
       "verificationRule": "Recompute the external artifact root over the Git tree while excluding .meta/."

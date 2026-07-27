@@ -107,10 +107,15 @@ authorization or effect.
 
 ## Metric Boundary
 
-The registry lists candidate derived metrics only. A metric becomes executable
-only when its numerator, denominator, unit, scope, observation window,
-uncertainty, and source are separately declared. No normative ratio is inferred
-from coordinate names alone.
+The registry contains five executable structural-completeness metrics. Every
+metric declares its numerator, denominator, unit, scope, observation window,
+uncertainty statement, source coordinates, and calculation rule. The evaluator
+counts only null versus non-null coordinate values and emits an `OBSERVE_ONLY`
+receipt with `authorityEffect: NONE`.
+
+These metrics measure envelope population, not correctness. They do not score
+truth, evidence quality, scientific validity, identity, authority, or Permit
+eligibility. No normative ratio is inferred from coordinate names alone.
 
 ## Non-Claims
 

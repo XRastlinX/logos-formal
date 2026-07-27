@@ -24,7 +24,9 @@
           "scope",
           "observationWindow",
           "uncertainty",
-          "source"
+          "source",
+          "coordinateIds",
+          "calculation"
         ],
         "properties": {
           "id": {"type": "string", "minLength": 1},
@@ -34,7 +36,14 @@
           "scope": {"type": "string", "minLength": 1},
           "observationWindow": {"type": "string", "minLength": 1},
           "uncertainty": {"type": "string", "minLength": 1},
-          "source": {"type": "string", "minLength": 1}
+          "source": {"type": "string", "minLength": 1},
+          "coordinateIds": {
+            "type": "array",
+            "minItems": 1,
+            "uniqueItems": true,
+            "items": {"type": "string", "pattern": "^d(0[1-9]|1[0-3])$"}
+          },
+          "calculation": {"const": "NON_NULL_COUNT_OVER_DECLARED_COUNT"}
         }
       }
     },
@@ -45,8 +54,8 @@
       "properties": {
         "requiredFields": {
           "type": "array",
-          "minItems": 8,
-          "maxItems": 8,
+          "minItems": 10,
+          "maxItems": 10,
           "uniqueItems": true,
           "items": {
             "enum": [
@@ -57,7 +66,9 @@
               "scope",
               "observationWindow",
               "uncertainty",
-              "source"
+              "source",
+              "coordinateIds",
+              "calculation"
             ]
           }
         },
