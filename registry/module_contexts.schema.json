@@ -1,0 +1,46 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/XRastlinX/logos-formal/registry/module_contexts.schema.json",
+  "title": "Placetime 13D Go Module Context Registry",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["schema", "version", "status", "authorityEffect", "modules"],
+  "properties": {
+    "schema": {"const": "urn:logos-formal:placetime-13d-module-contexts:v0.1"},
+    "version": {"const": "0.1.0"},
+    "status": {"const": "PROPOSED"},
+    "authorityEffect": {"const": "NONE"},
+    "modules": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "path",
+          "semanticClass",
+          "lifecycleState",
+          "instrumentationClass",
+          "entityBinding"
+        ],
+        "properties": {
+          "path": {"type": "string", "pattern": "^(cmd|internal|runtime|tools)/"},
+          "semanticClass": {"type": "string", "minLength": 1},
+          "lifecycleState": {
+            "enum": ["PROPOSED", "IMPLEMENTED", "EXPERIMENTAL", "DEPRECATED"]
+          },
+          "instrumentationClass": {"const": "GO_PACKAGE_STATIC"},
+          "entityBinding": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["namespace", "identifier"],
+            "properties": {
+              "namespace": {"const": "go-import-path"},
+              "identifier": {"type": "string", "minLength": 1}
+            }
+          }
+        }
+      }
+    }
+  }
+}

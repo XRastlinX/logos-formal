@@ -34,6 +34,12 @@ registry/event_envelope.schema.json
 internal/placetime13d/registry_generated.go
 ```
 
+`registry/module_contexts.json` binds every current Go package to a semantic
+class, lifecycle declaration, D10-compatible instrumentation class, and
+D13-compatible entity identifier. Ontology and lifecycle are kept outside the
+coordinate vector because the recovered authored source defines d09 and d10 as
+observer confidence and instrumentation class, not ontology and lifecycle.
+
 ## Coordinate Partition
 
 | ID | Coordinate | Meaning |

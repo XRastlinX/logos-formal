@@ -12,6 +12,7 @@
     "authorityEffect",
     "registryPath",
     "eventSchemaPath",
+    "moduleContextPath",
     "generatedGoPath",
     "gitBinding",
     "governanceFence"
@@ -41,6 +42,9 @@
     },
     "eventSchemaPath": {
       "const": "registry/event_envelope.schema.json"
+    },
+    "moduleContextPath": {
+      "const": "registry/module_contexts.json"
     },
     "generatedGoPath": {
       "const": "internal/placetime13d/registry_generated.go"

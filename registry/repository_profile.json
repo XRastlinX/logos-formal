@@ -7,6 +7,7 @@
   "authorityEffect": "NONE",
   "registryPath": "registry/13D_coordinates.yaml",
   "eventSchemaPath": "registry/event_envelope.schema.json",
+  "moduleContextPath": "registry/module_contexts.json",
   "generatedGoPath": "internal/placetime13d/registry_generated.go",
   "gitBinding": {
     "allowedObjectFormats": [

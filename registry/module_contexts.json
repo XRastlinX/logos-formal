@@ -1,0 +1,72 @@
+{
+  "$schema": "module_contexts.schema.json",
+  "schema": "urn:logos-formal:placetime-13d-module-contexts:v0.1",
+  "version": "0.1.0",
+  "status": "PROPOSED",
+  "authorityEffect": "NONE",
+  "modules": [
+    {
+      "path": "cmd/cyonic-validate",
+      "semanticClass": "observation-cli",
+      "lifecycleState": "IMPLEMENTED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/cmd/cyonic-validate"}
+    },
+    {
+      "path": "cmd/placetime-13d",
+      "semanticClass": "governed-event-cli",
+      "lifecycleState": "PROPOSED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/cmd/placetime-13d"}
+    },
+    {
+      "path": "internal/cyonicvalidate",
+      "semanticClass": "observation-validator",
+      "lifecycleState": "IMPLEMENTED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/internal/cyonicvalidate"}
+    },
+    {
+      "path": "internal/placetime13d",
+      "semanticClass": "governed-event-validator",
+      "lifecycleState": "PROPOSED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/internal/placetime13d"}
+    },
+    {
+      "path": "runtime/autophagic-decay",
+      "semanticClass": "research-demonstrator",
+      "lifecycleState": "EXPERIMENTAL",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/runtime/autophagic-decay"}
+    },
+    {
+      "path": "runtime/cyonic-service",
+      "semanticClass": "boundary-service",
+      "lifecycleState": "IMPLEMENTED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/runtime/cyonic-service"}
+    },
+    {
+      "path": "runtime/dcif-membrane",
+      "semanticClass": "boundary-demonstrator",
+      "lifecycleState": "IMPLEMENTED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/runtime/dcif-membrane"}
+    },
+    {
+      "path": "runtime/demonstrator",
+      "semanticClass": "permit-gated-demonstrator",
+      "lifecycleState": "IMPLEMENTED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/runtime/demonstrator"}
+    },
+    {
+      "path": "tools/placetime13d-generate",
+      "semanticClass": "contract-generator",
+      "lifecycleState": "PROPOSED",
+      "instrumentationClass": "GO_PACKAGE_STATIC",
+      "entityBinding": {"namespace": "go-import-path", "identifier": "github.com/XRastlinX/logos-formal/tools/placetime13d-generate"}
+    }
+  ]
+}

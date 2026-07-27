@@ -24,6 +24,17 @@ func TestPublishedRegistryAndGeneratedContractsAgree(t *testing.T) {
 	}
 }
 
+func TestEveryGoPackageHasModuleContext(t *testing.T) {
+	repoRoot := filepath.Join("..", "..")
+	profile, err := LoadRepositoryProfile(filepath.Join(repoRoot, "registry", "repository_profile.json"))
+	if err != nil {
+		t.Fatal(err)
+	}
+	if err := VerifyModuleContexts(repoRoot, profile.ModuleContextPath); err != nil {
+		t.Fatal(err)
+	}
+}
+
 func TestGeneratedEventSchemaRequiresAllCoordinatesAndGovernanceFence(t *testing.T) {
 	data, err := os.ReadFile(filepath.Join("..", "..", "registry", "event_envelope.schema.json"))
 	if err != nil {

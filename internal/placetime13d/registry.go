@@ -29,15 +29,16 @@ type RegistryDimension struct {
 }
 
 type RepositoryProfile struct {
-	Schema          string `json:"schema"`
-	Version         string `json:"version"`
-	Profile         string `json:"profile"`
-	Status          string `json:"status"`
-	AuthorityEffect string `json:"authorityEffect"`
-	RegistryPath    string `json:"registryPath"`
-	EventSchemaPath string `json:"eventSchemaPath"`
-	GeneratedGoPath string `json:"generatedGoPath"`
-	GitBinding      struct {
+	Schema            string `json:"schema"`
+	Version           string `json:"version"`
+	Profile           string `json:"profile"`
+	Status            string `json:"status"`
+	AuthorityEffect   string `json:"authorityEffect"`
+	RegistryPath      string `json:"registryPath"`
+	EventSchemaPath   string `json:"eventSchemaPath"`
+	ModuleContextPath string `json:"moduleContextPath"`
+	GeneratedGoPath   string `json:"generatedGoPath"`
+	GitBinding        struct {
 		AllowedObjectFormats        []string `json:"allowedObjectFormats"`
 		RequireCommitOID            bool     `json:"requireCommitOid"`
 		RequireTreeOID              bool     `json:"requireTreeOid"`
@@ -150,5 +151,5 @@ func VerifyRepositorySources(repoRoot string) error {
 	if registryRootProperty.Const != root {
 		return fmt.Errorf("generated event schema registry root %q, want %q", registryRootProperty.Const, root)
 	}
-	return nil
+	return VerifyModuleContexts(repoRoot, profile.ModuleContextPath)
 }
