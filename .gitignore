@@ -26,3 +26,8 @@ Thumbs.db
 *.swp
 *.swo
 *~
+.cyonic-fixture/
+cyonic-evidence.jsonl
+cyonic-first-contact-report-*.json
+cyonic-first-contact-adjudication-*.json
+cyonic-first-contact-summary-*.json

@@ -1,143 +1,210 @@
-# Logos-Formal
+# logos-formal
 
-**Fail-closed separation of AI interpretation from human authorization.**
+**Fail-closed separation of interpretation from authorization.**
 
-An AI agent operating under this architecture cannot authorize or execute its own plans. Every effectual action requires a cryptographically bound permit issued by a human operator or external policy engine.
+An AI system may propose. It must not authorize or execute its own proposals
+without an external permit. If any required check fails, the effect does not
+happen.
+
+The reference Cyonic Boundary Service verifies Ed25519 permit evidence bound to
+an exact artifact proposal. It cannot issue, consume, revoke, or Apply a permit,
+and it has no actuator capability.
 
 [![Validate Canon](https://github.com/XRastlinX/logos-formal/actions/workflows/validate.yml/badge.svg)](https://github.com/XRastlinX/logos-formal/actions/workflows/validate.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
----
-
-## The Problem
-
-Modern AI systems increasingly conflate the ability to *plan* an action with the authority to *execute* it. Tool-calling LLMs can generate infrastructure commands, deployment scripts, and database mutations — and tooling increasingly lets them run those plans autonomously. The boundary between "what should we do?" and "do it" is collapsing.
-
-In safety-critical domains — industrial control, medical devices, supply-chain integrity, autonomous vehicles — this collapse is unacceptable.
-
-## The Architecture
-
-This repository implements **PIC-4** (Pure Invariant Constructor), a governance architecture built on a single hard invariant:
-
-> **Q never sets Cy.**
->
-> Mathematical output, AI models, and interpretive logic (Q) can never autonomously write to the capability/authorization geometry (Cy).
-
-The system enforces this through a five-stage pipeline aligned with [IETF RATS](https://datatracker.ietf.org/doc/rfc9334/) and [NIST ABAC](https://csrc.nist.gov/pubs/sp/800/162/final):
-
-```
-AI (010)          Validator          Attester          Human/Policy (101)     Actuator (001)
-   │                  │                 │                    │                    │
-   ├─ Propose ───────►│                 │                    │                    │
-   │                  ├─ Check ────────►│                    │                    │
-   │                  │                 ├─ Seal Evidence ───►│                    │
-   │                  │                 │                    ├─ Issue Permit ────►│
-   │                  │                 │                    │                    ├─ Execute
-   │                  │                 │                    │                    │
-   │            REJECT if unsafe  REJECT if untested  REJECT if unauthorized  FAIL CLOSED
-```
-
-The AI operates at coordinate **010** (pure interpretation). Only a human authority at **101** can issue a permit. If any stage fails, the actuator fails closed — it does nothing.
-
-## Run It (< 2 minutes)
+## Quick check (about 5–10 minutes)
 
 Requires [Go 1.24+](https://go.dev/dl/).
 
 ```bash
 git clone https://github.com/XRastlinX/logos-formal.git
 cd logos-formal
-
-# Run everything — all three demos + full test suite:
-./demo.sh          # Linux / macOS
-.\demo.ps1         # Windows PowerShell
+git checkout --detach 7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a
+go run ./runtime/cyonic-service smoke-http
 ```
 
-Or run individually:
+You should see:
+
+```text
+governanceState: 010
+authorityEffect: NONE
+effect: NOT_PERFORMED
+applyProbeStatus: 405
+applyProbeReason: EFFECT_ROUTE_FORBIDDEN
+```
+
+The trial validates a boundary and proves the Apply compatibility route
+rejects. It does not issue a permit or perform an effect.
+
+Independent cold-run reports belong in
+[Issue #2](https://github.com/XRastlinX/logos-formal/issues/2), which records
+the portable package SHA-256, qualification rules, and reporting instructions.
+
+## What this is
+
+- A reference governance boundary for agent-style systems
+- A runnable service for checking externally supplied authorization evidence
+- A formal separation between proposing, validating, authorizing, and applying
+- A research architecture mapped in spirit to separation patterns in RATS,
+  ABAC, in-toto, and SLSA
+
+## What this is not
+
+- Not a full agent framework or actuator
+- Not a permit issuer or source of ambient authority
+- Not production-hardened cryptographic infrastructure
+- Not a claim of scientific proof, standards conformance, certification, or
+  completed external adoption
+
+**External evaluation status:** Not yet established. Independent reports are
+welcome but optional; they are not prerequisites for engineering work, merge,
+or publication. Internal verification establishes only the behavior covered by
+the declared tests.
+
+## Status labels
+
+| Label | Meaning |
+|---|---|
+| `ACTIVE_CANON` | Binding within this repository's declared process |
+| `PROPOSED` | Research or design material; no authority |
+| `authority_effect: NONE` | The operation does not authorize or effectuate |
+| `010` | Interpretive or validation state |
+| `101` | Effect-capable state requiring an external permit |
+
+---
+
+## Service boundary
+
+The network service separates three questions:
+
+```text
+interpretation: was the proposal structurally validated?
+authorization: was external permit evidence verified?
+effect: NOT_PERFORMED
+```
+
+Read the [Cyonic Service Surface](docs/SERVICE_SURFACE.md) for the client path,
+receipt contract, limitations, and non-claims. The
+[First Contact Trial](docs/FIRST_CONTACT_TRIAL.md) defines the evidence intake,
+and [dist/README.md](dist/README.md) documents the portable package.
+
+## Validate this node
+
+The repository validator runs an allowlisted check manifest against an exact
+tree root and rejects observed in-run mutation:
 
 ```bash
-go test ./...                              # Run all 14 tests
-cd runtime/demonstrator && go run .        # Permit-gated actuation
-cd runtime/dcif-membrane && go run .       # Bleed-over epistemic membrane
-cd runtime/autophagic-decay && go run .    # Autophagic decay (PROPOSED)
+./scripts/validate.sh        # Linux / macOS
+scripts\validate.cmd         # Windows
 ```
 
-### What the Demonstrators Show
+Success is `010`, `governanceAuthorityEffect: NONE`, and `OBSERVE_ONLY`—never a
+permit, canon elevation, or truth claim. The checks run with the host process's
+ordinary OS permissions; this reference validator is not a sandbox. See
+[Node Validation](docs/NODE_VALIDATION.md) for the result contract, exit codes,
+and known limits.
 
-| Demonstrator | Tests | Status |
+## Architecture
+
+```text
+AI proposal (010)
+    |
+    v
+validation / witness (authority_effect: NONE)
+    |
+    v
+external human or policy decision
+    |
+    v
+permit-gated Apply (101) or fail-closed rejection
+```
+
+The core invariant is:
+
+> **Q never sets Cy.**
+>
+> Interpretive output cannot autonomously write to authorization or
+> effectuation state.
+
+The current service demonstrates the observer, evidence-verification, and
+refusal boundary. It does not establish a production permit issuer or actuator.
+
+## Demonstrators
+
+```bash
+go test ./...
+go run ./runtime/cyonic-service demo
+go run ./runtime/cyonic-service smoke-http
+go run ./runtime/demonstrator
+go run ./runtime/dcif-membrane
+go run ./runtime/autophagic-decay
+```
+
+| Demonstrator | Boundary exercised | Status |
 |---|---|---|
-| **Permit-Gated Cell** | Replay attacks, wrong targets, tampered artifacts, expired nonces | Reference |
-| **Bleed-Over (β) Membrane** | Certainty inflation, provenance erasure, authority escalation | Reference |
-| **Autophagic Decay (α)** | Echo-chamber collapse in recursive RAG loops | PROPOSED |
+| Cyonic Boundary Service | Ed25519 binding, expiry, issuer, scope, refusal of effect | Reference |
+| Permit-Gated Cell | Replay, wrong target, tampering, expiry | Reference |
+| Bleed-Over Membrane | Provenance, uncertainty, authority escalation | Reference |
+| Autophagic Decay | Recursive self-ingestion and evidence depth | `PROPOSED` |
 
-## Formal Boundaries (ACTIVE_CANON)
+## Formal core
 
-These documents define the system's mathematical invariants:
-
-| Document | Description |
+| Document | Purpose |
 |---|---|
-| [Cubed Bit Safety Lattice](01_Governance_Geometry/governance_algebra_v1.md) | The (A, I, E) state lattice — 8 vertices of governance |
-| [Bleed-Over Operator β](10_Elevation_Layer/ACTIVE_CANON_Bleed_Over_Operator_Beta_V1.md) | Governed cross-field translation preserving provenance and uncertainty |
-| [Normalization Criteria](10_Elevation_Layer/ACTIVE_CANON_Normalization_Criteria_v1.md) | Conditions for elevating artifacts through the Rite Machine |
-| [PIC-4 Standards Mapping](08_Builder_Layer/PIC4_STANDARDS_MAPPING_V1.md) | Bridge to IETF RATS, NIST ABAC, SLSA, in-toto |
-| [Cybot Pattern](08_Builder_Layer/CYBOT_PATTERN_V1.md) | Local-first AI assistant architecture |
+| [Cubed Bit Safety Lattice](01_Governance_Geometry/governance_algebra_v1.md) | Defines the `(A, I, E)` governance states |
+| [Bleed-Over Operator β](10_Elevation_Layer/ACTIVE_CANON_Bleed_Over_Operator_Beta_V1.md) | Preserves provenance and uncertainty across translation |
+| [Normalization Criteria](10_Elevation_Layer/ACTIVE_CANON_Normalization_Criteria_v1.md) | Defines post-lifecycle validation conditions |
+| [PIC-4 Standards Mapping](08_Builder_Layer/PIC4_STANDARDS_MAPPING_V1.md) | Relates the reference model to established assurance vocabulary |
+| [Cybot Pattern](08_Builder_Layer/CYBOT_PATTERN_V1.md) | Describes a local-first, proposal-only assistant pattern |
 
-### Research (PROPOSED — not elevated)
+The standards mapping is explanatory. It is not a claim of conformance,
+certification, or endorsement by the named standards bodies.
 
-| Document | Description |
-|---|---|
-| Autophagic Operator (α) | Epistemic half-life boundary for recursive AI self-ingestion |
+## Start here
 
-The α operator is under active research. It is used as a practical filter but has not been elevated to ACTIVE_CANON. See [docs/WHY_THIS_MATTERS.md](docs/WHY_THIS_MATTERS.md) for context.
-
-## Standards Alignment
-
-| Standard | PIC-4 Role |
-|---|---|
-| [IETF RATS (RFC 9334)](https://datatracker.ietf.org/doc/rfc9334/) | Attester/Verifier/Relying Party architecture |
-| [NIST ABAC (SP 800-162)](https://csrc.nist.gov/pubs/sp/800/162/final) | Attribute-based permit issuance |
-| [in-toto](https://in-toto.io/) | Supply-chain attestation layout |
-| [SLSA](https://slsa.dev/) | Build provenance and source integrity |
-
-## Documentation
-
-- [Why This Matters](docs/WHY_THIS_MATTERS.md) — Plain-language explainer
-- [Architecture Diagrams](docs/ARCHITECTURE.md) — Visual system overview
-- [Positioning](docs/POSITIONING.md) — How PIC-4 addresses funded problem domains
-- [Session Anchor](docs/SESSION_ANCHOR.md) — Start-here prompt for new AI sessions
+- [Why This Matters](docs/WHY_THIS_MATTERS.md)
+- [Architecture](docs/ARCHITECTURE.md)
+- [Cyonic Service Surface](docs/SERVICE_SURFACE.md)
+- [First Contact Trial](docs/FIRST_CONTACT_TRIAL.md)
+- [Guarded Builder Session](docs/BUILDER_SESSION.md)
 - [Contributing](CONTRIBUTING.md)
+- [Session Anchor](docs/SESSION_ANCHOR.md)
 
-## Repository Structure
+## Repository map
 
-```
-logos-formal/
-├── 00_Master_Codex/           # Core transparency manifest
-├── 01_Governance_Geometry/    # Cubed Bit Safety Lattice (A, I, E)
-├── 02_Cord_Algebra/           # Structural algebra (interior, residual, frame)
-├── 03_Q_Taxonomy/             # Content taxonomy
-├── 04_Dual_Projection/        # Observation without mutation
-├── 05_Rite_Machine/           # Seven-stage artifact maturation
-├── 06_Prime_Root_Field/       # Input structure for developmental analysis
-├── 07_Antigravity_Capability/ # Local agent operational bounds
-├── 08_Builder_Layer/          # Standards mapping, schemas, Cybot pattern
-├── 09_Exchange_Corridor/      # Cross-platform packet exchange
-├── 10_Elevation_Layer/        # ACTIVE_CANON registry
-├── runtime/
-│   ├── demonstrator/          # Permit-Gated Cell
-│   ├── dcif-membrane/         # Bleed-Over Membrane
-│   └── autophagic-decay/      # Epistemic Decay Simulator
-├── docs/                      # Plain-language documentation
-└── go.mod
+```text
+01_Governance_Geometry/  capability and authorization states
+02_Cord_Algebra/         structural algebra
+03_Q_Taxonomy/           content classification
+04_Dual_Projection/      observation without cross-modification
+05_Rite_Machine/         seven-stage construction lifecycle
+06_Prime_Root_Field/     bounded input profile
+08_Builder_Layer/        schemas, mappings, and builder guidance
+09_Exchange_Corridor/    proposed exchange and transport work
+10_Elevation_Layer/      ACTIVE_CANON records
+runtime/                 runnable reference implementations
+docs/                    public explanations and trial guidance
+dist/                    pinned portable trial package
 ```
 
-## What Is Not Claimed
+## Non-claims and current limits
 
-- The demonstrators are **reference implementations**, not production-hardened systems.
-- Signatures are currently **simulated** (literal string comparison, not Ed25519/ECDSA).
-- The Autophagic Operator (α) is **PROPOSED research**, not proven.
-- The architecture is a **framework and formal boundary**, not a finished product.
-- Independent custody separation (separate issuer/verifier processes) is **not yet implemented**.
+- The demonstrators are reference implementations, not production-hardened
+  systems.
+- The Cyonic Boundary Service uses Ed25519. Older actuation demonstrators still
+  use simulated signatures and must not be represented as cryptographic
+  enforcement.
+- The service verifies permit evidence but does not issue, consume, revoke, or
+  Apply permits.
+- The Autophagic Operator is `PROPOSED` research, not proven.
+- Independent custody separation and independent security review are not yet
+  established.
+- External adoption evidence remains incomplete.
 
-The next assurance tier requires real cryptographic signatures, canonical serialization, separate trust domains, and persistent nonce storage.
+The next assurance tier requires canonical serialization, separate trust
+domains, persistent nonce consumption at an external actuator, and independent
+security review.
 
 ## License
 
@@ -145,7 +212,7 @@ The next assurance tier requires real cryptographic signatures, canonical serial
 
 ## Citation
 
-If you use this work in research, please cite:
+See [CITATION.cff](CITATION.cff), or use:
 
 ```bibtex
 @software{mcclure2026logosformal,

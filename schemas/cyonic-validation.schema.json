@@ -1,0 +1,84 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/XRastlinX/logos-formal/schemas/cyonic-validation.schema.json",
+  "title": "Cyonic Validation Manifest",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "profile",
+    "target",
+    "requiredPaths",
+    "checks"
+  ],
+  "properties": {
+    "$schema": {
+      "type": "string"
+    },
+    "schema": {
+      "const": "urn:cyonic:validation-manifest:v1"
+    },
+    "version": {
+      "const": "1.0"
+    },
+    "profile": {
+      "type": "string",
+      "minLength": 1
+    },
+    "target": {
+      "type": "string",
+      "minLength": 1
+    },
+    "requiredPaths": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "checks": {
+      "type": "array",
+      "minItems": 5,
+      "maxItems": 5,
+      "uniqueItems": true,
+      "items": {
+        "enum": [
+          "CV-TARGET-BOUNDARY",
+          "CV-REQUIRED-PATHS",
+          "CV-GO-VET",
+          "CV-GO-TEST-FRESH",
+          "CV-TARGET-IMMUTABILITY"
+        ]
+      },
+      "allOf": [
+        {
+          "contains": {
+            "const": "CV-TARGET-BOUNDARY"
+          }
+        },
+        {
+          "contains": {
+            "const": "CV-REQUIRED-PATHS"
+          }
+        },
+        {
+          "contains": {
+            "const": "CV-GO-VET"
+          }
+        },
+        {
+          "contains": {
+            "const": "CV-GO-TEST-FRESH"
+          }
+        },
+        {
+          "contains": {
+            "const": "CV-TARGET-IMMUTABILITY"
+          }
+        }
+      ]
+    }
+  }
+}
