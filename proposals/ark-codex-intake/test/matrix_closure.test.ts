@@ -82,7 +82,7 @@ test('SQLite foundation enforces WAL, NORMAL sync, foreign keys, and STRICT matr
     assert.equal(Number(foreignKeys.foreign_keys), 1);
     assert.equal(Number(trustedSchema.trusted_schema), 0);
     const foundation = store.foundationStatus();
-    assert.equal(foundation.userVersion, 3);
+    assert.equal(foundation.userVersion, 4);
     assert.equal(foundation.closureForeignKeyRestricted, true);
 
     const strictRows = store.db
@@ -134,6 +134,7 @@ test('authenticated closure atomically changes INFINITY to finite witness cost',
       obligationId: declared.obligationId,
       resolvedByNode: 'Node_C',
       witnessDigest: sha256Canonical({ witness: 'exact' }),
+      resultDigest: sha256Canonical({ result: 'exact' }),
       graphHash: '0'.repeat(64),
       propagationHopLimit: 3,
       resolutionState: 'RESOLVED_BY_WITNESS',
@@ -141,6 +142,11 @@ test('authenticated closure atomically changes INFINITY to finite witness cost',
     });
     assert.equal(closure.obligation.currentState, 'RESOLVED_BY_WITNESS');
     assert.equal(closure.obligation.opCost, '2');
+    assert.equal(closure.receipt.profile, 'CLOSURE_RECEIPT_v0.3');
+    assert.equal(
+      closure.receipt.resultDigest,
+      sha256Canonical({ result: 'exact' }),
+    );
     assert.equal(store.verifyClosureReceipt(closure.receipt), true);
     assert.equal(
       store.verifyClosureReceipt({
@@ -148,6 +154,27 @@ test('authenticated closure atomically changes INFINITY to finite witness cost',
         finiteCost: closure.receipt.finiteCost + 1,
       }),
       false,
+    );
+    assert.equal(
+      store.verifyClosureReceipt({
+        ...closure.receipt,
+        resultDigest: 'f'.repeat(64),
+      }),
+      false,
+    );
+    const persisted = store.db
+      .prepare(
+        `SELECT result_digest, receipt_payload_json
+         FROM closure_receipts WHERE receipt_id = ?`,
+      )
+      .get(closure.receipt.receiptId) as {
+      result_digest: string;
+      receipt_payload_json: string;
+    };
+    assert.equal(persisted.result_digest, closure.receipt.resultDigest);
+    assert.equal(
+      JSON.parse(persisted.receipt_payload_json).resultDigest,
+      closure.receipt.resultDigest,
     );
     assert.deepEqual(
       store.getClosureReceipt(closure.receipt.receiptId),
@@ -169,6 +196,7 @@ test('receipt clearance permits only finite cost zero and bounded hop limits', (
           obligationId: first.obligationId,
           resolvedByNode: 'Node_C',
           witnessDigest: sha256Canonical({ witness: 1 }),
+          resultDigest: sha256Canonical({ result: 1 }),
           graphHash: '0'.repeat(64),
           propagationHopLimit: 65,
           resolutionState: 'CLEARED_BY_RECEIPT',
@@ -182,6 +210,7 @@ test('receipt clearance permits only finite cost zero and bounded hop limits', (
           obligationId: first.obligationId,
           resolvedByNode: 'Node_C',
           witnessDigest: sha256Canonical({ witness: 1 }),
+          resultDigest: sha256Canonical({ result: 1 }),
           graphHash: '0'.repeat(64),
           propagationHopLimit: 2,
           resolutionState: 'CLEARED_BY_RECEIPT',
@@ -193,6 +222,7 @@ test('receipt clearance permits only finite cost zero and bounded hop limits', (
       obligationId: first.obligationId,
       resolvedByNode: 'Node_C',
       witnessDigest: sha256Canonical({ witness: 1 }),
+      resultDigest: sha256Canonical({ result: 1 }),
           graphHash: '0'.repeat(64),
       propagationHopLimit: 2,
       resolutionState: 'CLEARED_BY_RECEIPT',
@@ -239,6 +269,7 @@ test('resolved obligation and closure receipt form an immutable audit relation',
       obligationId: declared.obligationId,
       resolvedByNode: 'Node_C',
       witnessDigest: sha256Canonical({ witness: 2 }),
+      resultDigest: sha256Canonical({ result: 2 }),
       graphHash: '0'.repeat(64),
       propagationHopLimit: 1,
       resolutionState: 'RESOLVED_BY_WITNESS',
@@ -323,6 +354,41 @@ test('foreign key and JSON-column checks reject orphaned or mismatched traces', 
 
     const declared = binding();
     store.openMatrixObligation(declared);
+    const missingResult = {
+      ...fake,
+      profile: 'CLOSURE_RECEIPT_v0.3',
+      obligationId: declared.obligationId,
+    };
+    assert.throws(
+      () =>
+        store.db
+          .prepare(
+            `INSERT INTO closure_receipts
+             (receipt_id, obligation_id, resolved_by_node, witness_digest,
+              graph_hash, graph_binding_status, verifier_algorithm,
+              verifier_key_id, verifier_key_purpose, verifier_mac,
+              propagation_hop_limit, resolution_state, finite_cost,
+              receipt_payload_json, recorded_at, result_digest)
+             VALUES (?, ?, ?, ?, ?, 'BOUND', ?, ?, 'RECEIPT_HMAC',
+                     ?, ?, ?, ?, ?, ?, NULL)`,
+          )
+          .run(
+            missingResult.receiptId,
+            missingResult.obligationId,
+            missingResult.resolvedByNode,
+            missingResult.witnessDigest,
+            missingResult.graphHash,
+            missingResult.verifierAlgorithm,
+            missingResult.verifierKeyId,
+            missingResult.verifierMac,
+            missingResult.propagationHopLimit,
+            missingResult.resolutionState,
+            missingResult.finiteCost,
+            JSON.stringify(missingResult),
+            missingResult.recordedAt,
+          ),
+      /CHECK constraint failed/,
+    );
     const mismatched = { ...fake, obligationId: declared.obligationId };
     assert.throws(
       () =>
@@ -380,6 +446,7 @@ test('invalid closure inside protected transaction rolls back nonce and state', 
             obligationId: declared.obligationId,
             resolvedByNode: 'Node_C',
             witnessDigest: sha256Canonical({ witness: 3 }),
+            resultDigest: 'invalid',
             graphHash: '0'.repeat(64),
             propagationHopLimit: -1,
             resolutionState: 'RESOLVED_BY_WITNESS',
@@ -442,6 +509,7 @@ test('Cadence Engine optimistic concurrency prevents overriding valid receipts',
         obligationId: declared.obligationId,
         resolvedByNode: 'Node_C',
         witnessDigest: sha256Canonical({ witness: 1 }),
+        resultDigest: sha256Canonical({ result: 1 }),
         graphHash: '0'.repeat(64),
         propagationHopLimit: 2,
         resolutionState: 'CLEARED_BY_RECEIPT',

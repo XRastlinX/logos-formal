@@ -2,9 +2,11 @@
 
 The checked-in suite exercises:
 
-- SQLite schema migration from version 2 to version 3 while preserving legacy
-  receipt bytes as read-only, unbound custody records;
-- exact graph binding for version 0.2 closure receipts;
+- SQLite schema migration from versions 2 and 3 to version 4 while preserving
+  legacy v0.1/v0.2 receipt payload bytes and retaining `NULL` result digests;
+- exact graph binding for legacy version 0.2 closure receipts;
+- mandatory SHA-256 result binding for newly emitted version 0.3 closure
+  receipts across canonical identity, HMAC input, JSON payload, and SQLite row;
 - single-transaction nonce claim, mutation, receipt persistence, response
   persistence, and commit;
 - authenticated, monotonically versioned registry updates and transactional

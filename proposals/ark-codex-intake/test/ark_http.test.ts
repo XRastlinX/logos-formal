@@ -137,6 +137,7 @@ test('HTTP apply requires authentication, exact permit binding, and replays prio
       obligationId: openPayload.obligationId,
       resolvedByNode: 'Node_C',
       witnessDigest: sha256Canonical({ witness: 'http' }),
+      resultDigest: sha256Canonical({ result: 'http' }),
       propagationHopLimit: 2,
       resolutionState: 'RESOLVED_BY_WITNESS',
       finiteCost: 1,

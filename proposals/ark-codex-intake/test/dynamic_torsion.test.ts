@@ -46,6 +46,7 @@ interface ClosureInput {
   obligationId: string;
   resolvedByNode: string;
   witnessDigest: string;
+  resultDigest: string;
   graphHash: string;
   propagationHopLimit: number;
   resolutionState: 'RESOLVED_BY_WITNESS';
@@ -386,6 +387,7 @@ function runRoutingScenario(mode: RoutingMode) {
       obligationId: primaryObligationId,
       resolvedByNode: 'Node_50',
       witnessDigest: sha256Canonical({ witness: mode }),
+      resultDigest: sha256Canonical({ result: mode }),
       graphHash,
       propagationHopLimit: HOP_LIMIT,
       resolutionState: 'RESOLVED_BY_WITNESS',
@@ -507,6 +509,7 @@ test('replicated registry revocation blocks a delayed closure at each node', () 
         obligationId: obligation.obligationId,
         resolvedByNode: 'Delayed_Resolver',
         witnessDigest: sha256Canonical({ witness: 'delayed' }),
+        resultDigest: sha256Canonical({ result: 'delayed' }),
         graphHash,
         propagationHopLimit: 1,
         resolutionState: 'RESOLVED_BY_WITNESS',

@@ -103,6 +103,14 @@ export interface ClosureReceipt_v02 {
   verifierMac: string;
 }
 
+export interface ClosureReceipt_v03
+  extends Omit<ClosureReceipt_v02, 'profile'> {
+  profile: 'CLOSURE_RECEIPT_v0.3';
+  resultDigest: string;
+}
+
+export type ClosureReceipt = ClosureReceipt_v02 | ClosureReceipt_v03;
+
 export interface RegistryUpdate_v01 {
   profile: 'REGISTRY_UPDATE_v0.1';
   updateId: string;
@@ -122,7 +130,8 @@ const SHA256_HEX = /^[a-f0-9]{64}$/;
 const NONCE = /^[a-f0-9]{32,128}$/;
 const RECEIPT_DOMAIN = 'ARK_RECEIPT_V1';
 const LEASE_DOMAIN = 'ARK_LEASE_V1';
-const CLOSURE_RECEIPT_DOMAIN = 'ARK_CLOSURE_RECEIPT_V2';
+const CLOSURE_RECEIPT_DOMAIN_V2 = 'ARK_CLOSURE_RECEIPT_V2';
+const CLOSURE_RECEIPT_DOMAIN_V3 = 'ARK_CLOSURE_RECEIPT_V3';
 
 function requireEnv(name: string): string {
   const value = process.env[name]?.trim();
@@ -388,7 +397,7 @@ export class ArkBoundaryStore {
           ALTER TABLE matrix_obligations RENAME TO matrix_obligations_old;
           ALTER TABLE closure_receipts RENAME TO closure_receipts_old;
         `);
-        this.createSchemaV3();
+        this.createSchemaV4();
         this.db.exec(`
           INSERT INTO trust_keys
             (key_id, purpose, registry_version, revoked, last_update_id, created_at)
@@ -407,18 +416,65 @@ export class ArkBoundaryStore {
              graph_hash, graph_binding_status, verifier_algorithm,
              verifier_key_id, verifier_key_purpose, verifier_mac,
              propagation_hop_limit, resolution_state, finite_cost,
-             receipt_payload_json, recorded_at)
+             receipt_payload_json, recorded_at, result_digest)
           SELECT receipt_id, obligation_id, resolved_by_node, witness_digest,
                  NULL, 'LEGACY_UNBOUND', verifier_algorithm,
                  verifier_key_id, verifier_key_purpose, verifier_mac,
                  propagation_hop_limit, resolution_state, finite_cost,
-                 receipt_payload_json, recorded_at
+                 receipt_payload_json, recorded_at, NULL
           FROM closure_receipts_old;
 
           DROP TABLE closure_receipts_old;
           DROP TABLE matrix_obligations_old;
           DROP TABLE trust_keys_old;
-          PRAGMA user_version = 3;
+          PRAGMA user_version = 4;
+        `);
+        this.db.exec('COMMIT;');
+      } catch (error) {
+        try {
+          this.db.exec('ROLLBACK;');
+        } catch {
+          // Preserve the original migration failure.
+        }
+        throw error;
+      } finally {
+        this.db.exec('PRAGMA foreign_keys = ON;');
+      }
+    } else if (userVersion === 3) {
+      this.db.exec('PRAGMA foreign_keys = OFF;');
+      try {
+        this.db.exec('BEGIN EXCLUSIVE;');
+        this.db.exec(`
+          DROP TRIGGER IF EXISTS matrix_obligation_identity_immutable;
+          DROP TRIGGER IF EXISTS matrix_obligation_transition_guard;
+          DROP TRIGGER IF EXISTS closure_receipt_graph_binding_guard;
+          DROP TRIGGER IF EXISTS closure_receipt_applies_transition;
+          DROP TRIGGER IF EXISTS closure_receipt_immutable_update;
+          DROP TRIGGER IF EXISTS closure_receipt_immutable_delete;
+          DROP TRIGGER IF EXISTS resolved_obligation_trace_immutable;
+          DROP TRIGGER IF EXISTS trust_key_registry_update_guard;
+          DROP TRIGGER IF EXISTS registry_update_immutable_update;
+          DROP TRIGGER IF EXISTS registry_update_immutable_delete;
+
+          ALTER TABLE closure_receipts RENAME TO closure_receipts_v3;
+        `);
+        this.createSchemaV4();
+        this.db.exec(`
+          INSERT INTO closure_receipts
+            (receipt_id, obligation_id, resolved_by_node, witness_digest,
+             graph_hash, graph_binding_status, verifier_algorithm,
+             verifier_key_id, verifier_key_purpose, verifier_mac,
+             propagation_hop_limit, resolution_state, finite_cost,
+             receipt_payload_json, recorded_at, result_digest)
+          SELECT receipt_id, obligation_id, resolved_by_node, witness_digest,
+                 graph_hash, graph_binding_status, verifier_algorithm,
+                 verifier_key_id, verifier_key_purpose, verifier_mac,
+                 propagation_hop_limit, resolution_state, finite_cost,
+                 receipt_payload_json, recorded_at, NULL
+          FROM closure_receipts_v3;
+
+          DROP TABLE closure_receipts_v3;
+          PRAGMA user_version = 4;
         `);
         this.db.exec('COMMIT;');
       } catch (error) {
@@ -434,15 +490,15 @@ export class ArkBoundaryStore {
     } else if (userVersion === 0) {
       this.db.exec('PRAGMA foreign_keys = ON;');
       this.db.exec('BEGIN EXCLUSIVE;');
-      this.createSchemaV3();
+      this.createSchemaV4();
       this.seedTrustRegistry();
-      this.db.exec('PRAGMA user_version = 3;');
+      this.db.exec('PRAGMA user_version = 4;');
       this.db.exec('COMMIT;');
-    } else if (userVersion !== 3) {
+    } else if (userVersion !== 4) {
       throw new Error(`UNSUPPORTED_USER_VERSION: ${userVersion}`);
     } else {
       this.db.exec('PRAGMA foreign_keys = ON;');
-      this.createSchemaV3();
+      this.createSchemaV4();
     }
 
     this.db.exec('PRAGMA trusted_schema = OFF;');
@@ -450,7 +506,7 @@ export class ArkBoundaryStore {
     this.assertFoundation();
   }
 
-  private createSchemaV3(): void {
+  private createSchemaV4(): void {
     this.db.exec(`
       CREATE TABLE IF NOT EXISTS trust_keys (
         key_id TEXT NOT NULL,
@@ -619,6 +675,26 @@ export class ArkBoundaryStore {
         finite_cost INTEGER NOT NULL CHECK (finite_cost >= 0),
         receipt_payload_json TEXT NOT NULL CHECK (json_valid(receipt_payload_json)),
         recorded_at TEXT NOT NULL,
+        result_digest TEXT CHECK (
+          (
+            json_extract(receipt_payload_json, '$.profile')
+              IN ('CLOSURE_RECEIPT_v0.1', 'CLOSURE_RECEIPT_v0.2')
+            AND result_digest IS NULL
+          )
+          OR
+          (
+            graph_binding_status = 'BOUND'
+            AND json_extract(receipt_payload_json, '$.profile')
+              = 'CLOSURE_RECEIPT_v0.3'
+            AND result_digest IS NOT NULL
+            AND length(result_digest) = 64
+            AND result_digest = lower(result_digest)
+            AND result_digest NOT GLOB '*[^0-9a-f]*'
+            AND json_type(receipt_payload_json, '$.resultDigest') = 'text'
+            AND json_extract(receipt_payload_json, '$.resultDigest')
+              = result_digest
+          )
+        ),
         FOREIGN KEY(obligation_id)
           REFERENCES matrix_obligations(obligation_id)
           ON DELETE RESTRICT
@@ -634,6 +710,8 @@ export class ArkBoundaryStore {
           (graph_binding_status = 'LEGACY_UNBOUND' AND json_extract(receipt_payload_json, '$.profile') = 'CLOSURE_RECEIPT_v0.1' AND json_extract(receipt_payload_json, '$.graphHash') IS NULL)
           OR
           (graph_binding_status = 'BOUND' AND json_extract(receipt_payload_json, '$.profile') = 'CLOSURE_RECEIPT_v0.2' AND json_extract(receipt_payload_json, '$.graphHash') = graph_hash)
+          OR
+          (graph_binding_status = 'BOUND' AND json_extract(receipt_payload_json, '$.profile') = 'CLOSURE_RECEIPT_v0.3' AND json_extract(receipt_payload_json, '$.graphHash') = graph_hash AND json_extract(receipt_payload_json, '$.resultDigest') = result_digest)
         ),
         CHECK (
           json_extract(receipt_payload_json, '$.receiptId') = receipt_id
@@ -835,7 +913,7 @@ export class ArkBoundaryStore {
       status.synchronous !== 1 ||
       status.foreignKeys !== 1 ||
       status.trustedSchema !== 0 ||
-      status.userVersion !== 3 ||
+      status.userVersion !== 4 ||
       status.strictTables.join(',') !==
         'closure_receipts,matrix_obligations' ||
       !status.closureForeignKeyRestricted ||
@@ -978,11 +1056,12 @@ export class ArkBoundaryStore {
     obligationId: string;
     resolvedByNode: string;
     witnessDigest: string;
+    resultDigest: string;
     graphHash: string;
     propagationHopLimit: number;
     resolutionState: Exclude<MatrixObligationState, 'SUSPENDED_STATE'>;
     finiteCost: number;
-  }): { receipt: ClosureReceipt_v02; obligation: MatrixObligation } {
+  }): { receipt: ClosureReceipt_v03; obligation: MatrixObligation } {
     if (!this.db.isTransaction) {
       throw new BoundaryError(500, 'TRANSACTION_CONTEXT_REQUIRED');
     }
@@ -998,6 +1077,7 @@ export class ArkBoundaryStore {
     }
     if (
       !SHA256_HEX.test(input.witnessDigest) ||
+      !SHA256_HEX.test(input.resultDigest) ||
       !Number.isSafeInteger(input.propagationHopLimit) ||
       input.propagationHopLimit < 0 ||
       input.propagationHopLimit > 64 ||
@@ -1025,10 +1105,11 @@ export class ArkBoundaryStore {
     }
 
     const body = {
-      profile: 'CLOSURE_RECEIPT_v0.2' as const,
+      profile: 'CLOSURE_RECEIPT_v0.3' as const,
       obligationId: input.obligationId,
       resolvedByNode: input.resolvedByNode,
       witnessDigest: input.witnessDigest,
+      resultDigest: input.resultDigest,
       graphHash: input.graphHash,
       verifierAlgorithm: 'HMAC-SHA256' as const,
       verifierKeyId: this.secrets.activeKeyId,
@@ -1039,12 +1120,12 @@ export class ArkBoundaryStore {
       authorityEffect: 'NONE' as const,
     };
     const receiptId = sha256Canonical(body);
-    const receipt: ClosureReceipt_v02 = {
+    const receipt: ClosureReceipt_v03 = {
       ...body,
       receiptId,
       verifierMac: hmacHex(
         this.secrets.receiptSecret,
-        CLOSURE_RECEIPT_DOMAIN,
+        CLOSURE_RECEIPT_DOMAIN_V3,
         { receiptId, ...body },
       ),
     };
@@ -1054,8 +1135,8 @@ export class ArkBoundaryStore {
          (receipt_id, obligation_id, resolved_by_node, witness_digest, graph_hash, graph_binding_status,
           verifier_algorithm, verifier_key_id, verifier_key_purpose, verifier_mac,
           propagation_hop_limit, resolution_state, finite_cost,
-          receipt_payload_json, recorded_at)
-         VALUES (?, ?, ?, ?, ?, 'BOUND', ?, ?, 'RECEIPT_HMAC', ?, ?, ?, ?, ?, ?)`
+          receipt_payload_json, recorded_at, result_digest)
+         VALUES (?, ?, ?, ?, ?, 'BOUND', ?, ?, 'RECEIPT_HMAC', ?, ?, ?, ?, ?, ?, ?)`
       )
       .run(
         receipt.receiptId,
@@ -1071,6 +1152,7 @@ export class ArkBoundaryStore {
         receipt.finiteCost,
         canonicalJson(receipt),
         receipt.recordedAt,
+        receipt.resultDigest,
       );
     return {
       receipt,
@@ -1233,10 +1315,17 @@ export class ArkBoundaryStore {
 
   verifyClosureReceipt(candidate: unknown): boolean {
     if (!candidate || typeof candidate !== 'object') return false;
-    const receipt = candidate as ClosureReceipt_v02;
+    const receipt = candidate as ClosureReceipt;
     if (
-      receipt.profile !== 'CLOSURE_RECEIPT_v0.2' ||
+      (receipt.profile !== 'CLOSURE_RECEIPT_v0.2' &&
+        receipt.profile !== 'CLOSURE_RECEIPT_v0.3') ||
       receipt.verifierAlgorithm !== 'HMAC-SHA256'
+    ) {
+      return false;
+    }
+    if (
+      receipt.profile === 'CLOSURE_RECEIPT_v0.3' &&
+      !SHA256_HEX.test(receipt.resultDigest)
     ) {
       return false;
     }
@@ -1250,13 +1339,17 @@ export class ArkBoundaryStore {
     }
 
     const { verifierMac, receiptId, ...body } = receipt;
+    const domain =
+      receipt.profile === 'CLOSURE_RECEIPT_v0.3'
+        ? CLOSURE_RECEIPT_DOMAIN_V3
+        : CLOSURE_RECEIPT_DOMAIN_V2;
     return (
       receiptId === sha256Canonical(body) &&
       constantTimeHexEqual(
         verifierMac,
         hmacHex(
           this.secrets.receiptSecret,
-          CLOSURE_RECEIPT_DOMAIN,
+          domain,
           { receiptId, ...body },
         ),
       )

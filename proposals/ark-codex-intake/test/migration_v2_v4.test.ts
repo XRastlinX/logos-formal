@@ -144,13 +144,13 @@ function createV2Database(databasePath: string) {
   return { obligationId, receiptId, receiptJson };
 }
 
-test('v2 to v3 migration preserves legacy bytes and restores v3 enforcement', () => {
+test('v2 to v4 migration preserves legacy bytes and restores v4 enforcement', () => {
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'ark-migration-'));
   const databasePath = path.join(directory, 'ark.sqlite');
   const legacy = createV2Database(databasePath);
   const store = new ArkBoundaryStore(databasePath, secrets);
   try {
-    assert.equal(store.foundationStatus().userVersion, 3);
+    assert.equal(store.foundationStatus().userVersion, 4);
     assert.equal(store.foundationStatus().requiredTriggersPresent, true);
     const obligation = store.getMatrixObligation(legacy.obligationId);
     assert.equal(obligation.graphHash, null);
@@ -207,6 +207,7 @@ test('v2 to v3 migration preserves legacy bytes and restores v3 enforcement', ()
       obligationId: opened.obligationId,
       resolvedByNode: 'New_Resolver',
       witnessDigest: sha256Canonical({ witness: 'v3' }),
+      resultDigest: sha256Canonical({ result: 'v4' }),
       graphHash,
       propagationHopLimit: 1,
       resolutionState: 'RESOLVED_BY_WITNESS' as const,
@@ -222,7 +223,7 @@ test('v2 to v3 migration preserves legacy bytes and restores v3 enforcement', ()
       expiresAt: new Date(Date.now() + 60_000).toISOString(),
       topologyHash: store.topologyHash(),
     });
-    const closed = store.executeOnce(lease, 'MIGRATION_V3_CLOSURE', () =>
+    const closed = store.executeOnce(lease, 'MIGRATION_V4_CLOSURE', () =>
       store.applyClosureReceipt(closureInput),
     );
     assert.equal(

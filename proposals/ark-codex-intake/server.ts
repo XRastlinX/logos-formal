@@ -471,6 +471,7 @@ app.post(
         obligationId: body.obligationId,
         resolvedByNode: body.resolvedByNode,
         witnessDigest: body.witnessDigest,
+        resultDigest: body.resultDigest,
         propagationHopLimit: body.propagationHopLimit,
         resolutionState: body.resolutionState,
         finiteCost: body.finiteCost,
@@ -488,6 +489,7 @@ app.post(
           obligationId: String(body.obligationId ?? ''),
           resolvedByNode: String(body.resolvedByNode ?? ''),
           witnessDigest: String(body.witnessDigest ?? ''),
+          resultDigest: String(body.resultDigest ?? ''),
           propagationHopLimit: Number(body.propagationHopLimit),
           resolutionState: body.resolutionState as
             | 'CLEARED_BY_RECEIPT'

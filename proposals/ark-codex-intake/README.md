@@ -17,6 +17,7 @@ Within the tested local simulation, integrity is maintained through layered cont
 *   **SQLite transactions:** `BEGIN IMMEDIATE … COMMIT` makes the nonce claim, mutation, receipt, response, and final commitment one atomic operation. A failure rolls the entire transaction back.
 *   **WAL recovery:** SQLite’s write-ahead log supports recovery after abrupt worker termination. Tests confirmed that uncommitted ledger writes and `CLAIMED` nonces disappeared after restart.
 *   **Exact identity binding:** Obligations include the frozen graph digest in their SHA-256 identity.
+*   **Execution-bound closure receipts:** Newly emitted `CLOSURE_RECEIPT_v0.3` records bind a 64-character SHA-256 `resultDigest` into the receipt identity, canonical payload, SQLite row, and a domain-separated HMAC.
 *   **Authenticated receipts:** HMAC-SHA256 detects modification by parties lacking the shared secret. It authenticates custody; it does not prove scientific truth or provide public non-repudiation.
 *   **Idempotent nonces:** Duplicate delivery retrieves the prior committed response without repeating the mutation.
 *   **Database constraints and triggers:** These reject graph mismatches, unauthorized transitions, malformed costs, trace deletion, and direct trust-registry modification.
@@ -24,6 +25,12 @@ Within the tested local simulation, integrity is maintained through layered cont
 *   **Independent oracle:** The test calculates the graph-permitted affected set separately and requires exact equality with observed terminal nodes. Orthogonal obligations must remain unchanged.
 
 *"Hostile" here means the exercised deterministic faults: delay, loss with fair retry, duplication, reordering, temporary partition, revocation, contention, and local process termination.*
+
+`resultDigest` binding proves internal agreement and detects unauthorized
+modification by parties without the HMAC key. The current boundary does not
+independently recompute the digest from external execution bytes, so it does
+not establish that the declared bytes existed, executed correctly, or were
+scientifically valid.
 
 ---
 
