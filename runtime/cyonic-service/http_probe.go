@@ -28,6 +28,7 @@ type HTTPProbeResult struct {
 	ApplyProbeReason  string   `json:"applyProbeReason"`
 	ExternalityStatus string   `json:"externalityStatus"`
 	SourceRef         string   `json:"sourceRef"`
+	ServerInstance    string   `json:"serverInstance,omitempty"`
 }
 
 func requireHTTPStatus(response *http.Response, expected int, label string) error {
@@ -67,10 +68,14 @@ func readLimitedBody(response *http.Response) ([]byte, error) {
 	return body, nil
 }
 
-func runHTTPProbe(baseURL string) (HTTPProbeResult, error) {
+func runHTTPProbe(baseURL, sourceRef, expectedInstance string) (HTTPProbeResult, error) {
 	baseURL = strings.TrimRight(strings.TrimSpace(baseURL), "/")
 	if baseURL == "" {
 		return HTTPProbeResult{}, errors.New("base URL is required")
+	}
+	sourceRef = strings.TrimSpace(sourceRef)
+	if sourceRef == "" {
+		sourceRef = detectSourceRef()
 	}
 	client := &http.Client{Timeout: 5 * time.Second}
 	result := HTTPProbeResult{
@@ -82,7 +87,7 @@ func runHTTPProbe(baseURL string) (HTTPProbeResult, error) {
 		Effect:            "NOT_PERFORMED",
 		Forwarded:         false,
 		ExternalityStatus: "NOT_ADJUDICATED",
-		SourceRef:         detectSourceRef(),
+		SourceRef:         sourceRef,
 	}
 
 	health, err := client.Get(baseURL + "/health")
@@ -97,7 +102,20 @@ func runHTTPProbe(baseURL string) (HTTPProbeResult, error) {
 		health.Body.Close()
 		return result, err
 	}
-	health.Body.Close()
+	healthBody, err := readLimitedBody(health)
+	if err != nil {
+		return result, fmt.Errorf("read health response: %w", err)
+	}
+	var healthPayload HTTPResponse
+	if err := json.Unmarshal(healthBody, &healthPayload); err != nil {
+		return result, fmt.Errorf("decode health response: %w", err)
+	}
+	result.ServerInstance = healthPayload.InstanceID
+	expectedInstance = strings.TrimSpace(expectedInstance)
+	if expectedInstance != "" && healthPayload.InstanceID != expectedInstance {
+		return result, fmt.Errorf("health instanceId = %q, expected %q",
+			healthPayload.InstanceID, expectedInstance)
+	}
 
 	sampleResponse, err := client.Get(baseURL + "/api/demo/request")
 	if err != nil {
@@ -200,6 +218,7 @@ func smokeHTTP(now time.Time) (HTTPProbeResult, error) {
 		TrustedIssuer: "example-principal",
 		PublicKey:     fixture.PublicKey,
 		OriginClaim:   "undetermined",
+		InstanceID:    "smoke-http",
 		Now:           func() time.Time { return now },
 		SampleRequest: &fixture.Request,
 	}
@@ -220,7 +239,11 @@ func smokeHTTP(now time.Time) (HTTPProbeResult, error) {
 		serverErrors <- server.Serve(listener)
 	}()
 
-	result, probeErr := runHTTPProbe("http://" + listener.Addr().String())
+	result, probeErr := runHTTPProbe(
+		"http://"+listener.Addr().String(),
+		detectSourceRef(),
+		config.InstanceID,
+	)
 	ctx, cancel := context.WithTimeout(context.Background(), 2*time.Second)
 	shutdownErr := server.Shutdown(ctx)
 	cancel()
@@ -265,10 +288,12 @@ func runProbeHTTP(args []string) int {
 	flags := flag.NewFlagSet("probe-http", flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
 	baseURL := flags.String("base-url", "http://127.0.0.1:8787", "Cyonic service base URL")
+	sourceRef := flags.String("source-ref", "", "explicit source commit or artifact reference")
+	expectedInstance := flags.String("expected-instance", "", "required server instance identity when process binding is needed")
 	if err := flags.Parse(args); err != nil {
 		return 2
 	}
-	result, err := runHTTPProbe(*baseURL)
+	result, err := runHTTPProbe(*baseURL, *sourceRef, *expectedInstance)
 	if err != nil {
 		result.Status = "COLD_CALL_FAILED"
 		_ = json.NewEncoder(os.Stdout).Encode(result)

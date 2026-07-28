@@ -24,6 +24,7 @@ type HTTPConfig struct {
 	TrustedIssuer string
 	PublicKey     ed25519.PublicKey
 	OriginClaim   string
+	InstanceID    string
 	Now           func() time.Time
 	SampleRequest *BoundaryRequest
 }
@@ -35,6 +36,7 @@ type HTTPResponse struct {
 	AuthorityEffect string           `json:"authorityEffect"`
 	Effect          string           `json:"effect"`
 	Forwarded       bool             `json:"forwarded"`
+	InstanceID      string           `json:"instanceId,omitempty"`
 	ReasonCode      string           `json:"reasonCode,omitempty"`
 	Detail          string           `json:"detail"`
 	Receipt         *BoundaryReceipt `json:"receipt,omitempty"`
@@ -119,8 +121,12 @@ func newHTTPHandler(config HTTPConfig) http.Handler {
 			writeHTTPJSON(writer, http.StatusMethodNotAllowed, "REJECT", response)
 			return
 		}
-		writeHTTPJSON(writer, http.StatusOK, "OBSERVE_ONLY",
-			baseHTTPResponse("READY", "Cyonic validation is available; this process has no Apply or forwarding capability."))
+		response := baseHTTPResponse(
+			"READY",
+			"Cyonic validation is available; this process has no Apply or forwarding capability.",
+		)
+		response.InstanceID = config.InstanceID
+		writeHTTPJSON(writer, http.StatusOK, "OBSERVE_ONLY", response)
 	})
 
 	validate := func(writer http.ResponseWriter, request *http.Request) {
@@ -217,7 +223,7 @@ func newHTTPHandler(config HTTPConfig) http.Handler {
 	})
 }
 
-func loadHTTPConfig(trustKeyPath, issuer, originClaim string) (HTTPConfig, error) {
+func loadHTTPConfig(trustKeyPath, issuer, originClaim, instanceID string) (HTTPConfig, error) {
 	if strings.TrimSpace(trustKeyPath) == "" {
 		return HTTPConfig{}, errors.New("-trust-key is required")
 	}
@@ -232,6 +238,7 @@ func loadHTTPConfig(trustKeyPath, issuer, originClaim string) (HTTPConfig, error
 		TrustedIssuer: issuer,
 		PublicKey:     publicKey,
 		OriginClaim:   originClaim,
+		InstanceID:    strings.TrimSpace(instanceID),
 	}, nil
 }
 
@@ -258,10 +265,11 @@ func runServe(args []string) int {
 	issuer := flags.String("issuer", "", "trusted issuer identifier")
 	originClaim := flags.String("origin-claim", "undetermined",
 		"caller relationship claim recorded in receipts; never self-verifies externality")
+	instanceID := flags.String("instance-id", "", "optional caller-selected process identity for bounded health checks")
 	if err := flags.Parse(args); err != nil {
 		return 2
 	}
-	config, err := loadHTTPConfig(*trustKeyPath, *issuer, *originClaim)
+	config, err := loadHTTPConfig(*trustKeyPath, *issuer, *originClaim, *instanceID)
 	if err != nil {
 		fmt.Fprintln(os.Stderr, "serve:", err)
 		return 2
@@ -277,6 +285,7 @@ func runServeDemo(args []string) int {
 	flags := flag.NewFlagSet("serve-demo", flag.ContinueOnError)
 	flags.SetOutput(os.Stderr)
 	address := flags.String("listen", defaultListenAddress, "listen address")
+	instanceID := flags.String("instance-id", "", "optional caller-selected process identity for bounded health checks")
 	if err := flags.Parse(args); err != nil {
 		return 2
 	}
@@ -290,6 +299,7 @@ func runServeDemo(args []string) int {
 		TrustedIssuer: "example-principal",
 		PublicKey:     fixture.PublicKey,
 		OriginClaim:   "undetermined",
+		InstanceID:    strings.TrimSpace(*instanceID),
 		Now:           func() time.Time { return now },
 		SampleRequest: &fixture.Request,
 	}

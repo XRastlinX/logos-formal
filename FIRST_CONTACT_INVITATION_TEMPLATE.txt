@@ -15,9 +15,12 @@ Package SHA-256:
 
 Please follow the published instructions and leave an Issue #2 comment containing:
 
-- elapsed time;
-- one sentence explaining what you believe the surface does;
-- anything that blocked or confused you, or “none observed.”
+elapsed:
+understanding: (one sentence — what separation does this surface enforce?)
+refusal_observed: yes | no
+friction: none | <what blocked or confused you>
+env: OS + go version
+source: exact commit or portable ZIP SHA-256
 
 This is not a request for endorsement or agreement. The trial makes no scientific or authority claim and performs no authorized effect. Please do not post credentials, private keys, tokens, or sensitive paths.
 

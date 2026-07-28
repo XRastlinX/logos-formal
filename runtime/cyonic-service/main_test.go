@@ -79,6 +79,88 @@ func TestValidPermitEvidenceNeverPerformsEffect(t *testing.T) {
 	}
 }
 
+// TestEvaluationBoundaryInvariantAcrossDecisionMatrix is a deterministic
+// property matrix over representative accept and reject paths. It is scoped
+// implementation evidence, not a proof over all possible programs or inputs.
+func TestEvaluationBoundaryInvariantAcrossDecisionMatrix(t *testing.T) {
+	now := time.Date(2026, 7, 26, 12, 0, 0, 0, time.UTC)
+
+	tests := []struct {
+		name   string
+		mutate func(*BoundaryRequest, *EvaluationConfig, ed25519.PrivateKey)
+	}{
+		{name: "valid externally signed permit evidence"},
+		{
+			name: "effectful operation",
+			mutate: func(request *BoundaryRequest, _ *EvaluationConfig, _ ed25519.PrivateKey) {
+				request.Operation = "APPLY"
+			},
+		},
+		{
+			name: "missing permit schema",
+			mutate: func(request *BoundaryRequest, _ *EvaluationConfig, _ ed25519.PrivateKey) {
+				request.Permit.Schema = ""
+			},
+		},
+		{
+			name: "artifact changed after permit",
+			mutate: func(request *BoundaryRequest, _ *EvaluationConfig, _ ed25519.PrivateKey) {
+				request.Artifact.Target = "other-target"
+			},
+		},
+		{
+			name: "untrusted issuer",
+			mutate: func(request *BoundaryRequest, _ *EvaluationConfig, privateKey ed25519.PrivateKey) {
+				request.Permit.Issuer = "other-issuer"
+				signPermit(&request.Permit, privateKey)
+			},
+		},
+		{
+			name: "expired permit",
+			mutate: func(request *BoundaryRequest, _ *EvaluationConfig, privateKey ed25519.PrivateKey) {
+				request.Permit.ExpiresAt = now.Format(time.RFC3339)
+				signPermit(&request.Permit, privateKey)
+			},
+		},
+		{
+			name: "trust configuration removed",
+			mutate: func(_ *BoundaryRequest, config *EvaluationConfig, _ ed25519.PrivateKey) {
+				config.TrustedIssuer = ""
+				config.PublicKey = nil
+			},
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			request, config, privateKey := testRequest(t, now)
+			if test.mutate != nil {
+				test.mutate(&request, &config, privateKey)
+			}
+
+			receipt, _ := evaluate(request, config)
+			if receipt.GovernanceState != "010" {
+				t.Fatalf("governance state escaped 010: %q", receipt.GovernanceState)
+			}
+			if receipt.AuthorityEffect != "NONE" ||
+				receipt.Authorization.ServiceAuthorityEffect != "NONE" {
+				t.Fatalf("evaluation claimed authority: %+v", receipt)
+			}
+			if receipt.Effect.Status != "NOT_PERFORMED" ||
+				receipt.Effect.AuthorityEffect != "NONE" {
+				t.Fatalf("evaluation crossed the effect boundary: %+v", receipt.Effect)
+			}
+			if receipt.Routing.Forwarded {
+				t.Fatalf("evaluation forwarded a request: %+v", receipt.Routing)
+			}
+			if receipt.Routing.Decision != "OBSERVE_ONLY" &&
+				receipt.Routing.Decision != "REJECT" {
+				t.Fatalf("unexpected bounded routing decision: %q", receipt.Routing.Decision)
+			}
+		})
+	}
+}
+
 func TestEffectfulRouteIsAlwaysRejected(t *testing.T) {
 	now := time.Date(2026, 7, 26, 12, 0, 0, 0, time.UTC)
 	request, config, _ := testRequest(t, now)
@@ -208,6 +290,29 @@ func TestFirstContactTrialNeverSelfAdjudicates(t *testing.T) {
 	}
 	if report.Friction.Category != "TRYABILITY" {
 		t.Fatalf("friction was not preserved: %+v", report.Friction)
+	}
+}
+
+func TestFirstContactParticipantRefStripsUTF8BOM(t *testing.T) {
+	now := time.Date(2026, 7, 26, 12, 0, 0, 0, time.UTC)
+	input := strings.NewReader(strings.Join([]string{
+		"\ufeffcold-user-powershell",
+		"4.5",
+		"it checked an artifact-bound signature",
+		"an external configured principal",
+		"no",
+		"NONE",
+		"none",
+		"",
+	}, "\n"))
+	var output bytes.Buffer
+
+	report, err := conductTrial(input, &output, now, "external", "candidate-sha")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if report.ParticipantRef != "cold-user-powershell" {
+		t.Fatalf("participantRef retained BOM or drifted: %q", report.ParticipantRef)
 	}
 }
 

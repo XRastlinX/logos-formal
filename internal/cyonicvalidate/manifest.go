@@ -180,6 +180,13 @@ func validateManifest(manifest Manifest) error {
 		}
 		seenPaths[clean] = true
 	}
+	if manifest.Profile == PublicProfile {
+		for _, path := range publicProfileRequiredPaths {
+			if !seenPaths[filepath.Clean(path)] {
+				return fmt.Errorf("public profile is missing required control path %q", path)
+			}
+		}
+	}
 	return nil
 }
 

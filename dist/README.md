@@ -23,6 +23,7 @@ Its recorded SHA-256 is:
 Unpack it, then follow its `README.md`. On Windows:
 
 ```powershell
+# Prefer a short extraction root such as C:\cyonic-trial\
 .\setup.cmd friend-node-01 codex
 .\trial.cmd cyonic-first-contact-report-01.json
 ```

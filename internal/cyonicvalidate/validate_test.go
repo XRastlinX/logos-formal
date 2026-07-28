@@ -108,6 +108,30 @@ func TestValidateRejectsMutation(t *testing.T) {
 	}
 }
 
+func TestValidateRejectsMissingRequiredControlFile(t *testing.T) {
+	root := newTestRepository(t)
+	manifest := testManifest()
+	manifest.RequiredPaths = append(manifest.RequiredPaths, "AGENTS.md")
+
+	result, exitCode := (Validator{Runner: fakeRunner{}}).Validate(
+		context.Background(),
+		root,
+		root,
+		".",
+		manifest,
+		"EXACT",
+	)
+
+	if exitCode != ExitRejected {
+		t.Fatalf("exit code = %d, want %d", exitCode, ExitRejected)
+	}
+	if result.RejectedInvariant != CheckRequiredPaths ||
+		result.RouterDecision != "REJECT" ||
+		result.GovernanceAuthorityEffect != "NONE" {
+		t.Fatalf("missing control file did not fail closed: %#v", result)
+	}
+}
+
 func TestValidateReportsMissingGoDependency(t *testing.T) {
 	root := newTestRepository(t)
 	result, exitCode := (Validator{
@@ -206,6 +230,31 @@ func TestLoadManifestAcceptsOnlyApprovedCheckRegistry(t *testing.T) {
 	}
 	if _, err := LoadManifest(path); err != nil {
 		t.Fatalf("approved manifest was rejected: %v", err)
+	}
+}
+
+func TestLoadPublicProfileRejectsRemovedControlReference(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "manifest.json")
+	data := `{
+	  "schema":"urn:cyonic:validation-manifest:v1",
+	  "version":"1.0",
+	  "profile":"logos-formal-node-setup-010",
+	  "target":".",
+	  "requiredPaths":[],
+	  "checks":[
+	    "CV-TARGET-BOUNDARY",
+	    "CV-REQUIRED-PATHS",
+	    "CV-GO-VET",
+	    "CV-GO-TEST-FRESH",
+	    "CV-TARGET-IMMUTABILITY"
+	  ]
+	}`
+	if err := os.WriteFile(path, []byte(data), 0o600); err != nil {
+		t.Fatal(err)
+	}
+	if _, err := LoadManifest(path); err == nil ||
+		!strings.Contains(err.Error(), `public profile is missing required control path "AGENTS.md"`) {
+		t.Fatalf("expected public control-floor rejection, got %v", err)
 	}
 }
 
