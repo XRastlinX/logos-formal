@@ -64,7 +64,7 @@ the deterministic service boundary.
 | A4-2 | `NOT_COVERED_BY_MEMORY_FIXTURES` | Requires a filesystem/worktree containment harness |
 | A4-3 | `A4-MEM-008` rejects a text-only residual-credential claim | Does not inspect operating-system credential stores |
 | A4-4 | Existing create-only evidence and digest-drift unit tests are partial implementation evidence | No complete append-only audit chain or truncation assay exists |
-| A4-5 | Injection, compacted-summary, receipt, and tool-description fixtures remain text-only | Does not establish model-level prompt-injection resistance |
+| A4-5 | Injection, compacted-summary, receipt, tool-description, and poisoned-upstream-file fixtures remain text-only; `A4-XPIA-010` cannot populate the typed Permit carrier | Does not establish model-level prompt-injection resistance or test a live retrieval pipeline |
 | A4-6 | `A4-MEM-002` cannot turn a policy-rewrite claim into Apply | Does not exercise repository policy-file mutation |
 | A4-7 | Husk and low-score recovery fixtures cannot self-resume Apply | Does not implement a production husk lifecycle |
 | A4-8 | Fixture conversion keeps text, receipt claims, and tool advertisements outside the Permit carrier | Does not exercise a live MCP registry |
