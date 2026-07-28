@@ -7,6 +7,11 @@
 *.test
 *.out
 
+# Local CyExchange durable runtime state
+cyexchange.db
+cyexchange.db-shm
+cyexchange.db-wal
+
 # Object files
 *.o
 *.obj

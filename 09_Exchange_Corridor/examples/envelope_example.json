@@ -1,0 +1,18 @@
+{
+  "envelope_id": "01HGWJ29FQ1Z1T7JXZN1KQQ6X7",
+  "sender": {
+    "did": "did:key:z6MkhaXgBZDvotDkL5257faiztiGiC2QtKLGpbnnEGta2doK",
+    "public_key_ed25519": "d75a980182b10ab7d54bfed3c964073a0ee172f3daa62325af021a68f707511a",
+    "capability_scope": "010-observer"
+  },
+  "receiver": {
+    "did": "did:key:z6Mkq4G6mX2E4r6W4Ww2tK8r5h8DnP3N8V7tL9Zq2Yv1Wk3X",
+    "public_key_ed25519": "e81d7f8d6e3c5a2b1f0c4e9d7b5a3f1e0c8d6b4a2f9e7d5c3b1a0f8e6d4c2b0a",
+    "capability_scope": "101-actuator"
+  },
+  "required_state": "101",
+  "payload_schema_uri": "cyexchange.routes/v1/oracle.interpret",
+  "payload_bytes": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9...",
+  "payload_hash": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+  "signature_ed25519": "7b2c9a1d5e3f8b0c4a6d2e1f9b3c5a7d8e0f2b4c6a1d3e5f7b9c0a2d4e6f8b1c..."
+}

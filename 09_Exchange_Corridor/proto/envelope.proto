@@ -1,0 +1,29 @@
+syntax = "proto3";
+
+package cyexchange.v1;
+
+option go_package = "logos-formal/pkg/cyexchange/proto;cyexchangepb";
+
+// PROPOSED: CyExchange Envelope V0.1
+// authority_effect: NONE
+// The Envelope wraps all payloads traversing the corridor, separating routing metadata from contents.
+
+message NodeCard {
+    string did = 1;                 // Decentralized Identifier (e.g. did:key:...)
+    string public_key_ed25519 = 2;  // Hex-encoded Ed25519 public key
+    string capability_scope = 3;    // E.g., "010-observer", "101-actuator"
+}
+
+message CyExchangeEnvelope {
+    string envelope_id = 1;         // UUIDv4 or monotonic ULID
+    NodeCard sender = 2;            // Provenance NodeCard
+    NodeCard receiver = 3;          // Target NodeCard
+    
+    string required_state = 4;      // Cubed Bit coordinate required (e.g. "010", "101")
+    string payload_schema_uri = 5;  // Schema of the inner payload
+    
+    bytes payload_bytes = 6;        // The raw payload
+    string payload_hash = 7;        // SHA-256 of canonicalized payload bytes
+    
+    bytes signature_ed25519 = 8;    // Ed25519 signature over (envelope_id + payload_hash)
+}

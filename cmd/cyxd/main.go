@@ -1,0 +1,35 @@
+// Status: PROPOSED
+// authority_effect: NONE
+// Command cyxd runs the CyExchange Inbox/Outbox daemon.
+package main
+
+import (
+	"fmt"
+	"os"
+)
+
+func main() {
+	if len(os.Args) < 2 {
+		fmt.Println("Usage: cyxd <command>")
+		fmt.Println("Commands: init, serve, route")
+		os.Exit(1)
+	}
+
+	command := os.Args[1]
+
+	switch command {
+	case "init":
+		InitCommand()
+	case "serve":
+		port := "8081"
+		if len(os.Args) > 2 {
+			port = os.Args[2]
+		}
+		ServeCommand(port)
+	case "route":
+		RouteCommand()
+	default:
+		fmt.Printf("Unknown command: %s\n", command)
+		os.Exit(1)
+	}
+}

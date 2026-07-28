@@ -1,0 +1,9 @@
+schema: cyexchange.routes/v1
+version: "1.0"
+routes:
+  # Oracle interpretive mode for AI Studio / NotebookLM integration
+  - id: oracle.interpret
+    input_state: "010"
+    output_state: "010"
+    permit: FORBIDDEN
+    handler: oracle-runtime
