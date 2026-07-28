@@ -1,0 +1,252 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/XRastlinX/logos-formal/schemas/cyonic-validation-result.schema.json",
+  "title": "Cyonic Validation Result",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "version",
+    "status",
+    "validationStatus",
+    "validatorVersion",
+    "goVersion",
+    "goos",
+    "goarch",
+    "cubedBit",
+    "validatorOperator",
+    "governanceAuthorityEffect",
+    "executionContainment",
+    "validationProfile",
+    "metadataScope",
+    "target",
+    "checks",
+    "routerDecision"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:cyonic:validation-result:v1"
+    },
+    "version": {
+      "const": "1.0"
+    },
+    "status": {
+      "enum": [
+        "VALIDATED",
+        "REJECTED",
+        "NO_DECISION"
+      ]
+    },
+    "validationStatus": {
+      "enum": [
+        "COMPLETE",
+        "INPUT_ERROR",
+        "PROFILE_ERROR",
+        "ENVIRONMENT_ERROR",
+        "INTERNAL_ERROR"
+      ]
+    },
+    "validatorVersion": {
+      "const": "0.1.0"
+    },
+    "validatorRuntimeRoot": {
+      "$ref": "#/$defs/sha256"
+    },
+    "goVersion": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goos": {
+      "type": "string",
+      "minLength": 1
+    },
+    "goarch": {
+      "type": "string",
+      "minLength": 1
+    },
+    "cubedBit": {
+      "const": "010"
+    },
+    "validatorOperator": {
+      "const": "000"
+    },
+    "governanceAuthorityEffect": {
+      "const": "NONE"
+    },
+    "executionContainment": {
+      "const": "HOST"
+    },
+    "validationProfile": {
+      "type": "string"
+    },
+    "profileRoot": {
+      "$ref": "#/$defs/sha256"
+    },
+    "metadataScope": {
+      "enum": [
+        "EXACT",
+        "UNDECLARED"
+      ]
+    },
+    "target": {
+      "type": "string"
+    },
+    "targetRoot": {
+      "$ref": "#/$defs/sha256"
+    },
+    "checks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "passed",
+        "total",
+        "results"
+      ],
+      "properties": {
+        "passed": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "total": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "results": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "id",
+              "status"
+            ],
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "status": {
+                "enum": [
+                  "PASSED",
+                  "FAILED"
+                ]
+              },
+              "detail": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "routerDecision": {
+      "enum": [
+        "OBSERVE_ONLY",
+        "REJECT",
+        "NONE"
+      ]
+    },
+    "rejectedInvariant": {
+      "type": "string"
+    },
+    "failureCode": {
+      "type": "string"
+    },
+    "decisionRoot": {
+      "$ref": "#/$defs/sha256"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "validationStatus": {
+            "const": "COMPLETE"
+          },
+          "status": {
+            "const": "VALIDATED"
+          }
+        },
+        "required": [
+          "validationStatus",
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "routerDecision": {
+            "const": "OBSERVE_ONLY"
+          }
+        },
+        "required": [
+          "targetRoot",
+          "profileRoot",
+          "validatorRuntimeRoot",
+          "decisionRoot"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validationStatus": {
+            "const": "COMPLETE"
+          },
+          "status": {
+            "const": "REJECTED"
+          }
+        },
+        "required": [
+          "validationStatus",
+          "status"
+        ]
+      },
+      "then": {
+        "properties": {
+          "routerDecision": {
+            "const": "REJECT"
+          }
+        },
+        "required": [
+          "rejectedInvariant",
+          "decisionRoot"
+        ]
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "validationStatus": {
+            "enum": [
+              "INPUT_ERROR",
+              "PROFILE_ERROR",
+              "ENVIRONMENT_ERROR",
+              "INTERNAL_ERROR"
+            ]
+          }
+        },
+        "required": [
+          "validationStatus"
+        ]
+      },
+      "then": {
+        "properties": {
+          "status": {
+            "const": "NO_DECISION"
+          },
+          "routerDecision": {
+            "const": "NONE"
+          }
+        },
+        "required": [
+          "failureCode"
+        ]
+      }
+    }
+  ]
+}

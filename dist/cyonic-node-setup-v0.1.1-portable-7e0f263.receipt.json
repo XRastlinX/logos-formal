@@ -1,0 +1,51 @@
+{
+  "schema": "urn:cyonic:node-package-receipt:v1",
+  "package": "cyonic-node-setup-v0.1.1-portable-7e0f263.zip",
+  "packageVersion": "0.1.1",
+  "sourceRepository": "https://github.com/XRastlinX/logos-formal.git",
+  "sourceBranch": "codex/cyonic-service-surface-v1",
+  "sourceCommit": "7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a",
+  "archiveRoot": "sha256:2b539eea8ee392bb5f1318b3661b1d04bc090bffb19e7482d9813453a9001c12",
+  "archiveBytes": 12867,
+  "manifestRoot": "sha256:cbf19abdf9d83f91bca9b89d29ea7ba3f801e7f87ddb3c6e24cb075e69938474",
+  "archiveInspection": {
+    "entries": 17,
+    "unsafePaths": 0,
+    "pathSeparator": "/"
+  },
+  "internalColdRun": {
+    "observedAt": "2026-07-26T16:55:07.6914401Z",
+    "platform": "windows",
+    "goVersion": "go1.26.2",
+    "elapsedSeconds": 16.55,
+    "setupStatus": "PASSED",
+    "repositoryValidation": {
+      "validationStatus": "COMPLETE",
+      "status": "VALIDATED",
+      "cubedBit": "010",
+      "validatorOperator": "000",
+      "governanceAuthorityEffect": "NONE",
+      "executionContainment": "HOST",
+      "checksPassed": 5,
+      "checksTotal": 5,
+      "routerDecision": "OBSERVE_ONLY"
+    },
+    "serviceProbe": {
+      "status": "COLD_CALL_PASSED",
+      "governanceState": "010",
+      "authorityEffect": "NONE",
+      "effect": "NOT_PERFORMED",
+      "forwarded": false,
+      "applyProbeStatus": 405,
+      "applyProbeReason": "EFFECT_ROUTE_FORBIDDEN"
+    }
+  },
+  "externalityStatus": "NOT_ADJUDICATED",
+  "authorityEffect": "NONE",
+  "limits": [
+    "Archive and manifest roots are SHA-256 checksums, not signatures.",
+    "The cold run was performed by the project workflow and is not independent external evidence.",
+    "The receipt proves only the listed observations in the recorded environment.",
+    "It does not prove semantic truth, safety, adoption, lawful authority, or canon elevation."
+  ]
+}

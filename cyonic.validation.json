@@ -1,0 +1,30 @@
+{
+  "$schema": "schemas/cyonic-validation.schema.json",
+  "schema": "urn:cyonic:validation-manifest:v1",
+  "version": "1.0",
+  "profile": "logos-formal-node-setup-010",
+  "target": ".",
+  "requiredPaths": [
+    "README.md",
+    ".gitattributes",
+    "go.mod",
+    "01_Governance_Geometry",
+    "08_Builder_Layer",
+    "docs",
+    "runtime/cyonic-service",
+    "cmd/cyonic-validate",
+    "internal/cyonicvalidate",
+    "scripts/validate.sh",
+    "scripts/validate.ps1",
+    "scripts/validate.cmd",
+    "schemas/cyonic-validation.schema.json",
+    "schemas/cyonic-validation-result.schema.json"
+  ],
+  "checks": [
+    "CV-TARGET-BOUNDARY",
+    "CV-REQUIRED-PATHS",
+    "CV-GO-VET",
+    "CV-GO-TEST-FRESH",
+    "CV-TARGET-IMMUTABILITY"
+  ]
+}

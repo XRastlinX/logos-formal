@@ -1,0 +1,16 @@
+{
+  "schema": "urn:cyonic:validation-manifest:v1",
+  "version": "1.0",
+  "profile": "rejection-fixture-010",
+  "target": ".",
+  "requiredPaths": [
+    "this-path-must-not-exist"
+  ],
+  "checks": [
+    "CV-TARGET-BOUNDARY",
+    "CV-REQUIRED-PATHS",
+    "CV-GO-VET",
+    "CV-GO-TEST-FRESH",
+    "CV-TARGET-IMMUTABILITY"
+  ]
+}

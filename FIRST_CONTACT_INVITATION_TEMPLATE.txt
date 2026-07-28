@@ -1,0 +1,29 @@
+Subject: Independent 10-minute cold-run request
+
+Hi [Name],
+
+Would you be willing to run a small published Go trial without guidance from me?
+
+Instructions:
+https://github.com/XRastlinX/logos-formal/issues/2
+
+Pinned commit:
+7e0f263c2a31eaece5bf8ded76ce4ba47c7db32a
+
+Package SHA-256:
+8d1263b1dff0fcd84c42ac8911f132d270e8b172d50d06982d73d227499315a7
+
+Please follow the published instructions and leave an Issue #2 comment containing:
+
+- elapsed time;
+- one sentence explaining what you believe the surface does;
+- anything that blocked or confused you, or “none observed.”
+
+This is not a request for endorsement or agreement. The trial makes no scientific or authority claim and performs no authorized effect. Please do not post credentials, private keys, tokens, or sensitive paths.
+
+If you become blocked, record the exact point before asking me for help so the friction remains observable.
+
+No problem if you cannot participate.
+
+Thank you,
+Charles
