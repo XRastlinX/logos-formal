@@ -1,0 +1,92 @@
+{
+  "limited_vocabulary_model": {
+    "vocabulary": {
+      "namespace": "agent",
+      "terms": [
+        {
+          "id": "agent.route_case",
+          "label": "route_case",
+          "definition": "Send a case object to a declared target queue.",
+          "scope": "workflow",
+          "version": "2026-07-24",
+          "deprecated": false
+        },
+        {
+          "id": "agent.issue_lease",
+          "label": "issue_lease",
+          "definition": "Cryptographically sign and emit a temporal application window.",
+          "scope": "governance",
+          "version": "2026-07-24",
+          "deprecated": false
+        },
+        {
+          "id": "agent.apply_mutation",
+          "label": "apply_mutation",
+          "definition": "Permanently settle a validated topology state to the Shadow Ledger.",
+          "scope": "governance",
+          "version": "2026-07-24",
+          "deprecated": false
+        },
+        {
+          "id": "agent.vibe",
+          "label": "vibe",
+          "definition": "A measurable, periodic oscillation or waveform interference pattern within a symbolic or physical topology.",
+          "scope": "cy_physics",
+          "version": "2026-07-24",
+          "deprecated": false
+        }
+      ]
+    },
+    "grammar": {
+      "allowed_predicates": [
+        "invoke",
+        "read",
+        "validate",
+        "refuse",
+        "settle"
+      ],
+      "forbidden_surface_forms": [
+        "anthropomorphic_verbs",
+        "evaluative_intensifiers",
+        "metaphysical_claims",
+        "narrative_framing"
+      ],
+      "forbidden_surface_terms": [
+        "amazing", "incredible", "perfect", "beautiful", "terrible", "awful", "wonderful", "magical", "chaotic", "profound",
+        "love", "hate", "fear", "hope", "desire", "passion", "anger", "sadness", "joy", "excitement",
+        "should", "must", "supposed to", "destined", "meant to", "inevitable", "fate", "purpose", "calling", "chosen",
+        "think", "feel", "believe", "want", "intend", "decide", "judge", "understand", "imagine", "realize",
+        "extremely", "totally", "absolutely", "deeply", "truly", "massively", "wildly", "unbelievably", "insanely", "remarkably"
+      ]
+    },
+    "schemas": {
+      "invoke.route_case": {
+        "input_schema_ref": "jsonschema://agent/route_case/v1",
+        "output_schema_ref": "jsonschema://agent/route_case_result/v1"
+      }
+    },
+    "permissions": {
+      "analyst": {
+        "may": ["read", "validate"],
+        "may_not": ["invoke.route_case", "settle", "issue_lease"]
+      },
+      "router": {
+        "may": ["invoke.route_case"],
+        "may_not": ["settle", "issue_lease"]
+      },
+      "sovereign_operator": {
+        "may": ["read", "validate", "invoke.route_case", "settle", "issue_lease"],
+        "may_not": []
+      }
+    },
+    "provenance": {
+      "model": "PROV-O",
+      "identifier_policy": "persistent_versioned_ids"
+    },
+    "extension_policy": {
+      "review_required": true,
+      "duplicate_check": true,
+      "semantic_impact_check": true
+    }
+  }
+}

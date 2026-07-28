@@ -1,0 +1,59 @@
+{
+  "profile": "gue-jitter-fixture-result/v0.1",
+  "status": "OBSERVED_LOCAL_FIXTURE",
+  "command": "npm run research:jitter -- 1000 1785263704 500 2",
+  "config": {
+    "nodeCount": 1000,
+    "epoch": 1785263704,
+    "meanJitterMs": 500,
+    "collisionWindowMs": 2
+  },
+  "results": [
+    {
+      "strategy": "UNIFORM_ABSOLUTE",
+      "meanOffsetMs": 482.8410294360947,
+      "spanMs": 997.5176493171602,
+      "minimumSpacingMs": 0.0005133915692567825,
+      "adjacentCollisionCount": 858,
+      "pairCollisionCount": 2021,
+      "samplerAttempts": 0,
+      "samplerFallbacks": 0
+    },
+    {
+      "strategy": "EXPONENTIAL_ABSOLUTE",
+      "meanOffsetMs": 498.63967698077556,
+      "spanMs": 3743.2698917211355,
+      "minimumSpacingMs": 0.00031197094926938007,
+      "adjacentCollisionCount": 744,
+      "pairCollisionCount": 2002,
+      "samplerAttempts": 0,
+      "samplerFallbacks": 0
+    },
+    {
+      "strategy": "INDEPENDENT_GUE_OFFSETS",
+      "meanOffsetMs": 495.616973012693,
+      "spanMs": 1252.1192229671774,
+      "minimumSpacingMs": 0.00033394281149412564,
+      "adjacentCollisionCount": 880,
+      "pairCollisionCount": 2708,
+      "samplerAttempts": 3055,
+      "samplerFallbacks": 0
+    },
+    {
+      "strategy": "COORDINATED_GUE_SPACINGS",
+      "meanOffsetMs": 494.40846191193697,
+      "spanMs": 998.8461400363373,
+      "minimumSpacingMs": 0.11474319597084559,
+      "adjacentCollisionCount": 980,
+      "pairCollisionCount": 1590,
+      "samplerAttempts": 3061,
+      "samplerFallbacks": 0
+    }
+  ],
+  "disposition": {
+    "greaterThan90PercentReduction": "FALSIFIED_FOR_THIS_FIXTURE",
+    "runtimeIntegration": "NOT_PERFORMED",
+    "productionClaim": "NOT_ESTABLISHED",
+    "authorityEffect": "NONE"
+  }
+}
