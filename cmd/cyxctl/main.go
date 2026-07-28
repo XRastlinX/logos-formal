@@ -10,7 +10,7 @@ import (
 func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("Usage: cyxctl <command> [args]")
-		fmt.Println("Commands: send, inspect-node, verify-receipt, conformance")
+		fmt.Println("Commands: send, inspect-node, verify-receipt, conformance, reliability")
 		os.Exit(1)
 	}
 
@@ -25,6 +25,11 @@ func main() {
 		VerifyCommand(os.Args[2:])
 	case "conformance":
 		ConformanceCommand()
+	case "reliability":
+		if err := ReliabilityCommand(); err != nil {
+			fmt.Printf("[FAIL] Reliability suite: %v\n", err)
+			os.Exit(1)
+		}
 	default:
 		fmt.Printf("Unknown command: %s\n", command)
 		os.Exit(1)

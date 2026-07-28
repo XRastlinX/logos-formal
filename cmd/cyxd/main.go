@@ -6,8 +6,6 @@ package main
 import (
 	"fmt"
 	"os"
-
-	"github.com/XRastlinX/logos-formal/pkg/cyexchange/inbox"
 )
 
 func main() {
@@ -35,6 +33,3 @@ func main() {
 		os.Exit(1)
 	}
 }
-
-// Global adapters (stubs for PROPOSED state)
-var globalInbox = inbox.NewAdapter()

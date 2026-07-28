@@ -3,66 +3,89 @@
 package envelope
 
 import (
+	"bytes"
 	"crypto/ed25519"
 	"encoding/hex"
-	"fmt"
+	"strings"
 	"testing"
 )
 
-func TestValidator_Valid010(t *testing.T) {
-	// Generate valid Ed25519 keys
+func signedTestEnvelope(t *testing.T) *CyExchangeEnvelope {
+	t.Helper()
 	pub, priv, err := ed25519.GenerateKey(nil)
 	if err != nil {
 		t.Fatal(err)
 	}
-	pubHex := hex.EncodeToString(pub)
-
 	payload := []byte(`{"request":"observe"}`)
-	payloadHash, _ := HashPayload(payload)
-
-	envID := "ENV-1234"
-	msgHex := fmt.Sprintf("%x%x", []byte(envID), []byte(payloadHash))
-	msgBytes, _ := hex.DecodeString(msgHex)
-
-	sig := ed25519.Sign(priv, msgBytes)
-	sigHex := hex.EncodeToString(sig)
-
-	env := &CyExchangeEnvelope{
-		EnvelopeID: envID,
-		Sender: NodeCard{
-			PublicKeyEd25519: pubHex,
-		},
-		RequiredState: "010",
-		PayloadBytes:  payload,
-		PayloadHash:   payloadHash,
-		SignatureEd25519: sigHex,
+	payloadHash, err := HashPayload(payload)
+	if err != nil {
+		t.Fatal(err)
 	}
+	env := &CyExchangeEnvelope{
+		EnvelopeID: "ENV-1234",
+		Sender: NodeCard{
+			DID:              "did:key:sender",
+			PublicKeyEd25519: hex.EncodeToString(pub),
+			CapabilityScope:  "010-observer",
+		},
+		Receiver:         NodeCard{DID: "did:key:receiver"},
+		RequiredState:    "010",
+		PayloadSchemaURI: "urn:cyexchange:test",
+		PayloadBytes:     payload,
+		PayloadHash:      payloadHash,
+	}
+	signingBytes, err := SigningBytes(env)
+	if err != nil {
+		t.Fatal(err)
+	}
+	env.SignatureEd25519 = hex.EncodeToString(ed25519.Sign(priv, signingBytes))
+	return env
+}
 
-	if err := Validate(env); err != nil {
+func TestValidatorValid010(t *testing.T) {
+	if err := Validate(signedTestEnvelope(t)); err != nil {
 		t.Fatalf("expected valid envelope, got error: %v", err)
 	}
 }
 
-func TestValidator_RejectsMutatedHash(t *testing.T) {
-	pub, priv, _ := ed25519.GenerateKey(nil)
-	payload := []byte(`{"request":"observe"}`)
-	payloadHash, _ := HashPayload(payload)
-
-	envID := "ENV-1234"
-	msgHex := fmt.Sprintf("%x%x", []byte(envID), []byte(payloadHash))
-	msgBytes, _ := hex.DecodeString(msgHex)
-	sig := ed25519.Sign(priv, msgBytes)
-
-	env := &CyExchangeEnvelope{
-		EnvelopeID: envID,
-		Sender: NodeCard{PublicKeyEd25519: hex.EncodeToString(pub)},
-		RequiredState: "010",
-		PayloadBytes:  []byte(`{"request":"MUTATE"}`), // Altered payload
-		PayloadHash:   payloadHash,
-		SignatureEd25519: hex.EncodeToString(sig),
-	}
-
+func TestValidatorRejectsMutatedHash(t *testing.T) {
+	env := signedTestEnvelope(t)
+	env.PayloadBytes = []byte(`{"request":"MUTATE"}`)
 	if err := Validate(env); err == nil {
 		t.Fatal("expected validation to fail on mutated hash")
+	}
+}
+
+func TestValidatorRejects101(t *testing.T) {
+	env := signedTestEnvelope(t)
+	env.RequiredState = "101"
+	if err := Validate(env); err == nil {
+		t.Fatal("expected 101 envelope to be rejected")
+	}
+}
+
+func TestDecodeStrictRejectsDuplicateAndUnknownFields(t *testing.T) {
+	tests := map[string]string{
+		"duplicate": `{"envelope_id":"a","envelope_id":"b"}`,
+		"unknown":   `{"unknown":true}`,
+	}
+	for name, raw := range tests {
+		t.Run(name, func(t *testing.T) {
+			if _, err := DecodeStrict(strings.NewReader(raw), MaxEnvelopeBytes); err == nil {
+				t.Fatal("expected strict decoding failure")
+			}
+		})
+	}
+}
+
+func TestDecodeStrictRejectsOversize(t *testing.T) {
+	if _, err := DecodeStrict(bytes.NewReader(bytes.Repeat([]byte("x"), 9)), 8); err == nil {
+		t.Fatal("expected byte-limit failure")
+	}
+}
+
+func TestCanonicalizeRejectsDuplicatePayloadKeys(t *testing.T) {
+	if _, err := Canonicalize([]byte(`{"claim":1,"claim":2}`)); err == nil {
+		t.Fatal("expected duplicate payload key rejection")
 	}
 }

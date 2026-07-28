@@ -1,29 +1,25 @@
 // Status: PROPOSED
 // authority_effect: NONE
-// Package envelope handles the wrapping and validation of CyExchange payloads.
 package envelope
 
 import (
 	"crypto/sha256"
 	"encoding/hex"
-	"encoding/json"
 	"fmt"
+
+	jsoncanonicalizer "github.com/cyberphone/json-canonicalization/go/src/webpki.org/jsoncanonicalizer"
 )
 
-// Canonicalize applies RFC 8785 (JCS) canonicalization to a payload.
-// For the PROPOSED stub, this simulates canonicalization by standardizing JSON.
+// Canonicalize applies RFC 8785 JSON Canonicalization Scheme bytes. Invalid
+// JSON is rejected; there is no permissive or simulated fallback.
 func Canonicalize(payload []byte) ([]byte, error) {
-	var generic map[string]interface{}
-	if err := json.Unmarshal(payload, &generic); err != nil {
-		return nil, fmt.Errorf("invalid payload format, must be JSON for canonicalization: %w", err)
+	canonical, err := jsoncanonicalizer.Transform(payload)
+	if err != nil {
+		return nil, fmt.Errorf("RFC 8785 canonicalization: %w", err)
 	}
-	
-	// Simulated canonicalization (standard Go json.Marshal sorts map keys).
-	// In ACTIVE_CANON, this must strictly conform to RFC 8785.
-	return json.Marshal(generic)
+	return canonical, nil
 }
 
-// HashPayload generates the SHA-256 hash of the canonicalized payload.
 func HashPayload(payload []byte) (string, error) {
 	canonical, err := Canonicalize(payload)
 	if err != nil {

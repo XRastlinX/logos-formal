@@ -13,4 +13,7 @@ var (
 	ErrExpiration = errors.New("cyexchange: ttl or permit bounds expired")
 	ErrLineage    = errors.New("cyexchange: epistemic lineage broken")
 	ErrGovernance = errors.New("cyexchange: illegal cubed bit geometry")
+	ErrNotFound   = errors.New("cyexchange: record not found")
+	ErrDurability = errors.New("cyexchange: durable storage failure")
+	ErrCorrupt    = errors.New("cyexchange: durable log corrupt")
 )
