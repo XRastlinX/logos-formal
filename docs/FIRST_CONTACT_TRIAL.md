@@ -45,6 +45,8 @@ sha256:8d1263b1dff0fcd84c42ac8911f132d270e8b172d50d06982d73d227499315a7
 After verifying and unpacking the archive, run on Windows:
 
 ```powershell
+# Use a short extraction path to avoid Windows path-length friction.
+# Example: C:\cyonic-trial\
 .\setup.cmd friend-node-01 codex
 .\trial.cmd cyonic-first-contact-report-01.json
 ```
@@ -103,15 +105,22 @@ The report records:
 
 ## Reporting
 
-Issue #2 is the preferred public feedback channel. A report may include:
+Issue #2 is the preferred public feedback channel. Copy this template so the
+six required observations stay together:
 
-1. operating system and `go version`;
-2. exact commit or package hash;
-3. elapsed time;
-4. the participant's explanation of interpretation, external authorization
-   evidence, and effect;
-5. terminal output showing a failure, if any;
-6. concrete friction or `NONE`.
+```text
+elapsed:
+understanding: (one sentence — what separation does this surface enforce?)
+refusal_observed: yes | no
+friction: none | <what blocked or confused you>
+env: OS + go version
+source: exact commit or portable ZIP SHA-256
+```
+
+`refusal_observed: yes` means the run showed successful permit-evidence
+verification while the effect remained `NOT_PERFORMED`, `forwarded=false`, and
+the Apply compatibility route returned HTTP 405. It does not mean the
+participant attempted a real effect.
 
 Do not post credentials, private keys, access tokens, or unrelated personal
 paths.

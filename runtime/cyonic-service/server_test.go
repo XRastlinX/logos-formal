@@ -122,6 +122,67 @@ func TestHTTPRejectsEffectfulOperation(t *testing.T) {
 	}
 }
 
+func TestHTTPRejectsScopeAndIssuerMismatchBeforeEffectBoundary(t *testing.T) {
+	config, validRequest := testHTTPConfig(t)
+	server := httptest.NewServer(newHTTPHandler(config))
+	defer server.Close()
+
+	tests := []struct {
+		name       string
+		mutate     func(*BoundaryRequest)
+		wantReason string
+	}{
+		{
+			name: "scope mismatch",
+			mutate: func(request *BoundaryRequest) {
+				request.Permit.Target = "other-target"
+			},
+			wantReason: "PERMIT_SCOPE_MISMATCH",
+		},
+		{
+			name: "issuer mismatch",
+			mutate: func(request *BoundaryRequest) {
+				request.Permit.Issuer = "unknown-principal"
+			},
+			wantReason: "UNTRUSTED_ISSUER",
+		},
+	}
+
+	for _, test := range tests {
+		t.Run(test.name, func(t *testing.T) {
+			request := validRequest
+			test.mutate(&request)
+
+			response := postBoundaryRequest(t, server, "/api/service/cyonic-validate", request)
+			if response.StatusCode != http.StatusForbidden {
+				t.Fatalf("status = %d, want %d", response.StatusCode, http.StatusForbidden)
+			}
+			assertGovernanceHeaders(t, response, "REJECT")
+
+			payload := decodeHTTPResponse(t, response)
+			if payload.GovernanceState != "010" ||
+				payload.AuthorityEffect != "NONE" ||
+				payload.Effect != "NOT_PERFORMED" ||
+				payload.Forwarded {
+				t.Fatalf("rejection crossed boundary: %+v", payload)
+			}
+			if payload.ReasonCode != test.wantReason {
+				t.Fatalf("reasonCode = %q, want %q", payload.ReasonCode, test.wantReason)
+			}
+			if payload.Receipt == nil {
+				t.Fatal("rejection receipt is missing")
+			}
+			if payload.Receipt.Friction.Code != test.wantReason ||
+				payload.Receipt.Routing.Decision != "REJECT" ||
+				payload.Receipt.Routing.Forwarded ||
+				payload.Receipt.Effect.Status != "NOT_PERFORMED" ||
+				payload.Receipt.AuthorityEffect != "NONE" {
+				t.Fatalf("rejection receipt crossed boundary: %+v", payload.Receipt)
+			}
+		})
+	}
+}
+
 type countedReader struct {
 	reads int
 }
@@ -268,10 +329,11 @@ func TestHTTPDemoRequestIsExplicitlyNonAuthoritative(t *testing.T) {
 
 func TestHTTPProbeExercisesAliasesAndFailClosedApply(t *testing.T) {
 	config, _ := testHTTPConfig(t)
+	config.InstanceID = "test-instance"
 	server := httptest.NewServer(newHTTPHandler(config))
 	defer server.Close()
 
-	result, err := runHTTPProbe(server.URL)
+	result, err := runHTTPProbe(server.URL, "test-source-ref", config.InstanceID)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -290,6 +352,24 @@ func TestHTTPProbeExercisesAliasesAndFailClosedApply(t *testing.T) {
 	}
 	if result.ExternalityStatus != "NOT_ADJUDICATED" {
 		t.Fatalf("probe self-adjudicated externality: %+v", result)
+	}
+	if result.SourceRef != "test-source-ref" {
+		t.Fatalf("sourceRef = %q, want explicit test source", result.SourceRef)
+	}
+	if result.ServerInstance != config.InstanceID {
+		t.Fatalf("serverInstance = %q, want %q", result.ServerInstance, config.InstanceID)
+	}
+}
+
+func TestHTTPProbeRejectsWrongServerInstance(t *testing.T) {
+	config, _ := testHTTPConfig(t)
+	config.InstanceID = "actual-instance"
+	server := httptest.NewServer(newHTTPHandler(config))
+	defer server.Close()
+
+	result, err := runHTTPProbe(server.URL, "test-source-ref", "expected-instance")
+	if err == nil {
+		t.Fatalf("probe accepted wrong server instance: %+v", result)
 	}
 }
 
@@ -310,5 +390,11 @@ func TestHTTPSmokeRunsOneCommandBoundaryWithoutExternalityClaim(t *testing.T) {
 	}
 	if result.ExternalityStatus != "NOT_ADJUDICATED" {
 		t.Fatalf("smoke result self-adjudicated externality: %+v", result)
+	}
+	if strings.TrimSpace(result.SourceRef) == "" || result.SourceRef == "UNDECLARED" {
+		t.Fatalf("smoke result omitted its source reference: %+v", result)
+	}
+	if result.ServerInstance != "smoke-http" {
+		t.Fatalf("smoke result did not bind its server instance: %+v", result)
 	}
 }

@@ -1,0 +1,322 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cyonic:decision-receipt:v1",
+  "title": "Cyonic observer decision receipt",
+  "description": "An immutable, verifier-only record of a proposal observation. It never authorizes or records an effect.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "core",
+    "proof"
+  ],
+  "properties": {
+    "core": {
+      "$ref": "#/$defs/core"
+    },
+    "proof": {
+      "$ref": "#/$defs/proof"
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    },
+    "core": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "schema",
+        "version",
+        "canonicalization",
+        "observedAt",
+        "proposal",
+        "authorizationBasis",
+        "decision",
+        "effect",
+        "governance",
+        "policyRoot",
+        "operatorRoot",
+        "runtimeRoot",
+        "evidenceIds"
+      ],
+      "properties": {
+        "schema": {
+          "const": "urn:cyonic:decision-receipt:v1"
+        },
+        "version": {
+          "const": "1.0"
+        },
+        "canonicalization": {
+          "const": "RFC8785"
+        },
+        "observedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "proposal": {
+          "$ref": "#/$defs/proposal"
+        },
+        "authorizationBasis": {
+          "$ref": "#/$defs/authorizationBasis"
+        },
+        "decision": {
+          "$ref": "#/$defs/decision"
+        },
+        "effect": {
+          "$ref": "#/$defs/effect"
+        },
+        "governance": {
+          "$ref": "#/$defs/governance"
+        },
+        "policyRoot": {
+          "$ref": "#/$defs/sha256"
+        },
+        "operatorRoot": {
+          "$ref": "#/$defs/sha256"
+        },
+        "runtimeRoot": {
+          "$ref": "#/$defs/sha256"
+        },
+        "evidenceIds": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/sha256"
+          },
+          "uniqueItems": true
+        },
+        "previousReceiptDigest": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "proposal": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "requestDigest",
+        "artifactDigest",
+        "action",
+        "target",
+        "payloadDigest"
+      ],
+      "properties": {
+        "requestDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "artifactDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "action": {
+          "type": "string",
+          "minLength": 1
+        },
+        "target": {
+          "type": "string",
+          "minLength": 1
+        },
+        "payloadDigest": {
+          "$ref": "#/$defs/sha256"
+        }
+      }
+    },
+    "authorizationBasis": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "verificationStatus"
+      ],
+      "properties": {
+        "kind": {
+          "enum": [
+            "NONE",
+            "EXTERNAL_PERMIT_EVIDENCE"
+          ]
+        },
+        "permitDigest": {
+          "$ref": "#/$defs/sha256"
+        },
+        "verificationStatus": {
+          "enum": [
+            "NOT_PRESENT",
+            "NOT_VERIFIED",
+            "VERIFIED"
+          ]
+        },
+        "issuer": {
+          "type": "string",
+          "minLength": 1
+        },
+        "keyId": {
+          "$ref": "#/$defs/sha256"
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "verificationStatus": {
+                "const": "NOT_PRESENT"
+              }
+            },
+            "required": [
+              "verificationStatus"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "NONE"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "permitDigest"
+                  ]
+                },
+                {
+                  "required": [
+                    "issuer"
+                  ]
+                },
+                {
+                  "required": [
+                    "keyId"
+                  ]
+                }
+              ]
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "verificationStatus": {
+                "const": "NOT_VERIFIED"
+              }
+            },
+            "required": [
+              "verificationStatus"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "EXTERNAL_PERMIT_EVIDENCE"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "verificationStatus": {
+                "const": "VERIFIED"
+              }
+            },
+            "required": [
+              "verificationStatus"
+            ]
+          },
+          "then": {
+            "properties": {
+              "kind": {
+                "const": "EXTERNAL_PERMIT_EVIDENCE"
+              }
+            },
+            "required": [
+              "permitDigest",
+              "issuer",
+              "keyId"
+            ]
+          }
+        }
+      ]
+    },
+    "decision": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "operation",
+        "outcome",
+        "reasonCode",
+        "forwarded"
+      ],
+      "properties": {
+        "operation": {
+          "const": "VERIFY_PERMIT_EVIDENCE"
+        },
+        "outcome": {
+          "enum": [
+            "OBSERVE_ONLY",
+            "REJECT",
+            "NO_DECISION"
+          ]
+        },
+        "reasonCode": {
+          "type": "string",
+          "minLength": 1
+        },
+        "forwarded": {
+          "const": false
+        }
+      }
+    },
+    "effect": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "status",
+        "authorityEffect"
+      ],
+      "properties": {
+        "status": {
+          "const": "NOT_PERFORMED"
+        },
+        "authorityEffect": {
+          "const": "NONE"
+        }
+      }
+    },
+    "governance": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "state",
+        "authorityEffect"
+      ],
+      "properties": {
+        "state": {
+          "const": "010"
+        },
+        "authorityEffect": {
+          "const": "NONE"
+        }
+      }
+    },
+    "proof": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "keyId",
+        "signature"
+      ],
+      "properties": {
+        "algorithm": {
+          "const": "Ed25519"
+        },
+        "keyId": {
+          "$ref": "#/$defs/sha256"
+        },
+        "signature": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9+/]{86}==$"
+        }
+      }
+    }
+  }
+}

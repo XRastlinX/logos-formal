@@ -1,0 +1,69 @@
+# Cyonic Node Setup v@@PACKAGE_VERSION@@
+
+This package creates a local node for a small group sharing a Git-anchored
+epistemic ledger.
+
+Your AI sessions remain at governance state `010`: they may inspect, explain,
+test, and propose. They do not authorize, Apply, merge, or turn a local session
+result into group knowledge.
+
+The node pins the public `logos-formal` repository to source commit
+`@@SOURCE_COMMIT@@` and source tree `@@SOURCE_TREE@@`. Its validation path
+binds the checkout to that exact tree, then runs the Cyonic Service Surface as
+a local, read-only HTTP verifier.
+
+## What this is
+
+- a reproducible local checkout of the public source;
+- a repository-bound validation receipt over exact bytes;
+- a standalone `010` validation service;
+- a cold-call probe for its two HTTP aliases and effect refusal;
+- local node identity and pathway configuration.
+
+## What this is not
+
+- an autonomous agent or Apply gateway;
+- a source of permits or ambient authority;
+- proof that an interpretation is true, safe, lawful, or canonical.
+
+## Windows
+
+Requires Git and Go 1.24+. Extract to a short path such as
+`C:\cyonic-trial\` to avoid Windows path-length friction:
+
+```powershell
+.\setup.cmd friend-node-01 codex
+.\trial.cmd cyonic-first-contact-report-01.json
+```
+
+The `.cmd` wrappers avoid default PowerShell execution-policy friction.
+
+## Linux or macOS
+
+Requires Git and Go 1.24+:
+
+```bash
+chmod +x scripts/*.sh
+./scripts/setup.sh friend-node-01 codex
+./scripts/trial.sh cyonic-first-contact-report-01.json
+```
+
+## Expected boundary
+
+```text
+status: COLD_CALL_PASSED
+sourceRef: @@SOURCE_COMMIT@@
+serverInstance: <per-run validation identifier>
+governanceState: 010
+authorityEffect: NONE
+effect: NOT_PERFORMED
+forwarded: false
+applyProbeStatus: 405
+applyProbeReason: EFFECT_ROUTE_FORBIDDEN
+externalityStatus: NOT_ADJUDICATED
+```
+
+The trial report remains `CLAIMED_EXTERNAL`,
+`PENDING_EXTERNAL_REVIEW`, and `authorityEffect: NONE` until reviewed
+separately. A receipt is evidence that declared software ran; it is not a
+Permit, canon elevation, certification, or adoption claim.

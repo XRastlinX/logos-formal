@@ -31,6 +31,12 @@ Open an issue tagged `enhancement` for:
 5. Ensure `go vet ./...` passes
 6. Submit a pull request
 
+AI-assisted contributions follow the same path. Read `AGENTS.md` and
+`.github/copilot-instructions.md` before editing. An agent-created branch or
+pull request is a proposal; it does not approve its own merge, package, release,
+or deployment. See the
+[GitHub + AI Operating Model](docs/GITHUB_AI_OPERATING_MODEL.md).
+
 ### Epistemic Rules
 
 All contributions must maintain the project's epistemic discipline:

@@ -1,0 +1,15 @@
+{
+  "schema": "urn:cyonic:node-setup-manifest:v1",
+  "packageVersion": "@@PACKAGE_VERSION@@",
+  "sourceRepository": "@@SOURCE_REPOSITORY@@",
+  "sourceBranch": "@@SOURCE_BRANCH@@",
+  "sourceCommit": "@@SOURCE_COMMIT@@",
+  "sourceTree": "@@SOURCE_TREE@@",
+  "validatorPath": "cmd/cyonic-validate",
+  "validationManifest": "cyonic.validation.json",
+  "servicePath": "runtime/cyonic-service",
+  "minimumGoVersion": "1.24",
+  "governanceState": "010",
+  "authorityEffect": "NONE",
+  "externalityStatus": "NOT_ADJUDICATED"
+}

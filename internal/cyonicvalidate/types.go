@@ -3,10 +3,11 @@ package cyonicvalidate
 import "runtime"
 
 const (
-	ValidatorVersion = "0.1.0"
+	ValidatorVersion = "0.2.0"
 
 	ManifestSchema = "urn:cyonic:validation-manifest:v1"
 	ResultSchema   = "urn:cyonic:validation-result:v1"
+	PublicProfile  = "logos-formal-node-setup-010"
 
 	CheckTargetBoundary     = "CV-TARGET-BOUNDARY"
 	CheckRequiredPaths      = "CV-REQUIRED-PATHS"
@@ -30,6 +31,26 @@ var requiredCheckOrder = []string{
 	CheckGoVet,
 	CheckGoTestFresh,
 	CheckTargetImmutability,
+}
+
+// publicProfileRequiredPaths is the validator's minimum control-file floor for
+// the public profile. A manifest may add paths but cannot remove these and
+// still claim the same profile.
+var publicProfileRequiredPaths = []string{
+	"AGENTS.md",
+	".github/copilot-instructions.md",
+	".github/CODEOWNERS",
+	"03_Q_Taxonomy/Q_CONTENT_CLASSIFICATION_STATUS_V1.md",
+	"docs/A4_BOUNDARY_TEST_MATRIX.md",
+	"docs/ARTIFACT_ATTESTATION_POLICY.md",
+	"docs/CODEX_REPOSITORY_PROFILE.md",
+	"docs/CYONIC_SOCKET_CLI.md",
+	"docs/DECISION_RECEIPT_V1.md",
+	"docs/GITHUB_AI_OPERATING_MODEL.md",
+	"docs/OPERATIONAL_CLOSURE_RECEIPTS.md",
+	"schemas/cyonic-decision-receipt.schema.json",
+	"schemas/cyonic-decision-receipt-verification.schema.json",
+	"cyonic.validation.json",
 }
 
 type Manifest struct {

@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
@@ -36,8 +36,13 @@ jobs:
         run: go test -count=1 ./cmd/cyonic-validate ./internal/cyonicvalidate
 
   validate-unix:
+    name: Public Unix validation (${{ matrix.os }})
     needs: validator-conformance
-    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
     timeout-minutes: 10
     steps:
       - name: Check out repository
@@ -52,11 +57,13 @@ jobs:
       - name: Capture checked-out commit
         id: checkout
         shell: bash
-        run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+        run: |
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "platform=$(printf '%s' "$RUNNER_OS" | tr '[:upper:]' '[:lower:]')" >> "$GITHUB_OUTPUT"
       - name: Run governed validator
         shell: bash
         run: |
-          receipt="$RUNNER_TEMP/cyonic-validation-linux.json"
+          receipt="$RUNNER_TEMP/cyonic-validation-${{ steps.checkout.outputs.platform }}.json"
           partial="$receipt.partial"
           set +e
           bash scripts/validate.sh --format json > "$partial"
@@ -66,13 +73,13 @@ jobs:
             mv "$partial" "$receipt"
           fi
           exit "$validator_status"
-      - name: Upload Linux validation receipt
+      - name: Upload Unix validation receipt
         id: upload-receipt
         if: always()
         uses: actions/upload-artifact@v7
         with:
-          name: cyonic-validation-linux-${{ steps.checkout.outputs.sha }}
-          path: ${{ runner.temp }}/cyonic-validation-linux.json
+          name: cyonic-validation-${{ steps.checkout.outputs.platform }}-${{ steps.checkout.outputs.sha }}
+          path: ${{ runner.temp }}/cyonic-validation-${{ steps.checkout.outputs.platform }}.json
           if-no-files-found: error
           retention-days: 90
           compression-level: 0
@@ -113,6 +120,139 @@ jobs:
         with:
           name: cyonic-validation-windows-${{ steps.checkout.outputs.sha }}
           path: ${{ runner.temp }}/cyonic-validation-windows.json
+          if-no-files-found: error
+          retention-days: 90
+          compression-level: 0
+
+  package-candidate:
+    name: Build non-release package candidate
+    needs: [validate-unix, validate-windows]
+    runs-on: windows-latest
+    timeout-minutes: 10
+    env:
+      SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      SOURCE_BRANCH: ${{ github.head_ref || github.ref_name }}
+      SOURCE_REPOSITORY_NAME: ${{ github.event.pull_request.head.repo.full_name || github.repository }}
+      SOURCE_REPOSITORY: ${{ github.event.pull_request.head.repo.clone_url || format('https://github.com/{0}.git', github.repository) }}
+    steps:
+      - name: Check out exact package source
+        uses: actions/checkout@v6
+        with:
+          repository: ${{ env.SOURCE_REPOSITORY_NAME }}
+          ref: ${{ env.SOURCE_COMMIT }}
+          persist-credentials: false
+      - name: Build deterministic candidate
+        id: package
+        shell: pwsh
+        run: |
+          $out = Join-Path $env:RUNNER_TEMP "package"
+          .\scripts\build-cyonic-node-package.ps1 `
+            -SourceCommit $env:SOURCE_COMMIT `
+            -SourceBranch $env:SOURCE_BRANCH `
+            -SourceRepository $env:SOURCE_REPOSITORY `
+            -OutputDirectory $out
+          $archives = @(Get-ChildItem -LiteralPath $out -Filter "*.zip" -File -ErrorAction Stop)
+          if ($archives.Count -ne 1) {
+            throw "Expected one package candidate, found $($archives.Count)."
+          }
+          $archive = $archives[0]
+          "archive=$($archive.Name)" >> $env:GITHUB_OUTPUT
+          "sha256=$((Get-FileHash -Algorithm SHA256 -LiteralPath $archive.FullName).Hash.ToLowerInvariant())" >> $env:GITHUB_OUTPUT
+      - name: Upload non-release candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: cyonic-node-package-candidate-${{ env.SOURCE_COMMIT }}
+          path: ${{ runner.temp }}/package/${{ steps.package.outputs.archive }}
+          if-no-files-found: error
+          retention-days: 14
+          compression-level: 0
+
+  package-cold-path:
+    name: Package cold path (${{ matrix.os }})
+    needs: package-candidate
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    env:
+      SOURCE_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+    steps:
+      - name: Set up minimum supported Go
+        uses: actions/setup-go@v6
+        with:
+          go-version: 1.24.x
+          cache: false
+      - name: Download non-release candidate
+        uses: actions/download-artifact@v7
+        with:
+          name: cyonic-node-package-candidate-${{ env.SOURCE_COMMIT }}
+          path: ${{ runner.temp }}/package
+      - name: Run Unix cold path
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -- "$RUNNER_TEMP/package"/*.zip
+          test "$#" -eq 1
+          archive="$1"
+          mkdir -p "$RUNNER_TEMP/c"
+          unzip -q "$archive" -d "$RUNNER_TEMP/c"
+          set -- "$RUNNER_TEMP/c"/*
+          test "$#" -eq 1
+          package_root="$1"
+          test -d "$package_root"
+          chmod +x "$package_root"/scripts/*.sh
+          platform="$(printf '%s' "$RUNNER_OS" | tr '[:upper:]' '[:lower:]')"
+          "$package_root/scripts/setup.sh" "ci-$platform" codex
+          set -- "$package_root"/evidence/service-probe-*.json
+          test "$#" -eq 1
+          probe="$1"
+          grep -Fq "\"sourceRef\": \"$SOURCE_COMMIT\"" "$probe"
+          grep -Fq '"authorityEffect": "NONE"' "$probe"
+          grep -Fq '"effect": "NOT_PERFORMED"' "$probe"
+          grep -Fq '"forwarded": false' "$probe"
+          grep -Fq '"applyProbeStatus": 405' "$probe"
+          grep -Fq '"applyProbeReason": "EFFECT_ROUTE_FORBIDDEN"' "$probe"
+      - name: Run Windows cold path
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $archive = Get-ChildItem -LiteralPath (Join-Path $env:RUNNER_TEMP "package") `
+            -Filter "*.zip" -File -ErrorAction Stop
+          $archives = @($archive)
+          if ($archives.Count -ne 1) {
+            throw "Expected one package candidate, found $($archives.Count)."
+          }
+          $archive = $archives[0]
+          $extract = Join-Path $env:RUNNER_TEMP "c"
+          Expand-Archive -LiteralPath $archive.FullName -DestinationPath $extract
+          $packageRoots = @(Get-ChildItem -LiteralPath $extract -Directory -ErrorAction Stop)
+          if ($packageRoots.Count -ne 1) {
+            throw "Expected one package root, found $($packageRoots.Count)."
+          }
+          $packageRoot = $packageRoots[0]
+          & (Join-Path $packageRoot.FullName "setup.cmd") "ci-windows" "codex"
+          if ($LASTEXITCODE -ne 0) {
+            throw "Windows package setup failed with exit code $LASTEXITCODE."
+          }
+          $probePath = Get-ChildItem -LiteralPath (Join-Path $packageRoot.FullName "evidence") `
+            -Filter "service-probe-*.json" -File -ErrorAction Stop | Select-Object -Last 1
+          $probe = Get-Content -Raw -LiteralPath $probePath.FullName | ConvertFrom-Json
+          if ($probe.sourceRef -ne $env:SOURCE_COMMIT -or
+              $probe.authorityEffect -ne "NONE" -or
+              $probe.effect -ne "NOT_PERFORMED" -or
+              $probe.forwarded -ne $false -or
+              $probe.applyProbeStatus -ne 405 -or
+              $probe.applyProbeReason -ne "EFFECT_ROUTE_FORBIDDEN") {
+            throw "Windows package receipt violated the cold-path boundary."
+          }
+      - name: Upload package cold-path evidence
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: cyonic-node-package-evidence-${{ matrix.os }}-${{ env.SOURCE_COMMIT }}
+          path: ${{ runner.temp }}/c/*/evidence/*.json
           if-no-files-found: error
           retention-days: 90
           compression-level: 0

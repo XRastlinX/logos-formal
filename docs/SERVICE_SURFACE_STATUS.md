@@ -86,17 +86,17 @@ These internal verification events establish the behavior covered by the
 declared tests. They do not establish external usability, adoption, or
 certification, and no such claim is required for merge.
 
-The exact implementation is published on the public pull-request branch:
+The service surface was merged into `main` through the protected pull-request
+path on 2026-07-27:
 
 ```text
-codex/cyonic-service-surface-v1
 https://github.com/XRastlinX/logos-formal/pull/1
+merge commit: 3157610958435d47558740013f6e3953ca5db921
 ```
 
-The protected merge path requires validator-conformance jobs on Windows and
-Ubuntu followed by the public Windows and Unix validation scripts. The PR head
-must satisfy those checks before merge. These checks are implementation
-evidence, not external usability or adoption evidence.
+The protected merge path ran validator-conformance jobs on Windows and Ubuntu
+followed by the public Windows and Unix validation scripts. Those checks are
+implementation evidence, not external usability or adoption evidence.
 
 ## External-evaluation audit
 
@@ -106,12 +106,15 @@ evidence, not external usability or adoption evidence.
 | Outsider can call in under ten minutes | Not externally established |
 | Outsider can articulate the separation | Not externally established |
 | External feedback recorded | None |
-| Service is public primary discovery entry | Public PR candidate and Issue #2 trial entry; not merged into `main` |
+| Service is public primary discovery entry | Merged into `main`; README and Issue #2 point to the cold path |
 | Phase 3+ claims withheld | Satisfied |
 
 ## Remaining engineering gate
 
-1. Review and merge the candidate through the protected repository path.
+1. Keep the Windows and Unix portable paths behaviorally symmetric.
+2. Bind packaged probe receipts to the pinned source instead of ambient Git
+   discovery.
+3. Validate a rebuilt package on Windows, Linux, and macOS before publication.
 
 External feedback may be collected after publication. It is optional, has no
 required count, and does not govern engineering work or merge eligibility. No

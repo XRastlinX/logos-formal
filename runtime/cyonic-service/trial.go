@@ -47,7 +47,7 @@ func prompt(reader *bufio.Reader, writer io.Writer, label string) (string, error
 	if err != nil && err != io.EOF {
 		return "", err
 	}
-	return strings.TrimSpace(value), nil
+	return strings.TrimSpace(strings.TrimPrefix(value, "\ufeff")), nil
 }
 
 func normalizeTrialCategory(value string) string {
@@ -69,6 +69,10 @@ func detectSourceRef() string {
 	value := strings.TrimSpace(string(output))
 	if value == "" {
 		return "UNDECLARED"
+	}
+	status := exec.Command("git", "status", "--porcelain")
+	if dirty, statusErr := status.Output(); statusErr == nil && len(dirty) != 0 {
+		return value + "+dirty"
 	}
 	return value
 }

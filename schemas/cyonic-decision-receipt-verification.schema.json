@@ -1,0 +1,91 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "urn:cyonic:decision-receipt-verification:v1",
+  "title": "Cyonic decision receipt verification result",
+  "description": "A verifier result that cannot authorize or record an effect.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schema",
+    "cryptographicStatus",
+    "artifactStatus",
+    "routerDecision",
+    "reasonCode",
+    "detail",
+    "governanceState",
+    "authorityEffect",
+    "effect",
+    "forwarded"
+  ],
+  "properties": {
+    "schema": {
+      "const": "urn:cyonic:decision-receipt-verification:v1"
+    },
+    "cryptographicStatus": {
+      "enum": [
+        "NO_DECISION",
+        "VERIFIED",
+        "REJECTED"
+      ]
+    },
+    "artifactStatus": {
+      "enum": [
+        "UNCLASSIFIED",
+        "PROPOSED"
+      ]
+    },
+    "routerDecision": {
+      "enum": [
+        "NONE",
+        "OBSERVE_ONLY",
+        "REJECT"
+      ]
+    },
+    "receiptDigest": {
+      "$ref": "#/$defs/sha256"
+    },
+    "signerKeyId": {
+      "$ref": "#/$defs/sha256"
+    },
+    "recordedOutcome": {
+      "enum": [
+        "OBSERVE_ONLY",
+        "REJECT",
+        "NO_DECISION"
+      ]
+    },
+    "recordedAuthorizationStatus": {
+      "enum": [
+        "NOT_PRESENT",
+        "NOT_VERIFIED",
+        "VERIFIED"
+      ]
+    },
+    "reasonCode": {
+      "type": "string",
+      "minLength": 1
+    },
+    "detail": {
+      "type": "string",
+      "minLength": 1
+    },
+    "governanceState": {
+      "const": "010"
+    },
+    "authorityEffect": {
+      "const": "NONE"
+    },
+    "effect": {
+      "const": "NOT_PERFORMED"
+    },
+    "forwarded": {
+      "const": false
+    }
+  },
+  "$defs": {
+    "sha256": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

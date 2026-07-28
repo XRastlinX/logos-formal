@@ -20,22 +20,23 @@ The service never issues a permit and never performs an effect.
 
 Usage:
   cyonic-service demo
-  cyonic-service serve-demo [-listen 127.0.0.1:8787]
-  cyonic-service serve -trust-key <public.key> -issuer <issuer> [-listen 127.0.0.1:8787]
-  cyonic-service probe-http [-base-url http://127.0.0.1:8787]
+  cyonic-service serve-demo [-listen 127.0.0.1:8787] [-instance-id <id>]
+  cyonic-service serve -trust-key <public.key> -issuer <issuer> [-listen 127.0.0.1:8787] [-instance-id <id>]
+  cyonic-service probe-http [-base-url http://127.0.0.1:8787] [-source-ref <ref>] [-expected-instance <id>]
   cyonic-service smoke-http
   cyonic-service trial    -report <trial-report.json> [-origin external]
   cyonic-service adjudicate -report <trial-report.json> -out <adjudication.json> -reviewer <ref> [review options]
   cyonic-service summarize-trials -dir <adjudication-dir> -out <summary.json>
   cyonic-service fixture  -dir <directory>
   cyonic-service evaluate -request <request.json> -trust-key <public.key> -issuer <issuer> [options]
+  cyonic-service receipt verify -receipt <decision-receipt.json> -trust-key <receipt-public.key> [options]
 
 Evaluate options:
   -origin internal|external     Caller/operator claim; never self-verifies externality
   -evidence-log <path>         Append the returned receipt as one JSONL record
 
 Exit codes:
-  0  permit evidence valid; no effect performed
+  0  requested verification valid; no effect performed
   1  typed boundary rejection
   2  malformed input or service configuration`)
 }
@@ -217,6 +218,8 @@ func main() {
 		code = runFixture(os.Args[2:])
 	case "evaluate":
 		code = runEvaluate(os.Args[2:])
+	case "receipt":
+		code = runReceipt(os.Args[2:])
 	case "help", "-h", "--help":
 		usage()
 		code = 0

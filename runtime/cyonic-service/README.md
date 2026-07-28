@@ -94,12 +94,15 @@ exercise the verifier but cannot cause an effect.
 In another terminal, run the dependency-free cold-call probe:
 
 ```bash
-go run ./runtime/cyonic-service probe-http
+go run ./runtime/cyonic-service probe-http \
+  -source-ref "$(git rev-parse HEAD)"
 ```
 
 It exercises both validate aliases and the fail-closed Apply compatibility
-path. Its output remains `externalityStatus: NOT_ADJUDICATED`; an internal
-probe is not external adoption evidence.
+path. `-source-ref` binds the probe receipt to the source selected by the
+caller; portable-package scripts pass their pinned commit explicitly. Its
+output remains `externalityStatus: NOT_ADJUDICATED`; an internal probe is not
+external adoption evidence.
 
 You can also use `curl`:
 
@@ -235,6 +238,23 @@ Ed25519.
 
 The trust key and trusted issuer are operator configuration. They are not
 accepted from the request being evaluated.
+
+Observer decision receipts use a separate verifier-only profile. Their
+immutable core is canonicalized with RFC 8785, domain-separated, hashed with
+SHA-256, and verified with Ed25519. The signature proof remains outside the
+core. Verify one with:
+
+```bash
+go run ./runtime/cyonic-service receipt verify \
+  -receipt ./decision-receipt.json \
+  -trust-key ./receipt-public.key \
+  -expected-signer sha256:<expected-public-key-digest>
+```
+
+The command has no signing key loader and no effect route. `VERIFIED` means the
+receipt core and signer profile verified; it does not mean the proposal was
+authorized. See
+[`docs/DECISION_RECEIPT_V1.md`](../../docs/DECISION_RECEIPT_V1.md).
 
 ## Limits and non-claims
 
