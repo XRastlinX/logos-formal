@@ -3,7 +3,7 @@ status: PROPOSED
 repository_lane: non-canonical proposals/
 canonical_effect: NONE
 authority_effect: NONE
-implemented_stage: REFERENCE_XI_AND_DESIGN_MATRIX
+implemented_stage: SVD_RIDGE_CONTROLS_AND_ZERO_SCANNER
 
 atom_family:
   count: 24
@@ -27,4 +27,31 @@ residual_design:
   intercept: 1
   atom_column: x^(-s)
 
-next_action: IMPLEMENT_RIDGE_PATH_AND_VALIDATION_SELECTION
+ridge_pipeline:
+  solver: COLUMN_NORMALIZED_AUGMENTED_SVD
+  penalty: diag(0,1,...,1)
+  lambda_grid: 1e-12_to_1e2_half_dex
+  selection: largest_lambda_within_1_percent_of_validation_minimum
+
+controls:
+  - PRIMES_5_MOD_6
+  - CHEBYSHEV_MATCHED_SUPPORT
+  - STRATIFIED_RANDOM_SUPPORT_100_PCG64_SEED_20260729
+
+zero_pipeline:
+  method: ADAPTIVE_ARGUMENT_PRINCIPLE_WITH_NEWTON_REFINEMENT
+  verification_precision_decimal_digits: 80
+  training_steps: [0.20, 0.25, 0.30]
+  stability_displacement_maximum: 0.05
+  unresolved_policy: FAIL_CLOSED_NOT_EVALUABLE
+
+latest_execution:
+  reconstruction_threshold: PASSED_RELATIVE_CONTROL_CRITERION
+  primary_unregularized_effective_rank: 8
+  primary_stable_off_center_zero_count: 0
+  zero_control_threshold: NOT_EVALUABLE
+  unresolved_zero_families: 14
+  trh_established: false
+  riemann_hypothesis_established: false
+
+next_action: RESOLVE_ARGUMENT_CONTOUR_AMBIGUITIES_AND_REPEAT_ZERO_ASSAY
