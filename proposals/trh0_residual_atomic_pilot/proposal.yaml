@@ -1,0 +1,30 @@
+proposal: TRH-0_RESIDUAL_ATOMIC_PILOT
+status: PROPOSED
+repository_lane: non-canonical proposals/
+canonical_effect: NONE
+authority_effect: NONE
+implemented_stage: REFERENCE_XI_AND_DESIGN_MATRIX
+
+atom_family:
+  count: 24
+  predicate: prime_and_1_mod_6
+  embedding: x=(a-1)/(2(a+1))
+
+reference_target:
+  function: Riemann_xi
+  direct_precision_decimal_digits: 80
+  independent_cross_check: symmetric_theta_Mellin
+  fit_dtype: complex128_to_float64_real_system
+
+coupled_design:
+  intercept: 2
+  atom_column: x^(-s)+x^(s-1)
+  coefficient_domain: REAL
+  functional_symmetry: B(1-s)=B(s)
+  critical_line_property: B(1/2+it)_is_real
+
+residual_design:
+  intercept: 1
+  atom_column: x^(-s)
+
+next_action: IMPLEMENT_RIDGE_PATH_AND_VALIDATION_SELECTION
