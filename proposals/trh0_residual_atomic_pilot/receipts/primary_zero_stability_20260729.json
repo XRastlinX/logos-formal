@@ -1,0 +1,79 @@
+{
+  "authority_effect": "NONE",
+  "canonical_effect": "NONE",
+  "family": "PRIMARY_PRIMES_1_MOD_6",
+  "fit_variants": [
+    {
+      "admissible_lambdas": [1.0],
+      "selected_lambda": 1.0,
+      "training_step": 0.2
+    },
+    {
+      "admissible_lambdas": [1.0],
+      "selected_lambda": 1.0,
+      "training_step": 0.25
+    },
+    {
+      "admissible_lambdas": [1.0],
+      "selected_lambda": 1.0,
+      "training_step": 0.3
+    }
+  ],
+  "proposal": "TRH-0_RESIDUAL_ATOMIC_PILOT",
+  "result": "OBSERVE_ONLY",
+  "root_variants": [
+    {
+      "lambda": 1.0,
+      "off_center_zero_count": 1,
+      "status": "RESOLVED",
+      "training_step": 0.2,
+      "zero_count": 1,
+      "zeros": [
+        {
+          "distance_from_critical_line": 0.4935236428526939,
+          "distance_from_search_boundary": 0.0064763571473061,
+          "imag": 30.227684042170413,
+          "isolating_rectangle": {
+            "sigma_max": 1.0,
+            "sigma_min": 0.5,
+            "t_max": 40.0,
+            "t_min": 20.0
+          },
+          "multiplicity_estimate": 1,
+          "off_center": true,
+          "real": 0.9935236428526939,
+          "verified_residual_abs": 2.57545610665079e-19
+        }
+      ]
+    },
+    {
+      "lambda": 1.0,
+      "off_center_zero_count": 0,
+      "status": "RESOLVED",
+      "training_step": 0.25,
+      "zero_count": 0,
+      "zeros": []
+    },
+    {
+      "lambda": 1.0,
+      "off_center_zero_count": 0,
+      "status": "RESOLVED",
+      "training_step": 0.3,
+      "zero_count": 0,
+      "zeros": []
+    }
+  ],
+  "search_rectangle": {
+    "sigma_max": 1.0,
+    "sigma_min": 0.0,
+    "t_max": 40.0,
+    "t_min": 0.0
+  },
+  "stability_distance": 0.05,
+  "stability_status": "RESOLVED",
+  "stable_off_center_zero_count": 0,
+  "stable_zero_count": 0,
+  "stable_zeros": [],
+  "status": "PROPOSED",
+  "unresolved_variant_count": 0
+}
