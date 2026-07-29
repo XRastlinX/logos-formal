@@ -1,0 +1,42 @@
+{
+  "schema": "mst.axiomatic-charter",
+  "schemaVersion": "1.0.0",
+  "status": "PROPOSED",
+  "axioms": [
+    {
+      "id": "I",
+      "name": "Origin Point",
+      "statement": "Zero is a single dimensionless point (locus count 1, extension 0). It is the anchor of all measure."
+    },
+    {
+      "id": "II",
+      "name": "Ur-Prime",
+      "statement": "The number 1 is the first prime (Ur-Prime), containing the Monadic Polarity: the Origin Point (0) and the unit whole (1). Its internal two-valuedness makes it irreducible."
+    },
+    {
+      "id": "III",
+      "name": "Spatial Support",
+      "statement": "Star-Prime atoms are embedded via x_k = (a_k-1)/(2(a_k+1)), yielding strictly real coordinates in (0, 1/2) on the Axial Diameter. Only the complex exponentiation x_k^{-s} expands their influence into the transverse s-plane."
+    },
+    {
+      "id": "IV",
+      "name": "Monadic Reflection",
+      "statement": "The coupling A_ξ F(s) = F(s) + F(1-s) enforces s ↔ 1-s symmetry. It guarantees that zeros occur in pairs ρ, 1-ρ but does not force them onto the critical line."
+    },
+    {
+      "id": "V",
+      "name": "Transverse Residual Hypothesis (TRH)",
+      "statement": "For a Monadic Measure μ, the zeros of F_μ(s) include Spectral Transverse Zeros (Re(s) ≠ 1/2). A constrained coupling maps these transverse modes to the critical line, producing the observed Riemann zeros as projections."
+    }
+  ],
+  "governance": {
+    "repository_lane": "non-canonical proposals/",
+    "canonical_effect": "NONE",
+    "authority_effect": "NONE"
+  },
+  "claimBoundary": {
+    "conventionalNumberTheoryModified": false,
+    "riemannHypothesisEstablished": false,
+    "empiricalStatus": "UNTESTED_PROPOSAL"
+  }
+}
