@@ -1,0 +1,118 @@
+{
+  "authority_effect": "NONE",
+  "canonical_effect": "NONE",
+  "claim_boundary": {
+    "riemann_hypothesis_established": false,
+    "trh_established": false
+  },
+  "deterministic_controls": [
+    {
+      "family": "C1_PRIMES_5_MOD_6",
+      "stability_status": "RESOLVED",
+      "stable_off_center_zero_count": 0,
+      "stable_zero_count": 0,
+      "unresolved_variant_count": 0
+    },
+    {
+      "family": "C2_CHEBYSHEV_MATCHED",
+      "stability_status": "NUMERICALLY_UNRESOLVED",
+      "stable_off_center_zero_count": null,
+      "stable_zero_count": null,
+      "unresolved_variant_count": 1
+    }
+  ],
+  "evidence_threshold": {
+    "control_95th_percentile": null,
+    "primary_stable_off_center_zero_count": 0,
+    "status": "NOT_EVALUABLE",
+    "unresolved_families": [
+      "C2_CHEBYSHEV_MATCHED",
+      "C3_STRATIFIED_RANDOM_018",
+      "C3_STRATIFIED_RANDOM_025",
+      "C3_STRATIFIED_RANDOM_027",
+      "C3_STRATIFIED_RANDOM_029",
+      "C3_STRATIFIED_RANDOM_044",
+      "C3_STRATIFIED_RANDOM_054",
+      "C3_STRATIFIED_RANDOM_063",
+      "C3_STRATIFIED_RANDOM_067",
+      "C3_STRATIFIED_RANDOM_072",
+      "C3_STRATIFIED_RANDOM_074",
+      "C3_STRATIFIED_RANDOM_077",
+      "C3_STRATIFIED_RANDOM_093",
+      "C3_STRATIFIED_RANDOM_094"
+    ],
+    "zero_threshold_passed": false
+  },
+  "primary": {
+    "root_variants": [
+      {
+        "lambda": 1.0,
+        "off_center_zero_count": 1,
+        "status": "RESOLVED",
+        "training_step": 0.2,
+        "zero_count": 1,
+        "zeros": [
+          {
+            "distance_from_critical_line": 0.4935236428526939,
+            "distance_from_search_boundary": 0.0064763571473061,
+            "imag": 30.227684042170413,
+            "isolating_rectangle": {
+              "sigma_max": 1.0,
+              "sigma_min": 0.5,
+              "t_max": 40.0,
+              "t_min": 20.0
+            },
+            "multiplicity_estimate": 1,
+            "off_center": true,
+            "real": 0.9935236428526939,
+            "verified_residual_abs": 2.57545610665079e-19
+          }
+        ]
+      },
+      {
+        "lambda": 1.0,
+        "off_center_zero_count": 0,
+        "status": "RESOLVED",
+        "training_step": 0.25,
+        "zero_count": 0,
+        "zeros": []
+      },
+      {
+        "lambda": 1.0,
+        "off_center_zero_count": 0,
+        "status": "RESOLVED",
+        "training_step": 0.3,
+        "zero_count": 0,
+        "zeros": []
+      }
+    ],
+    "stability_status": "RESOLVED",
+    "stable_off_center_zero_count": 0,
+    "stable_zero_count": 0
+  },
+  "proposal": "TRH-0_RESIDUAL_ATOMIC_PILOT",
+  "random_controls": {
+    "declared": 100,
+    "resolved": 87,
+    "resolved_with_stable_off_center": 0,
+    "unresolved": 13,
+    "unresolved_families": [
+      "C3_STRATIFIED_RANDOM_018",
+      "C3_STRATIFIED_RANDOM_025",
+      "C3_STRATIFIED_RANDOM_027",
+      "C3_STRATIFIED_RANDOM_029",
+      "C3_STRATIFIED_RANDOM_044",
+      "C3_STRATIFIED_RANDOM_054",
+      "C3_STRATIFIED_RANDOM_063",
+      "C3_STRATIFIED_RANDOM_067",
+      "C3_STRATIFIED_RANDOM_072",
+      "C3_STRATIFIED_RANDOM_074",
+      "C3_STRATIFIED_RANDOM_077",
+      "C3_STRATIFIED_RANDOM_093",
+      "C3_STRATIFIED_RANDOM_094"
+    ]
+  },
+  "result": "OBSERVE_ONLY",
+  "source_receipt_sha256": "28085307fec21af35db89069085ce6e628c7094db1aab0349b4aa92f54657adf",
+  "status": "PROPOSED"
+}
