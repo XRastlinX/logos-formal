@@ -1,4 +1,4 @@
-# TRH-0 Reference Xi and Design Matrix
+# TRH-0 Residual Atomic Pilot
 
 ```yaml
 proposal: TRH-0_RESIDUAL_ATOMIC_PILOT
@@ -6,27 +6,49 @@ status: PROPOSED
 authority_effect: NONE
 canonical_effect: NONE
 repository_lane: non-canonical proposals/
-implemented_stage: REFERENCE_XI_AND_DESIGN_MATRIX
+implemented_stage: SVD_RIDGE_CONTROLS_AND_ZERO_SCANNER
 ```
 
-This directory implements the first executable layer of the frozen TRH-0 pilot.
-It does **not** fit coefficients, inspect residual zeros, or assert support for
-TRH or the Riemann Hypothesis.
+This directory contains a frozen, non-canonical numerical pilot. It does not
+modify the canonical archive, establish Monadic Spectral Theory, prove the
+Transverse Residual Hypothesis, or prove the Riemann Hypothesis.
 
-## Implemented
+## Artifacts
 
-- the exact 24-prime `1 mod 6` atom family;
-- the embedding `x=(a-1)/(2(a+1))`;
-- an 80-digit direct evaluator of the completed Riemann xi function;
-- an independent symmetric theta/Mellin xi evaluator for cross-checking;
-- the coupled matrix
-  `B_0=2`, `B_k=x_k^(-s)+x_k^(s-1)`;
-- the raw residual matrix `R_0=1`, `R_k=x_k^(-s)`;
-- height-balanced complex-to-real stacking for real coefficients;
-- normalization of penalized columns only;
-- effective-rank and condition diagnostics;
-- invariant tests for functional symmetry, conjugation, and real-on-line
-  behavior.
+- `MST_Glossary.md` — reconciled proposal vocabulary and claim boundary.
+- `mst_axiomatic_charter_v1.json` — proposed axioms I–V with explicit governance.
+- `trh0_reference.py` — 80-digit xi target, theta/Mellin cross-check, atom support,
+  weighting, and design matrices.
+- `trh_0_evaluator.py` — SVD ridge path, validation selection, matched controls,
+  argument-principle zero isolation, stability filtering, and receipts.
+- `test_trh0_reference.py` and `test_trh_0_evaluator.py` — deterministic invariant
+  and synthetic zero-isolation tests.
+- `receipts/` — execution records; receipts are observations, not promotion records.
+
+## Frozen model
+
+The primary support consists of the first 24 primes congruent to `1 mod 6`,
+embedded by
+
+```text
+x_k = (a_k - 1) / (2(a_k + 1))
+```
+
+The fitted coupled object is
+
+```text
+xi_hat(s) = 2*c0 + sum c_k * (x_k^(-s) + x_k^(s-1))
+```
+
+with real coefficients. The raw residual transform used for zero inspection is
+
+```text
+F_24(s) = c0 + sum c_k * x_k^(-s)
+```
+
+All support coordinates are real and contained in `(0, 1/2)`. Complex spectral
+behavior comes from the exponent `s`, not from pretending that the atoms are
+complex.
 
 ## Environment
 
@@ -38,36 +60,98 @@ mpmath >= 1.3
 
 ## Verify
 
-From this directory:
-
 ```bash
-python -m unittest -v test_trh0_reference.py
+python -m unittest -v test_trh0_reference.py test_trh_0_evaluator.py
 python trh0_reference.py verify --dps 80
 ```
 
-A successful CLI run emits a JSON receipt with:
+## Run the reconstruction assay
 
-```text
-status: PROPOSED
-authority_effect: NONE
-result: OBSERVE_ONLY
+```bash
+python trh_0_evaluator.py fit \
+  --dps 80 \
+  --random-controls 100 \
+  --seed 20260729 \
+  --output receipts/reconstruction_assay_20260729.json
 ```
 
-## Frozen row order
-
-Grid rows are height-major and sigma-minor:
+The fitter uses an augmented SVD, algebraically equivalent to
 
 ```text
-for t in heights:
-    for sigma in sigmas:
-        s = sigma + i*t
+min ||B*c-y||^2 + lambda*||c[1:]||^2
 ```
 
-The training matrix therefore has `730 x 25` complex entries and becomes a
-`1460 x 25` real system after real/imaginary stacking.
+on the column-normalized real system. The intercept remains unpenalized. The
+selected lambda is the largest value within 1% of the minimum validation loss.
 
-## Numerical boundary
+## Run residual-zero stability
 
-Target values are evaluated with `mpmath` at 80 decimal digits and cast once to
-`complex128` for the declared float64 fit. The theta/Mellin route is a slower,
-independent check and is not used to generate every grid target.
+One support family:
+
+```bash
+python trh_0_evaluator.py zeros \
+  --family primary \
+  --dps 80 \
+  --output receipts/primary_zero_stability_20260729.json
+```
+
+Full matched-control zero assay:
+
+```bash
+python trh_0_evaluator.py zero-assay \
+  --dps 80 \
+  --random-controls 100 \
+  --seed 20260729 \
+  --output receipts/zero_control_assay_20260729.json
+```
+
+The zero scanner counts zeros by contour winding, recursively subdivides the
+search rectangle, refines isolated roots by Newton iteration, and verifies the
+residual at 80 digits. A contour that cannot be resolved is recorded as
+`NUMERICALLY_UNRESOLVED`; it is not silently treated as zero evidence.
+
+## Current observed results
+
+The frozen reconstruction run produced:
+
+```text
+primary selected lambda:                    1.0
+primary unregularized effective rank:       8 of 25
+primary test height-balanced MSE:           110444.5829758669
+best deterministic control MSE:             199685.09334920358
+observed primary/control ratio:              0.553093779427614
+random-control fifth percentile MSE:         162258.5162670578
+reconstruction relative threshold:          PASSED
+```
+
+This is a relative approximation result under the pre-registered metric. It is
+not evidence for TRH by itself, particularly because the design remains
+numerically degenerate.
+
+The full zero-control run produced:
+
+```text
+primary stable off-center zeros:             0
+C1 stable off-center zeros:                  0
+C2 zero assay:                               NUMERICALLY_UNRESOLVED
+resolved random controls:                    87 of 100
+unresolved random controls:                  13 of 100
+resolved controls with stable off-center:    0
+zero-control threshold:                      NOT_EVALUABLE
+```
+
+The current zero result therefore does not support the transverse-zero claim.
+The next valid step is to resolve the contour ambiguities without changing the
+support families, fit objective, validation rule, or evidence thresholds.
+
+## Claim boundary
+
+```text
+functional symmetry alone:        NOT EVIDENCE
+training error alone:              NOT EVIDENCE
+relative reconstruction pass:      PILOT OBSERVATION ONLY
+stable transverse-zero evidence:   NOT ESTABLISHED
+TRH:                               NOT ESTABLISHED
+Riemann Hypothesis:                NOT ESTABLISHED
+authority effect:                  NONE
+```
