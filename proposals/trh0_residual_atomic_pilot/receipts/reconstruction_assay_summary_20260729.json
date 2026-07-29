@@ -1,0 +1,91 @@
+{
+  "authority_effect": "NONE",
+  "canonical_effect": "NONE",
+  "claim_boundary": {
+    "functional_symmetry_counts_as_evidence": false,
+    "riemann_hypothesis_established": false,
+    "training_error_counts_as_evidence": false,
+    "trh_established": false
+  },
+  "deterministic_controls": [
+    {
+      "effective_rank": 9,
+      "family": "C1_PRIMES_5_MOD_6",
+      "selected_lambda": 100.0,
+      "test_metrics": {
+        "height_balanced_mse": 532709.7845826448,
+        "height_balanced_rmse": 729.8697038394215,
+        "unweighted_max_residual": 0.0003863372678422198,
+        "unweighted_rmse": 0.0003658207891920198
+      }
+    },
+    {
+      "effective_rank": 10,
+      "family": "C2_CHEBYSHEV_MATCHED",
+      "selected_lambda": 3.1622776601683795,
+      "test_metrics": {
+        "height_balanced_mse": 199685.09334920358,
+        "height_balanced_rmse": 446.8613804628943,
+        "unweighted_max_residual": 0.0003633917777384402,
+        "unweighted_rmse": 0.00022377737657040497
+      }
+    }
+  ],
+  "dps": 80,
+  "evidence_threshold": {
+    "best_deterministic_control_mse": 199685.09334920358,
+    "observed_deterministic_ratio": 0.553093779427614,
+    "primary_below_random_fifth_percentile": true,
+    "primary_test_height_balanced_mse": 110444.5829758669,
+    "random_fifth_percentile_mse": 162258.5162670578,
+    "reconstruction_threshold_passed": true,
+    "required_deterministic_ratio": 0.8
+  },
+  "master_seed": 20260729,
+  "primary": {
+    "admissible_lambdas": [1.0],
+    "coefficient_norm": 0.00010691693202017297,
+    "coefficients": [
+      -6.62402328854571e-05,
+      3.8671447894746224e-05,
+      -2.908638977139963e-05,
+      -5.6149459779899775e-05,
+      -2.537623440307969e-05,
+      -1.8658322865652318e-05,
+      -1.4732498929305435e-05,
+      -9.001118671407444e-06,
+      -7.939998881519792e-06,
+      -7.083759335718885e-06,
+      -6.375631155696615e-06,
+      -4.822970258438225e-06,
+      -4.4334873284420264e-06,
+      -4.088625311304163e-06,
+      -3.254182692103484e-06,
+      -2.819276706235107e-06,
+      -2.453506637146324e-06,
+      -2.2914736335943003e-06,
+      -2.141260140919132e-06,
+      -1.7496654381905408e-06,
+      -1.528583992895987e-06,
+      -1.427866340144903e-06,
+      -1.2432930238528184e-06,
+      -1.0781955998757621e-06,
+      -1.0020010841703695e-06
+    ],
+    "condition_number": 4.604911026534591e+20,
+    "effective_rank": 8,
+    "selected_lambda": 1.0,
+    "test_metrics": {
+      "height_balanced_mse": 110444.5829758669,
+      "height_balanced_rmse": 332.33203723966625,
+      "unweighted_max_residual": 0.00034952898898458134,
+      "unweighted_rmse": 0.00016535342427806984
+    }
+  },
+  "proposal": "TRH-0_RESIDUAL_ATOMIC_PILOT",
+  "random_control_count": 100,
+  "random_generator": "PCG64",
+  "result": "OBSERVE_ONLY",
+  "source_receipt_sha256": "59bc6d681b707682f471f954146aea5879d6bdffdc9d424129cd3b8d22babb2d",
+  "status": "PROPOSED"
+}
