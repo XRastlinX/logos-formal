@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LOGOS Substrate - Resonometric Phase Soundstage</title>
+  <style>
+    :root {
+      --bg: #070b12;
+      --card-bg: #0d1524;
+      --border: #1e293b;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+      --geo: #38bdf8;
+      --aco: #f43f5e;
+      --closure: #34d399;
+    }
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      background-color: var(--bg);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", monospace;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+      padding: 24px;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    h1 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      color: var(--text-main);
+      text-transform: uppercase;
+      margin-bottom: 6px;
+    }
+    .subtitle {
+      font-size: 13px;
+      color: var(--text-muted);
+      font-family: monospace;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      max-width: 960px;
+      width: 100%;
+    }
+    .canvas-container {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 16px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    canvas {
+      width: 100%;
+      max-width: 880px;
+      height: 440px;
+      display: block;
+      border-radius: 8px;
+    }
+    .controls-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+    .control-group {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .control-group label {
+      font-size: 12px;
+      font-family: monospace;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      display: flex;
+      justify-content: space-between;
+    }
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--geo);
+    }
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      grid-column: 1 / -1;
+      justify-content: center;
+      margin-top: 8px;
+    }
+    button {
+      background: #1e293b;
+      color: var(--text-main);
+      border: 1px solid #334155;
+      padding: 10px 20px;
+      font-size: 13px;
+      font-family: monospace;
+      font-weight: 600;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    button:hover {
+      background: #334155;
+      border-color: var(--geo);
+    }
+    button.active {
+      background: rgba(56, 189, 248, 0.2);
+      border-color: var(--geo);
+      color: var(--geo);
+    }
+    .status-badge {
+      font-size: 12px;
+      font-family: monospace;
+      padding: 4px 8px;
+      border-radius: 4px;
+      background: #111b2e;
+      border: 1px solid #1e293b;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Resonometric Polymodular Soundstage</h1>
+    <div class="subtitle">SPECTER CLIENT TS PROJECTION &bull; &Zopf;<sub>8</sub> &times; &Zopf;<sub>12</sub> DETERMINISTIC RUNTIME</div>
+  </header>
+
+  <div class="container">
+    <div class="canvas-container">
+      <canvas id="stage" width="880" height="440"></canvas>
+    </div>
+
+    <div class="controls-card">
+      <div class="control-group">
+        <label>
+          <span>Continuous Driver (v)</span>
+          <span id="v-val" class="status-badge">0.00</span>
+        </label>
+        <input type="range" id="v-slider" min="0" max="72" step="0.05" value="0">
+      </div>
+
+      <div class="control-group">
+        <label>
+          <span>Rate (Ticks/Sec)</span>
+          <span id="rate-val" class="status-badge">3.0 Hz</span>
+        </label>
+        <input type="range" id="rate-slider" min="0.5" max="10" step="0.5" value="3.0">
+      </div>
+
+      <div class="btn-row">
+        <button id="btn-play">Start Auto Drive</button>
+        <button id="btn-step">Single Step (+1.0)</button>
+        <button id="btn-audio">Enable Audio Engine</button>
+        <button id="btn-reset">Reset Origin</button>
+      </div>
+    </div>
+  </div>
+
+  <script type="module">
+    // Mathematical & Transduction Subsystem
+    function gcd(a, b) {
+      let x = Math.abs(Math.floor(a)), y = Math.abs(Math.floor(b));
+      while (y !== 0) { const t = y; y = x % y; x = t; }
+      return x;
+    }
+    function lcm(a, b) {
+      if (a === 0 || b === 0) return 0;
+      return Math.abs(Math.floor(a) * Math.floor(b)) / gcd(a, b);
+    }
+    function phaseState(t, m = 8, n = 12) {
+      const s = Math.floor(t);
+      return {
+        t: s,
+        geometryResidue: ((s % m) + m) % m,
+        acousticResidue: ((s % n) + n) % n
+      };
+    }
+    function closureOffset(t, m = 8, n = 12) {
+      const L = lcm(m, n);
+      const s = Math.floor(t);
+      const rem = ((s % L) + L) % L;
+      return (L - rem) % L;
+    }
+    function pitchFreq(residue, base = 130.8128) {
+      return base * Math.pow(2, (residue % 12) / 12);
+    }
+
+    // Audio Engine
+    let audioCtx = null;
+    let masterGain = null;
+
+    async function initAudio() {
+      if (!audioCtx) {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        masterGain = audioCtx.createGain();
+        masterGain.gain.setValueAtTime(0.25, audioCtx.currentTime);
+        masterGain.connect(audioCtx.destination);
+      }
+      if (audioCtx.state === 'suspended') {
+        await audioCtx.resume();
+      }
+    }
+
+    function playAcousticClick(freq, isStar) {
+      if (!audioCtx || !masterGain) return;
+      const now = audioCtx.currentTime;
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+
+      osc.type = isStar ? 'triangle' : 'sine';
+      osc.frequency.setValueAtTime(freq, now);
+
+      const dur = isStar ? 0.35 : 0.08;
+      const peak = isStar ? 0.6 : 0.25;
+
+      gain.gain.setValueAtTime(0.0001, now);
+      gain.gain.exponentialRampToValueAtTime(peak, now + 0.005);
+      gain.gain.exponentialRampToValueAtTime(0.0001, now + dur);
+
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(now);
+      osc.stop(now + dur);
+
+      if (isStar) {
+        const subOsc = audioCtx.createOscillator();
+        const subGain = audioCtx.createGain();
+        subOsc.frequency.setValueAtTime(freq / 2, now);
+        subGain.gain.setValueAtTime(0.0001, now);
+        subGain.gain.exponentialRampToValueAtTime(0.5, now + 0.01);
+        subGain.gain.exponentialRampToValueAtTime(0.0001, now + 0.5);
+        subOsc.connect(subGain);
+        subGain.connect(masterGain);
+        subOsc.start(now);
+        subOsc.stop(now + 0.5);
+      }
+    }
+
+    // State
+    let v = 0;
+    let k = 0;
+    let currentBin = 0;
+    let autoPlaying = false;
+    let rateHz = 3.0;
+    let lastTime = 0;
+
+    const canvas = document.getElementById('stage');
+    const ctx = canvas.getContext('2d');
+    const vSlider = document.getElementById('v-slider');
+    const vVal = document.getElementById('v-val');
+    const rateSlider = document.getElementById('rate-slider');
+    const rateVal = document.getElementById('rate-val');
+    const btnPlay = document.getElementById('btn-play');
+    const btnStep = document.getElementById('btn-step');
+    const btnAudio = document.getElementById('btn-audio');
+    const btnReset = document.getElementById('btn-reset');
+
+    function advanceV(newV) {
+      if (newV < 0) return;
+      if (newV <= v) {
+        v = newV;
+        vSlider.value = v;
+        vVal.innerText = v.toFixed(2);
+        return;
+      }
+      v = newV;
+      vSlider.value = v;
+      vVal.innerText = v.toFixed(2);
+
+      const targetBin = Math.floor(v);
+      if (targetBin > currentBin) {
+        const deltaClicks = targetBin - currentBin;
+        currentBin = targetBin;
+        for (let i = 0; i < deltaClicks; i++) {
+          k++;
+          const ps = phaseState(k);
+          const isStar = k > 0 && ps.geometryResidue === 0;
+          const freq = pitchFreq(ps.acousticResidue);
+          playAcousticClick(freq, isStar);
+        }
+      }
+    }
+
+    function renderHUD() {
+      const { width, height } = canvas;
+      ctx.fillStyle = '#070b12';
+      ctx.fillRect(0, 0, width, height);
+
+      const ps = phaseState(k);
+      const offset = closureOffset(k);
+      const isJoint = ps.geometryResidue === 0 && ps.acousticResidue === 0;
+      const isStar = k > 0 && ps.geometryResidue === 0;
+      const winding = Math.floor(k / 8);
+
+      const cx = width * 0.32;
+      const cy = height * 0.5;
+      const rOuter = 140;
+      const rInner = 90;
+
+      // Dial Disc
+      ctx.beginPath();
+      ctx.arc(cx, cy, rOuter + 25, 0, 2 * Math.PI);
+      ctx.fillStyle = '#0c1322';
+      ctx.fill();
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+
+      // Outer Z_12
+      ctx.beginPath();
+      ctx.arc(cx, cy, rOuter, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      for (let i = 0; i < 12; i++) {
+        const ang = (i * 2 * Math.PI) / 12 - Math.PI / 2;
+        const x = cx + Math.cos(ang) * rOuter;
+        const y = cy + Math.sin(ang) * rOuter;
+        const act = ps.acousticResidue === i;
+        ctx.beginPath();
+        ctx.arc(x, y, act ? 8 : 4, 0, 2 * Math.PI);
+        ctx.fillStyle = act ? '#f43f5e' : '#475569';
+        ctx.fill();
+        ctx.font = act ? "bold 12px monospace" : "10px monospace";
+        ctx.fillStyle = act ? '#f43f5e' : '#94a3b8';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${i}`, cx + Math.cos(ang) * (rOuter + 16), cy + Math.sin(ang) * (rOuter + 16));
+      }
+
+      // Inner Z_8
+      ctx.beginPath();
+      ctx.arc(cx, cy, rInner, 0, 2 * Math.PI);
+      ctx.strokeStyle = '#334155';
+      ctx.lineWidth = 1.5;
+      ctx.stroke();
+
+      for (let i = 0; i < 8; i++) {
+        const ang = (i * 2 * Math.PI) / 8 - Math.PI / 2;
+        const x = cx + Math.cos(ang) * rInner;
+        const y = cy + Math.sin(ang) * rInner;
+        const act = ps.geometryResidue === i;
+        ctx.beginPath();
+        ctx.arc(x, y, act ? 9 : 4.5, 0, 2 * Math.PI);
+        ctx.fillStyle = act ? '#38bdf8' : '#475569';
+        ctx.fill();
+        ctx.font = act ? "bold 12px monospace" : "10px monospace";
+        ctx.fillStyle = act ? '#38bdf8' : '#94a3b8';
+        ctx.textAlign = "center";
+        ctx.textBaseline = "middle";
+        ctx.fillText(`${i}`, cx + Math.cos(ang) * (rInner - 16), cy + Math.sin(ang) * (rInner - 16));
+      }
+
+      // Vectors
+      const geoAng = (ps.geometryResidue * 2 * Math.PI) / 8 - Math.PI / 2;
+      const acoAng = (ps.acousticResidue * 2 * Math.PI) / 12 - Math.PI / 2;
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(acoAng) * rOuter, cy + Math.sin(acoAng) * rOuter);
+      ctx.strokeStyle = '#f43f5e';
+      ctx.lineWidth = 2.5;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.moveTo(cx, cy);
+      ctx.lineTo(cx + Math.cos(geoAng) * rInner, cy + Math.sin(geoAng) * rInner);
+      ctx.strokeStyle = '#38bdf8';
+      ctx.lineWidth = 3;
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(cx, cy, 6, 0, 2 * Math.PI);
+      ctx.fillStyle = isJoint ? '#34d399' : '#f8fafc';
+      ctx.fill();
+
+      // Right Panel
+      const panelLeft = width * 0.58;
+      const panelTop = 30;
+      const panelWidth = 320;
+      const panelHeight = 380;
+
+      ctx.fillStyle = '#0c1322';
+      ctx.strokeStyle = '#1e293b';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.roundRect(panelLeft, panelTop, panelWidth, panelHeight, 10);
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = "bold 14px monospace";
+      ctx.fillStyle = "#f8fafc";
+      ctx.textAlign = "left";
+      ctx.fillText("SPECTER TELEMETRY", panelLeft + 18, panelTop + 30);
+
+      const rows = [
+        ["Discrete Tick (k):", `${k}`, "#f8fafc"],
+        ["Continuous Input (v):", v.toFixed(3), "#f8fafc"],
+        ["Octanometric Winding:", `${winding}`, "#f8fafc"],
+        ["Phase State Φ(t):", `(${ps.geometryResidue} mod 8, ${ps.acousticResidue} mod 12)`, "#38bdf8"],
+        ["12-TET Pitch Class:", `${ps.acousticResidue} (${['C','C#','D','D#','E','F','F#','G','G#','A','A#','B'][ps.acousticResidue]})`, "#f43f5e"],
+      ];
+
+      let ry = panelTop + 65;
+      for (const [lbl, val, col] of rows) {
+        ctx.font = "12px monospace";
+        ctx.fillStyle = "#94a3b8";
+        ctx.fillText(lbl, panelLeft + 18, ry);
+        ctx.font = "bold 12px monospace";
+        ctx.fillStyle = col;
+        ctx.textAlign = "right";
+        ctx.fillText(val, panelLeft + panelWidth - 18, ry);
+        ctx.textAlign = "left";
+        ry += 25;
+      }
+
+      ry += 8;
+      ctx.font = "12px monospace";
+      ctx.fillStyle = "#94a3b8";
+      ctx.fillText("Closure Tension D(t):", panelLeft + 18, ry);
+      ctx.fillStyle = isJoint ? "#34d399" : "#f8fafc";
+      ctx.textAlign = "right";
+      ctx.fillText(`${offset} ticks to next closure`, panelLeft + panelWidth - 18, ry);
+      ctx.textAlign = "left";
+      ry += 12;
+
+      // Tension Bar
+      const bW = panelWidth - 36;
+      ctx.fillStyle = "#1e293b";
+      ctx.beginPath();
+      ctx.roundRect(panelLeft + 18, ry, bW, 10, 4);
+      ctx.fill();
+
+      const fillW = Math.max(0, Math.min(bW, ((24 - offset) / 24) * bW));
+      ctx.fillStyle = isJoint ? "#34d399" : "#38bdf8";
+      ctx.beginPath();
+      ctx.roundRect(panelLeft + 18, ry, fillW, 10, 4);
+      ctx.fill();
+      ry += 32;
+
+      // Badge
+      ctx.beginPath();
+      ctx.roundRect(panelLeft + 18, ry, bW, 36, 6);
+      if (isJoint) {
+        ctx.fillStyle = "rgba(52, 211, 153, 0.15)";
+        ctx.strokeStyle = "#34d399";
+      } else if (isStar) {
+        ctx.fillStyle = "rgba(56, 189, 248, 0.15)";
+        ctx.strokeStyle = "#38bdf8";
+      } else {
+        ctx.fillStyle = "rgba(30, 41, 59, 0.5)";
+        ctx.strokeStyle = "#334155";
+      }
+      ctx.fill();
+      ctx.stroke();
+
+      ctx.font = "bold 11px monospace";
+      ctx.textAlign = "center";
+      ctx.fillStyle = isJoint ? "#34d399" : isStar ? "#38bdf8" : "#94a3b8";
+      const statusStr = isJoint
+        ? "★ JOINT PHASE CLOSURE Φ(t) = (0, 0) ★"
+        : isStar
+        ? "★ OCTANOMETRIC STAR CLOSURE ★"
+        : `PHASE TRANSIT (OFFSET Δc = ${offset})`;
+      ctx.fillText(statusStr, panelLeft + panelWidth / 2, ry + 22);
+    }
+
+    function loop(t) {
+      if (lastTime === 0) lastTime = t;
+      const dt = (t - lastTime) / 1000;
+      lastTime = t;
+
+      if (autoPlaying) {
+        let nextV = v + rateHz * dt;
+        if (nextV > 72) {
+          nextV = 72;
+          autoPlaying = false;
+          btnPlay.innerText = "Start Auto Drive";
+          btnPlay.classList.remove('active');
+        }
+        advanceV(nextV);
+      }
+
+      renderHUD();
+      requestAnimationFrame(loop);
+    }
+
+    // Event Listeners
+    vSlider.addEventListener('input', (e) => {
+      advanceV(parseFloat(e.target.value));
+    });
+
+    rateSlider.addEventListener('input', (e) => {
+      rateHz = parseFloat(e.target.value);
+      rateVal.innerText = `${rateHz.toFixed(1)} Hz`;
+    });
+
+    btnPlay.addEventListener('click', () => {
+      initAudio();
+      autoPlaying = !autoPlaying;
+      btnPlay.innerText = autoPlaying ? "Pause Auto Drive" : "Start Auto Drive";
+      btnPlay.classList.toggle('active', autoPlaying);
+    });
+
+    btnStep.addEventListener('click', () => {
+      initAudio();
+      advanceV(v + 1.0);
+    });
+
+    btnAudio.addEventListener('click', async () => {
+      await initAudio();
+      btnAudio.innerText = "Audio Active (Unlocked)";
+      btnAudio.classList.add('active');
+    });
+
+    btnReset.addEventListener('click', () => {
+      v = 0;
+      k = 0;
+      currentBin = 0;
+      autoPlaying = false;
+      vSlider.value = 0;
+      vVal.innerText = "0.00";
+      btnPlay.innerText = "Start Auto Drive";
+      btnPlay.classList.remove('active');
+    });
+
+    requestAnimationFrame(loop);
+  </script>
+</body>
+</html>

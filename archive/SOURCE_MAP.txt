@@ -1,0 +1,18 @@
+Published so the folio raw URLs resolve. Filename on main is the link target.
+Drive name is the file that was copied. This map is not a verification of the caption.
+
+archive/phase_horizon_demo.mp4
+  drive_name: polymodular_phase_horizon.mp4
+  drive_id: 1nejlAVbgPvvl7neJcGxTpvfu1oCMf2Ie
+
+archive/strain_demo.mp4
+  drive_name: 04_topological_persistence_strain.mp4
+  drive_id: 1vkxPDDUZwOwv6itMQwj8n9vfclm9kR9-
+
+archive/firewall_demo.mp4
+  drive_name: Cypher_Demo_03_Epistemic_Firewall_Boundary.mp4
+  drive_id: 1rF74msedZq4_H2edxHCXSex40rAhT7Ct
+
+client-ts/demo/live_soundstage.html
+  drive_name: live_soundstage.html
+  drive_id: 1prwDlNsVamVe4uqsjEKLlxF6VbZuahmF
